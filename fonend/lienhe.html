@@ -1,0 +1,161 @@
+    <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Liên hệ – ICO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS chung -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .contact-header { text-align: center; margin-bottom: 30px; }
+        .contact-info { max-width: 700px; margin: auto; }
+        .contact-info p { margin: 10px 0; font-size: 17px; }
+        .social-icons img { width: 40px; margin-right: 10px; vertical-align: middle; }
+        .back-home { margin-top: 30px; display: block; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+<div class="top-bar">
+    📞 Hotline: 0822.314.555  
+    <a href="#dangky">Đăng ký tìm hiểu</a>
+</div>
+
+<nav>
+    <ul>
+        <li><a href="index.html">Trang chủ</a></li>
+
+        <li>
+            <a onclick="toggleMenu('duhocMenu','arrow1')">Du học 
+                <span id="arrow1" class="arrow">▶</span>
+            </a>
+
+            <ul id="duhocMenu" class="submenu">
+                <li>
+                    <a onclick="toggleNested(event,'ducNested','arrowDuc')">
+                        Du học nghề Đức 
+                        <span id="arrowDuc" class="arrow">▶</span>
+                    </a>
+                    <ul id="ducNested" class="nested">
+                        <li><a>Điều dưỡng</a></li>
+                        <li><a>Nhà hàng – KS</a></li>
+                        <li><a>Điện – Cơ khí</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a onclick="toggleNested(event,'nhatNested','arrowNhat')">
+                        Du học Nhật Bản 
+                        <span id="arrowNhat" class="arrow">▶</span>
+                    </a>
+                    <ul id="nhatNested" class="nested">
+                        <li><a>THPT</a></li>
+                        <li><a>CĐ – Đại học</a></li>
+                        <li><a>Vừa học vừa làm</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a onclick="toggleNested(event,'hanNested','arrowHan')">
+                        Du học Hàn Quốc 
+                        <span id="arrowHan" class="arrow">▶</span>
+                    </a>
+                    <ul id="hanNested" class="nested">
+                        <li><a>Trường tiếng</a></li>
+                        <li><a>Đại học</a></li>
+                        <li><a>Cao học</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <li>
+            <a onclick="toggleNested(event,'xkldNested','arrowXKLD')">
+                Xuất khẩu lao động 
+                <span id="arrowXKLD" class="arrow">▶</span>
+            </a>
+            <ul id="xkldNested" class="nested">
+                <li><a>Nhật Bản</a></li>
+                <li><a>Hàn Quốc</a></li>
+                <li><a>Đài Loan</a></li>
+                <li><a>Châu Âu</a></li>
+            </ul>
+        </li>
+
+        <li><a href="hoatdong.html">Hoạt động</a></li>
+        <li><a href="lienhe.html">Liên hệ</a></li>
+        <li><a href="#dangky" style="color:#ff6600; font-weight:bold;">Đăng ký</a></li>
+
+    </ul>
+</nav>
+    <h1 class="contact-header">📞 LIÊN HỆ – ICO GROUP</h1>
+
+    <div class="contact-info">
+        <p><strong>CÔNG TY CỔ PHẦN NHÂN LỰC QUỐC TẾ ICO</strong></p>
+        <p>Văn phòng tư vấn: Số 360, đường Phan Đình Phùng, phường Phan Đình Phùng, tỉnh Thái Nguyên.</p>
+        <p>☎️ Hotline: 0822.314.555</p>
+        <p>Email: <a href="mailto:contact@icogroup.vn">contact@icogroup.vn</a></p>
+        <p>Fanpage: <a href="https://www.facebook.com/">ICO Group Facebook</a></p>
+
+        <div class="social-icons">
+            <a href="#"><img src="https://images.seeklogo.com/logo-png/29/1/facebook-icon-logo-png_seeklogo-290339.png" alt="Facebook"></a>
+            <a href="#"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh5HJHkuziN0PF-CEjdKhElcEAL27me6W3kw&s" alt="Zalo"></a>
+            <a href="#"><img src="https://png.pngtree.com/png-vector/20190319/ourmid/pngtree-vector-web-icon-png-image_847779.jpg" alt="Website"></a>
+        </div>
+    </div>
+
+    <a class="back-home" href="index.html">⬅ Quay lại Trang Chủ</a>
+    <!-- THÔNG TIN -->
+<section style="background:#002b6f; color:white; padding:40px 20px; margin-top:40px;">
+    <div style="
+        max-width:1100px;
+        margin:auto;
+        display:flex;
+        gap:30px;
+        align-items:center;
+        flex-wrap:wrap;
+    ">
+
+        <!-- BÊN TRÁI: THÔNG TIN -->
+        <div style="flex:1; min-width:260px;">
+            <h2 style="margin-top:0;">CÔNG TY CỔ PHẦN NHÂN LỰC QUỐC TẾ ICO</h2>
+
+            <p>
+                <strong>📌 Địa chỉ:</strong><br>
+                Số 360, đường Phan Đình Phùng,<br>
+                Tỉnh Thái Nguyên
+            </p>
+
+            <p><strong>📞 Hotline:</strong> 0822.314.555</p>
+
+            <p>
+                <strong>🌐 Liên hệ:</strong><br>
+                Facebook | Zalo | Website
+            </p>
+        </div>
+
+        <!-- BÊN PHẢI: MAP CLICK -->
+        <div style="flex:1; min-width:300px;">
+            <a 
+                href="https://www.google.com/maps?q=21.583564667410258,105.83856648859603"
+                target="_blank"
+                style="display:block;"
+            >
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d907.4559325278975!2d105.83856648859603!3d21.583564667410258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x313527922dc8a8f1%3A0x1993dff35aafb279!2zVsSDbiBwaMOybmcgVGjEg25nIExvbmc!5e1!3m2!1sen!2s!4v1765696668145!5m2!1sen!2s"
+                    width="100%"
+                    height="550"
+                    style="border:0; border-radius:10px; pointer-events:none;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </a>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

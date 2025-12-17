@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xuất khẩu lao động Hàn Quốc - ICOGroup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* CSS ĐỒNG BỘ GIAO DIỆN (Giống hệt các trang khác) */
+        * { box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; }
+        body { background: #f4f7fb; line-height: 1.6; padding-top: 110px; }
+        a { text-decoration: none; }
+
+        /* Top Bar */
+        .top-bar { background: linear-gradient(to right, #e60000, #ff4d4d); color: white; padding: 0 50px; height: 40px; display: flex; justify-content: center; gap: 30px; align-items: center; font-size: 14px; position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; }
+        .top-bar a { background: white; color: #e60000; padding: 4px 15px; border-radius: 15px; font-weight: bold; font-size: 12px; transition: 0.3s; }
+        .top-bar a:hover { background: #ffe6e6; }
+
+        /* Navigation */
+        nav { background: #0f75bd; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 10%; position: fixed; top: 40px; left: 0; width: 100%; z-index: 1999; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+        .nav-logo { background: white; padding: 5px 15px; border-radius: 5px; height: 44px; display: flex; align-items: center; }
+        .nav-logo img { height: 100%; width: auto; }
+        
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav ul li { position: relative; }
+        nav ul li a { color: white; padding: 0 15px; line-height: 60px; display: block; font-weight: 500; cursor: pointer; }
+        nav ul li a:hover { background: rgba(255,255,255,0.1); }
+        
+        /* Submenu */
+        .submenu { display: none; position: absolute; background: white; top: 60px; left: 0; min-width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 0 0 5px 5px; }
+        .submenu a { color: #333 !important; line-height: 1.5; padding: 10px 20px; border-bottom: 1px solid #eee; }
+        .submenu a:hover { background: #f4f7fb; color: #0f75bd !important; }
+
+        /* CONTENT STYLE - HÀN QUỐC */
+        .page-banner {
+            /* Banner Hàn Quốc */
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://duhochanico.edu.vn/wp-content/uploads/2023/04/Banner-web-Han-1.png');
+            background-size: cover; background-position: center; height: 350px; 
+            display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: white; margin-bottom: 40px;
+        }
+        .page-banner h1 { font-size: 40px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); }
+        .page-banner p { font-size: 18px; font-weight: 300; background: rgba(0, 51, 102, 0.7); padding: 8px 25px; border-radius: 20px; }
+
+        .content-container { max-width: 1100px; margin: 0 auto 50px; padding: 0 20px; }
+
+        /* Grid Layout */
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .feature-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid #ff6600; transition:0.3s; }
+        .feature-card:hover { transform: translateY(-5px); }
+        .feature-card .icon { font-size: 40px; color: #0f75bd; margin-bottom: 10px; }
+        .feature-card h3 { margin-bottom: 10px; color: #333; }
+
+        .section-title { text-align: center; margin-bottom: 30px; color: #0f75bd; font-size: 28px; text-transform: uppercase; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        .job-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .job-item { background: white; padding: 15px; border-radius: 5px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 3px solid #0f75bd; }
+        .job-item i { color: #ff6600; }
+
+        .info-box { background: #eef6fb; padding: 30px; border-radius: 10px; border-left: 5px solid #0f75bd; margin-bottom: 30px; }
+        .info-box h3 { color: #0f75bd; margin-bottom: 15px; }
+        .info-box ul li { list-style: none; margin-bottom: 8px; position: relative; padding-left: 20px; }
+        .info-box ul li::before { content: '✔'; position: absolute; left: 0; color: #28a745; font-weight: bold; }
+
+        .btn-register { display: block; width: fit-content; margin: 40px auto 0; background: #ff6600; color: white; padding: 15px 60px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 18px; box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3); transition: 0.3s; }
+        .btn-register:hover { background: #e65c00; transform: scale(1.05); }
+
+        footer { background:#002b6f; color:white; padding:30px; margin-top:50px; text-align: center; }
+
+        @media (max-width: 768px) {
+            .top-bar { display: none; }
+            nav { top: 0; padding: 0 15px; }
+            body { padding-top: 60px; }
+            nav ul li a { padding: 0 10px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <span>📞 Hotline: 0822.314.555</span>
+        <a href="index.html#dangky">Đăng ký ngay</a>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-logo"><img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png"></a>
+        <ul>
+            <li><a href="index.html">Trang chủ</a></li>
+            <li>
+                <a onclick="toggleMenu('duhocMenu','arrow1')">Du học ▼</a>
+                <ul id="duhocMenu" class="submenu">
+                    <li><a href="duc.html">Du học Đức</a></li>
+                    <li><a href="nhat.html">Du học Nhật</a></li>
+                    <li><a href="han.html">Du học Hàn Quốc</a></li>
+                </ul>
+            </li>
+            <li>
+                <a onclick="toggleMenu('xkldNested','arrowXKLD')" style="color:#ffcc00; font-weight:bold;">Xuất khẩu lao động ▼</a>
+                <ul id="xkldNested" class="submenu">
+                    <li><a href="xkldjp.html">Nhật Bản</a></li>
+                    <li><a href="xkldhan.html" style="color:#ff6600; font-weight:bold;">Hàn Quốc</a></li>
+                    <li><a href="xklddailoan.html">Đài Loan</a></li>
+                    <li><a href="xkldchauau.html">Châu Âu</a></li>
+                </ul>
+            </li>
+            <li><a href="hoatdong.html">Hoạt động</a></li>
+            
+            <li><a href="lienhe.html">Liên hệ</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-banner">
+        <h1>THỊ TRƯỜNG HÀN QUỐC (EPS)</h1>
+        <p>Thu nhập Hấp Dẫn - Công nghệ Hiện Đại</p>
+    </div>
+
+    <div class="content-container">
+        
+        <h2 class="section-title">Tại sao chọn Hàn Quốc?</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="material-icons icon">attach_money</span>
+                <h3>Thu nhập cao</h3>
+                <p>Trung bình 35 - 55 triệu VNĐ/tháng. Lương cơ bản tăng đều hàng năm.</p>
+            </div>
+            <div class="feature-card">
+                <span class="material-icons icon">verified_user</span>
+                <h3>An toàn tuyệt đối</h3>
+                <p>Chương trình EPS do chính phủ Hàn Quốc cấp phép và bảo hộ lao động.</p>
+            </div>
+            <div class="feature-card">
+                <span class="material-icons icon">schedule</span>
+                <h3>Thời hạn lâu dài</h3>
+                <p>Hợp đồng 4 năm 10 tháng. Có cơ hội gia hạn thêm nếu làm tốt.</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">Các ngành nghề chính</h2>
+        <div class="job-list">
+            <div class="job-item"><i class="material-icons">precision_manufacturing</i> Sản xuất chế tạo (Cơ khí, Dệt, Nhựa)</div>
+            <div class="job-item"><i class="material-icons">apartment</i> Xây dựng (Cốt pha, Mộc)</div>
+            <div class="job-item"><i class="material-icons">agriculture</i> Nông nghiệp (Trồng trọt, Chăn nuôi)</div>
+            <div class="job-item"><i class="material-icons">sailing</i> Ngư nghiệp (Đánh bắt gần bờ)</div>
+        </div>
+
+        <div class="info-box">
+            <h3>📋 ĐIỀU KIỆN THAM GIA (BẮT BUỘC)</h3>
+            <ul>
+                <li><strong>Độ tuổi:</strong> 18 - 39 tuổi.</li>
+                <li><strong>Trình độ:</strong> Không yêu cầu bằng cấp cao (Tốt nghiệp THCS).</li>
+                <li><strong>Ngoại ngữ:</strong> Phải thi đạt chứng chỉ tiếng Hàn EPS-TOPIK.</li>
+                <li><strong>Sức khỏe:</strong> Tốt, không bị mù màu, không mắc bệnh truyền nhiễm.</li>
+                <li>Không có tiền án tiền sự, không thuộc diện cấm xuất cảnh.</li>
+            </ul>
+        </div>
+
+        <a href="index.html#dangky" class="btn-register">ĐĂNG KÝ TƯ VẤN NGAY</a>
+    </div>
+
+    <footer>
+        <h2 style="margin:0;">ICOGroup - Kiến tạo tương lai</h2>
+        <p>Địa chỉ: 360 Phan Đình Phùng, TP. Thái Nguyên | Hotline: 0822.314.555</p>
+    </footer>
+
+    <script>
+        function toggleMenu(id, arrowId){
+            document.querySelectorAll(".submenu").forEach(m => { if(m.id !== id) m.style.display = "none"; });
+            let menu = document.getElementById(id);
+            if (menu.style.display === "block") { menu.style.display = "none"; } else { menu.style.display = "block"; }
+        }
+        window.onclick = function(e) {
+            if (!e.target.closest('li')) { document.querySelectorAll(".submenu").forEach(m => m.style.display = "none"); }
+        }
+    </script>
+
+</body>
+</html>

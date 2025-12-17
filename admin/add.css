@@ -1,0 +1,321 @@
+/* Thiết lập cơ bản */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 1. Thanh Điều Hướng Trên Cùng (Top Bar) */
+.top-bar {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-bar .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.main-nav .nav-item {
+    background: none;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-right: 5px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.main-nav .nav-item:hover {
+    background-color: #0056b3;
+}
+
+.main-nav .nav-item.active {
+    background-color: #0056b3;
+    font-weight: bold;
+}
+
+.user-control .nav-item {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* 2. Khu Vực Nội Dung Chính */
+.main-container {
+    display: flex;
+    flex: 1;
+}
+
+/* Sidebar (Bên trái) */
+.sidebar {
+    width: 250px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar h3 {
+    color: #007bff;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar .menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    transition: background-color 0.2s;
+}
+
+.sidebar .menu-item:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .menu-item.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+/* Content Area (Bên phải) */
+.content-area {
+    flex: 1;
+    padding: 20px;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.content-view {
+    display: none; /* Mặc định ẩn tất cả nội dung */
+}
+
+.content-view.active-view {
+    display: block; /* Chỉ hiện nội dung đang được chọn */
+}
+
+/* Bảng Dữ Liệu (Ảnh 3) */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.data-table .btn {
+    padding: 5px 10px;
+    margin-left: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.data-table .btn-edit {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.data-table .btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Mockup Bố cục Web (Ảnh 2) */
+.web-layout-mockup {
+    border: 2px solid #333;
+    padding: 10px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.web-layout-mockup .row {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+    min-height: 80px;
+}
+
+.web-layout-mockup .row:last-child {
+    border-bottom: none;
+}
+
+.web-layout-mockup .cell {
+    flex: 1;
+    border-right: 1px solid #ccc;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+.web-layout-mockup .cell:last-child {
+    border-right: none;
+}
+
+/* Ẩn các menu không được chọn */
+.menu-list {
+    display: none;
+}
+
+.menu-list.active-menu {
+    display: block;
+}
+body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f7fb;
+            color: #333;
+        }
+        h1 {
+            color: #0f75bd;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #message {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #0f75bd;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+        .btn-update {
+            background-color: #ff6600;
+            color: white;
+        }
+        .btn-update:hover {
+            background-color: #e65c00;
+        }
+        /* Style cho pop-up chỉnh sửa */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-content label, .modal-content input {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .modal-content input[type="text"], 
+        .modal-content input[type="number"], 
+        .modal-content input[type="tel"],
+        .modal-content select {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }

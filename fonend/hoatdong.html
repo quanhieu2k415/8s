@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hoạt động – ICO Group</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <style>
+        /* === CSS CƠ BẢN (Đồng bộ với các trang khác) === */
+        * { box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; }
+        body { background: #f4f7fb; line-height: 1.6; padding-top: 110px; }
+
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(to right, #e60000, #ff4d4d);
+            color: white; padding: 0 50px; height: 40px; 
+            display: flex; justify-content: center; gap: 30px; align-items: center; font-size: 14px;
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 2000;
+        }
+        .top-bar a { background: white; color: #e60000; padding: 4px 15px; text-decoration: none; border-radius: 15px; font-weight: bold; font-size: 12px; }
+
+        /* Navigation */
+        nav {
+            background: #0f75bd; height: 60px; display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 10%; position: fixed; top: 40px; left: 0; width: 100%; z-index: 1999;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .nav-logo { height: 44px; background: white; padding: 5px 15px; border-radius: 5px; display: flex; align-items: center; }
+        .nav-logo img { height: 100%; width: auto; }
+        
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav ul li { position: relative; }
+        nav ul li a { color: white; padding: 0 15px; line-height: 60px; display: block; text-decoration: none; font-weight: 500; cursor: pointer; }
+        nav ul li a:hover { background: rgba(255,255,255,0.1); }
+
+        /* Submenu */
+        .submenu { display: none; position: absolute; background: white; top: 60px; left: 0; min-width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 0 0 5px 5px; z-index: 2001; }
+        .submenu a { color: #333 !important; line-height: 1.5; padding: 10px 20px; border-bottom: 1px solid #eee; }
+        .submenu a:hover { background: #f4f7fb; color: #0f75bd !important; }
+        .arrow { font-size: 10px; margin-left: 5px; }
+
+        /* Banner Trang Con */
+        .page-banner {
+            position: relative; background-size: cover; background-position: center; margin-bottom: 40px;
+        }
+        .banner-overlay {
+            background: rgba(0, 43, 111, 0.6); height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+        }
+        .banner-content h1 { font-size: 36px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* === CSS RIÊNG CHO TRANG HOẠT ĐỘNG === */
+        .activity-wrapper { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        
+        .activity-intro { 
+            text-align: center; max-width: 800px; margin: 0 auto 50px; 
+            font-size: 18px; color: #555; line-height: 1.6; 
+        }
+
+        .activity-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 30px; 
+        }
+
+        .activity-card { 
+            background: white; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: 0.3s; 
+            border: 1px solid #eee;
+        }
+        .activity-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15); 
+        }
+
+        .activity-img { width: 100%; height: 220px; object-fit: cover; }
+        
+        .activity-content { padding: 25px; }
+        .activity-content h3 { color: #0f75bd; margin-bottom: 15px; font-size: 22px; border-bottom: 2px solid #f4f7fb; padding-bottom: 10px; }
+        .activity-content p { color: #666; font-size: 15px; line-height: 1.6; margin-bottom: 15px; text-align: justify; }
+        
+        .activity-list { list-style: none; padding: 0; }
+        .activity-list li { padding-left: 20px; position: relative; margin-bottom: 10px; color: #444; font-size: 15px; }
+        .activity-list li::before { content: "✔"; color: #ff6600; font-weight: bold; position: absolute; left: 0; font-size: 14px; }
+
+        /* Responsive Mobile */
+        @media (max-width: 768px) {
+            .top-bar { flex-direction: column; height: auto; padding: 5px; }
+            nav { top: 60px; padding: 0 10px; }
+            nav ul li a { padding: 0 10px; font-size: 14px; }
+            .activity-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <span>📞 Hotline: 0822.314.555</span>
+        <a href="index.html#dangky">Đăng ký tìm hiểu</a>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" alt="ICOGroup Logo">
+        </a>
+
+        <ul>
+            <li><a href="index.html">Trang chủ</a></li>
+
+            <li>
+                <a onclick="toggleMenu('duhocMenu','arrow1')">Du học <span id="arrow1" class="arrow">▶</span></a>
+                <ul id="duhocMenu" class="submenu">
+                    <li><a href="duc.html">Du học Đức</a></li>
+                    <li><a href="nhat.html">Du học Nhật</a></li>
+                    <li><a href="han.html">Du học Hàn Quốc</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a onclick="toggleMenu('xkldNested','arrowXKLD')">Xuất khẩu lao động <span id="arrowXKLD" class="arrow">▶</span></a>
+                <ul id="xkldNested" class="submenu">
+                    <li><a href="#">Nhật Bản</a></li>
+                    <li><a href="#">Hàn Quốc</a></li>
+                    <li><a href="#">Đài Loan</a></li>
+                    <li><a href="#">Châu Âu</a></li>
+                </ul>
+            </li>
+
+            <li><a href="hoatdong.html" style="color:#ffcc00; font-weight:bold;">Hoạt động</a></li>
+            <li><a href="lienhe.html">Liên hệ</a></li>
+            <li><a href="index.html#dangky" style="font-weight:bold; background:rgba(255,255,255,0.2); border-radius:4px;">Đăng ký</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-banner" style="background-image: url('https://icogroup.vn/vnt_upload/weblink/banner_chu_03.jpg'); height: 350px;">
+        <div class="banner-overlay">
+            <div class="banner-content">
+                <h1>HOẠT ĐỘNG CỦA ICOGROUP</h1>
+                <p>Nơi đào tạo tương lai - Đồng hành cùng thế hệ trẻ Việt Nam</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-wrapper">
+        <div class="activity-intro">
+            <p><strong>ICO Group</strong> hoạt động chuyên sâu trong lĩnh vực <strong>Du học quốc tế</strong> và <strong>Xuất khẩu lao động</strong>. Chúng tôi cung cấp giải pháp toàn diện từ đào tạo ngôn ngữ, định hướng nghề nghiệp đến kết nối nguồn nhân lực chất lượng cao với thị trường quốc tế.</p>
+        </div>
+
+        <div class="activity-grid">
+            <div class="activity-card">
+                <img src="https://duhocxkldthanhdo.vn/Upload/Images/du-hoc-han-quoc-0111.jpg" alt="Du học" class="activity-img">
+                <div class="activity-content">
+                    <h3>1. Hoạt động Du học</h3>
+                    <p>Cung cấp lộ trình du học rõ ràng, minh bạch tại các nền giáo dục tiên tiến trên thế giới.</p>
+                    <ul class="activity-list">
+                        <li>Du học nghề Đức: Điều dưỡng, Nhà hàng KS, Cơ khí.</li>
+                        <li>Du học Nhật Bản: Học bổng báo, Học bổng điều dưỡng.</li>
+                        <li>Du học Hàn Quốc: Hệ tiếng, Đại học, Cao học.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="activity-card">
+                <img src="https://www.icogroup.vn/vnt_upload/news/02_2025/ICOGROUP_TUYEN_DUNG_23.jpg" alt="XKLD" class="activity-img">
+                <div class="activity-content">
+                    <h3>2. Xuất khẩu lao động</h3>
+                    <p>Kết nối người lao động với các doanh nghiệp uy tín tại nước ngoài với mức thu nhập hấp dẫn.</p>
+                    <ul class="activity-list">
+                        <li>Thị trường: Nhật Bản, Hàn Quốc, Đài Loan, Châu Âu.</li>
+                        <li>Đơn hàng đa dạng: Cơ khí, Xây dựng, Nông nghiệp.</li>
+                        <li>Hỗ trợ vay vốn và thủ tục pháp lý trọn gói.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="activity-card">
+                <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Đào tạo" class="activity-img">
+                <div class="activity-content">
+                    <h3>3. Đào tạo & Hỗ trợ</h3>
+                    <p>Chú trọng đào tạo kỹ năng và ngôn ngữ để học viên tự tin hòa nhập quốc tế ngay từ Việt Nam.</p>
+                    <ul class="activity-list">
+                        <li>Trung tâm đào tạo tiếng Đức – Nhật – Hàn chuyên nghiệp.</li>
+                        <li>Rèn luyện kỹ năng mềm, văn hóa bản địa.</li>
+                        <li>Hỗ trợ ký túc xá và sinh hoạt cho học viên ở xa.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section style="background:#002b6f; color:white; padding:40px 20px; margin-top:50px;">
+        <div style="max-width:1100px; margin:auto; display:flex; gap:30px; align-items:center; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px;">
+                <h2 style="margin-top:0;">CÔNG TY CỔ PHẦN NHÂN LỰC QUỐC TẾ ICO</h2>
+                <p><strong>📌 Địa chỉ:</strong> Số 360, đường Phan Đình Phùng, Tỉnh Thái Nguyên</p>
+                <p><strong>📞 Hotline:</strong> 0822.314.555</p>
+                <p><strong>🌐 Liên hệ:</strong> Facebook | Zalo | Website</p>
+            </div>
+            <div style="flex:1; min-width:300px; text-align: center;">
+                <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" style="background:white; padding:10px; border-radius:5px; height:60px; margin-bottom:10px;">
+                <p>© 2025 ICOGroup. All rights reserved.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Xử lý Menu (Giống logic Index.html và Lienhe.html)
+        function toggleMenu(id, arrowId){
+            // Đóng menu khác
+            document.querySelectorAll(".submenu").forEach(m => {
+                if(m.id !== id) m.style.display = "none";
+            });
+            document.querySelectorAll(".arrow").forEach(a => {
+                if(a.id !== arrowId) a.textContent = "▶";
+            });
+
+            // Mở menu hiện tại
+            let menu = document.getElementById(id);
+            let arrow = document.getElementById(arrowId);
+            if (menu.style.display === "block") {
+                menu.style.display = "none";
+                arrow.textContent = "▶";
+            } else {
+                menu.style.display = "block";
+                arrow.textContent = "▼";
+            }
+        }
+        
+        // Click ra ngoài thì đóng
+        window.onclick = function(event) {
+            if (!event.target.closest('li')) {
+                document.querySelectorAll(".submenu").forEach(m => m.style.display = "none");
+                document.querySelectorAll(".arrow").forEach(a => a.textContent = "▶");
+            }
+        }
+    </script>
+
+</body>
+</html>

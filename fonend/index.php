@@ -1,0 +1,319 @@
+<?php
+$pageTitle = "Trang chủ";
+$pageDescription = "ICOGroup - Tập đoàn Giáo dục và Đào tạo nghề hàng đầu Việt Nam. Du học Nhật Bản, Đức, Hàn Quốc. Xuất khẩu lao động uy tín.";
+include 'includes/header.php';
+?>
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-slider">
+        <div class="hero-slide">
+            <img src="https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg" alt="ICOGroup - Nơi tạo dựng tương lai">
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h1>ICOGroup - Nơi Tạo Dựng Tương Lai</h1>
+                    <p>Tập đoàn Giáo dục và Đào tạo nghề hàng đầu Việt Nam với hơn 15 năm kinh nghiệm</p>
+                    <a href="#dangky" class="hero-btn">Đăng ký tư vấn miễn phí</a>
+                </div>
+            </div>
+        </div>
+        <div class="hero-slide">
+            <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Du học quốc tế">
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h1>Chương Trình Du Học Quốc Tế</h1>
+                    <p>Nhật Bản • Đức • Hàn Quốc • Đài Loan</p>
+                    <a href="nhat.php" class="hero-btn">Tìm hiểu ngay</a>
+                </div>
+            </div>
+        </div>
+        <div class="hero-slide">
+            <img src="https://www.icogroup.vn/vnt_upload/news/02_2025/ICOGROUP_TUYEN_DUNG_23.jpg" alt="Xuất khẩu lao động">
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h1>Xuất Khẩu Lao Động Uy Tín</h1>
+                    <p>Cơ hội việc làm với thu nhập cao tại nước ngoài</p>
+                    <a href="xkldjp.php" class="hero-btn">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="hero-nav prev">
+        <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    <button class="hero-nav next">
+        <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+    
+    <div class="hero-dots">
+        <span class="hero-dot active"></span>
+        <span class="hero-dot"></span>
+        <span class="hero-dot"></span>
+    </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section class="section about-section" id="about">
+    <div class="container">
+        <div class="section-header">
+            <h2>Về ICOGroup</h2>
+            <p>Tổ chức Giáo dục và Nhân lực Quốc tế ICO - Hơn 15 năm xây dựng và phát triển</p>
+        </div>
+        
+        <div class="about-grid">
+            <div class="about-image">
+                <img src="https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg" alt="ICOGroup">
+                <div class="about-badge">Thành lập 2008</div>
+            </div>
+            
+            <div class="about-content">
+                <h3>Lịch Sử Hình Thành & Phát Triển</h3>
+                <p>Với tầm nhìn dài hạn và quan điểm phát triển bền vững, ICOGroup đã trở thành một trong những thương hiệu uy tín về du học và xuất khẩu lao động tại Việt Nam.</p>
+                <p>Hiện ICOGroup đã có mặt ở trên 60 tỉnh thành trong nước với cơ sở vật chất được đầu tư đồng bộ và hiện đại phục vụ công tác tuyển dụng, đào tạo và hoàn thiện visa.</p>
+                
+                <div class="about-values">
+                    <div class="value-item">
+                        <span>🎯</span>
+                        <span>Sứ mệnh: Nâng cao chất lượng nguồn nhân lực Việt Nam</span>
+                    </div>
+                    <div class="value-item">
+                        <span>👁️</span>
+                        <span>Tầm nhìn: Tập đoàn phát triển nhân lực lớn nhất Việt Nam</span>
+                    </div>
+                    <div class="value-item">
+                        <span>💎</span>
+                        <span>Giá trị cốt lõi: Trí tuệ, Trung thực, Tận tâm</span>
+                    </div>
+                </div>
+                
+                <a href="ve-icogroup.php" class="hero-btn" style="margin-top: 25px;">Tìm hiểu thêm</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ECOSYSTEM SECTION -->
+<section class="section ecosystem-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Hệ Sinh Thái ICOGroup</h2>
+            <p>Hệ thống giáo dục và đào tạo toàn diện</p>
+        </div>
+        
+        <div class="ecosystem-grid">
+            <div class="ecosystem-card">
+                <div class="ecosystem-icon">🌍</div>
+                <h3>Trung tâm Ngoại ngữ ICO</h3>
+                <p>Đào tạo tiếng Nhật, tiếng Đức, tiếng Hàn với đội ngũ giáo viên chất lượng cao</p>
+                <a href="#">Xem thêm →</a>
+            </div>
+            
+            <div class="ecosystem-card">
+                <div class="ecosystem-icon">🏫</div>
+                <h3>ICOSchool</h3>
+                <p>Hệ thống trường học với chương trình giáo dục tiên tiến, chuẩn quốc tế</p>
+                <a href="#">Xem thêm →</a>
+            </div>
+            
+            <div class="ecosystem-card">
+                <div class="ecosystem-icon">🎓</div>
+                <h3>ICOCollege</h3>
+                <p>Cao đẳng nghề chất lượng cao với cam kết việc làm sau tốt nghiệp</p>
+                <a href="#">Xem thêm →</a>
+            </div>
+            
+            <div class="ecosystem-card">
+                <div class="ecosystem-icon">💼</div>
+                <h3>ICOCareer</h3>
+                <p>Hướng nghiệp, tư vấn nghề nghiệp và kết nối việc làm trong nước và quốc tế</p>
+                <a href="huong-nghiep.php">Xem thêm →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATISTICS SECTION -->
+<section class="stats-section">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <span class="stat-number" data-target="17000">0</span>
+            <span class="stat-label">Du học sinh</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="38000">0</span>
+            <span class="stat-label">Lao động quốc tế</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="600">0</span>
+            <span class="stat-label">Đối tác doanh nghiệp</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="300">0</span>
+            <span class="stat-label">Trường liên kết</span>
+        </div>
+    </div>
+</section>
+
+<!-- PROGRAMS SECTION -->
+<section class="section programs-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Chương Trình Nổi Bật</h2>
+            <p>Đa dạng lựa chọn phù hợp với nhu cầu của bạn</p>
+        </div>
+        
+        <div class="programs-grid">
+            <div class="program-card" onclick="window.location='nhat.php'" style="cursor:pointer">
+                <div class="program-image">
+                    <img src="https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png" alt="Du học Nhật Bản">
+                </div>
+                <div class="program-content">
+                    <span class="program-tag">Du học</span>
+                    <h3>Du Học Nhật Bản</h3>
+                    <p>Chương trình du học Nhật Bản với 100+ trường đối tác. Học bổng hấp dẫn, visa cao.</p>
+                    <a href="nhat.php" class="program-link">
+                        Tìm hiểu thêm 
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="program-card" onclick="window.location='duc.php'" style="cursor:pointer">
+                <div class="program-image">
+                    <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Du học Đức">
+                </div>
+                <div class="program-content">
+                    <span class="program-tag">Du học</span>
+                    <h3>Du Học Đức</h3>
+                    <p>Du học kép (Ausbildung): Học miễn phí, có lương, việc làm ngay sau tốt nghiệp.</p>
+                    <a href="duc.php" class="program-link">
+                        Tìm hiểu thêm 
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="program-card" onclick="window.location='xkldjp.php'" style="cursor:pointer">
+                <div class="program-image">
+                    <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Xuất khẩu lao động">
+                </div>
+                <div class="program-content">
+                    <span class="program-tag">XKLĐ</span>
+                    <h3>Xuất Khẩu Lao Động Nhật Bản</h3>
+                    <p>Chương trình thực tập sinh kỹ năng với thu nhập từ 30-40 triệu/tháng.</p>
+                    <a href="xkldjp.php" class="program-link">
+                        Tìm hiểu thêm 
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NEWS SECTION -->
+<section class="section news-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Tin Tức & Hoạt Động</h2>
+            <p>Cập nhật những thông tin mới nhất từ ICOGroup</p>
+        </div>
+        
+        <div class="news-grid">
+            <?php
+            // Fetch news from API
+            $newsData = @file_get_contents('http://localhost/web8s/backend_api/news_api.php?limit=6');
+            if ($newsData) {
+                $newsItems = json_decode($newsData, true);
+                if (is_array($newsItems) && count($newsItems) > 0) {
+                    foreach ($newsItems as $news) {
+                        $image = !empty($news['image_url']) ? $news['image_url'] : 'https://via.placeholder.com/400x250?text=No+Image';
+                        $title = htmlspecialchars($news['title']);
+                        $date = date('d/m/Y', strtotime($news['created_at']));
+                        $newsId = $news['id'];
+                        ?>
+                        <div class="news-card" onclick="window.location='tin-tuc.php?id=<?php echo $newsId; ?>'" style="cursor:pointer">
+                            <div class="news-image">
+                                <img src="<?php echo $image; ?>" alt="<?php echo $title; ?>">
+                            </div>
+                            <div class="news-content">
+                                <div class="news-date">📅 <?php echo $date; ?></div>
+                                <h3><?php echo $title; ?></h3>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                } else {
+                    echo '<p style="text-align:center; color:#888; grid-column: 1/-1;">Chưa có tin tức nào. Vui lòng thêm tin tức trong trang quản trị.</p>';
+                }
+            } else {
+                echo '<p style="text-align:center; color:#888; grid-column: 1/-1;">Không thể tải tin tức.</p>';
+            }
+            ?>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="hoatdong.php" class="hero-btn">Xem tất cả tin tức</a>
+        </div>
+    </div>
+</section>
+
+<!-- REGISTRATION FORM SECTION -->
+<section class="form-section" id="dangky">
+    <div class="form-container">
+        <h3>🎯 ĐĂNG KÝ TƯ VẤN MIỄN PHÍ</h3>
+        
+        <form id="userRegistrationForm">
+            <div class="form-group">
+                <label for="ho_ten">Họ và Tên:</label>
+                <input type="text" id="ho_ten" name="ho_ten" required placeholder="Nhập họ tên của bạn...">
+            </div>
+            
+            <div class="form-group">
+                <label for="nam_sinh">Năm Sinh:</label>
+                <input type="text" id="nam_sinh" name="nam_sinh" required maxlength="4" placeholder="Ví dụ: 2005">
+            </div>
+            
+            <div class="form-group">
+                <label for="dia_chi">Địa Chỉ:</label>
+                <input type="text" id="dia_chi" name="dia_chi" required placeholder="Tỉnh/Thành phố...">
+            </div>
+            
+            <div class="form-group">
+                <label for="chuong_trinh">Chương Trình Quan Tâm:</label>
+                <select id="chuong_trinh" name="chuong_trinh" required>
+                    <option value="Du học">Du học</option>
+                    <option value="Xuất khẩu lao động">Xuất khẩu lao động</option>
+                    <option value="Đào tạo ngoại ngữ">Đào tạo ngoại ngữ</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="quoc_gia">Quốc Gia Muốn Đến:</label>
+                <select id="quoc_gia" name="quoc_gia">
+                    <option value="Nhật Bản">Nhật Bản</option>
+                    <option value="Đức">Đức</option>
+                    <option value="Hàn Quốc">Hàn Quốc</option>
+                    <option value="Đài Loan">Đài Loan</option>
+                    <option value="Khác">Khác</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="quoc_gia_khac_box" style="display: none;">
+                <label for="quoc_gia_khac">Nhập quốc gia khác:</label>
+                <input type="text" id="quoc_gia_khac" name="quoc_gia_khac" placeholder="Tên quốc gia...">
+            </div>
+            
+            <div class="form-group">
+                <label for="sdt">Số Điện Thoại:</label>
+                <input type="tel" id="sdt" name="sdt" required maxlength="11" pattern="[0-9]{9,11}" placeholder="Nhập số điện thoại...">
+            </div>
+            
+            <button type="submit" class="form-submit">GỬI THÔNG TIN</button>
+            <p id="message"></p>
+        </form>
+    </div>
+</section>
+
+<?php include 'includes/footer.php'; ?>

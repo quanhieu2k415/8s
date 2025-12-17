@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xuất khẩu lao động Đài Loan - ICOGroup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <style>
+        /* CSS CHUẨN TỪ TRANG NHẬT */
+        * { box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; }
+        body { background: #f4f7fb; line-height: 1.6; padding-top: 110px; }
+
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(to right, #e60000, #ff4d4d);
+            color: white; padding: 0 50px; height: 40px; 
+            display: flex; justify-content: center; gap: 30px; align-items: center; font-size: 14px;
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 2000;
+        }
+        .top-bar a { background: white; color: #e60000; padding: 4px 15px; text-decoration: none; border-radius: 15px; font-weight: bold; font-size: 12px; transition: 0.3s; }
+        .top-bar a:hover { background: #ffe6e6; }
+
+        /* Navigation */
+        nav {
+            background: #0f75bd; height: 60px; display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 10%; position: fixed; top: 40px; left: 0; width: 100%; z-index: 1999;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .nav-logo { display: flex; align-items: center; background: white; padding: 5px 15px; border-radius: 5px; height: 44px; }
+        .nav-logo img { height: 100%; width: auto; object-fit: contain; }
+
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav ul li { position: relative; }
+        nav ul li a { color: rgb(255, 255, 255); padding: 0 15px; line-height: 60px; display: block; text-decoration: none; font-weight: 500; cursor: pointer; font-size: 15px; }
+        nav ul li a:hover { background: rgba(255,255,255,0.1); }
+
+        /* Submenu */
+        .submenu { display: none; position: absolute; background: white; top: 60px; left: 0; min-width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 0 0 5px 5px; }
+        .submenu a { color: #333 !important; line-height: 1.5; padding: 10px 20px; border-bottom: 1px solid #eee; }
+        .submenu a:hover { background: #f4f7fb; color: #0f75bd !important; }
+        .arrow { font-size: 10px; margin-left: 5px; }
+
+        /* Content Styling */
+        .page-banner {
+            background-image: url('https://duhocdailoanico.edu.vn/wp-content/uploads/2023/04/Banner-web-Dai-Loan-1.png');
+            height: 350px; background-size: cover; background-position: center; position: relative; margin-bottom: 40px;
+        }
+        .banner-overlay { 
+            background: rgba(0, 43, 111, 0.6); height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; 
+        }
+        .banner-overlay h1 { font-size: 36px; margin-bottom: 10px; text-transform: uppercase; font-weight: bold; }
+
+        .content-container { max-width: 1000px; margin: 0 auto 40px; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .content-container h2 { color: #0f75bd; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; margin-top: 30px; font-size: 22px; }
+        .info-box { background: #eef6fb; padding: 25px; border-left: 5px solid #0f75bd; margin-bottom: 25px; border-radius: 5px; }
+        .info-box ul { padding-left: 20px; }
+        .info-box ul li { margin-bottom: 10px; }
+
+        .btn-register { 
+            display: block; width: fit-content; margin: 40px auto 0; background: #ff6600; color: white; padding: 15px 50px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 18px; transition: 0.3s; 
+        }
+        .btn-register:hover { background: #e65c00; transform: translateY(-3px); }
+
+        /* Responsive Fix */
+        @media (max-width: 768px) {
+            .top-bar { flex-direction: column; height: auto; padding: 5px; }
+            nav { top: 60px; padding: 0 10px; }
+            nav ul li a { padding: 0 10px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <span>📞 Hotline: 0822.314.555</span>
+        <a href="index.html#dangky">Đăng ký tìm hiểu</a>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" alt="Logo">
+        </a>
+
+        <ul>
+            <li><a href="index.html">Trang chủ</a></li>
+            
+            <li>
+                <a onclick="toggleMenu('duhocMenu','arrow1')">Du học <span id="arrow1" class="arrow">▶</span></a>
+                <ul id="duhocMenu" class="submenu">
+                    <li><a href="duc.html">Du học Đức</a></li>
+                    <li><a href="nhat.html">Du học Nhật</a></li>
+                    <li><a href="han.html">Du học Hàn Quốc</a></li>
+                </ul>
+            </li>
+            
+            <li>
+                <a onclick="toggleMenu('xkldNested','arrowXKLD')" style="color:#ffcc00; font-weight:bold;">
+                    Xuất khẩu lao động <span id="arrowXKLD" class="arrow">▶</span>
+                </a>
+                <ul id="xkldNested" class="submenu">
+                    <li><a href="xkldjp.html">Nhật Bản</a></li>
+                    <li><a href="xkldhan.html">Hàn Quốc</a></li>
+                    <li><a href="xklddailoan.html" style="color:#ff6600; font-weight:bold;">Đài Loan</a></li>
+                    <li><a href="xkldchauau.html">Châu Âu</a></li>
+                </ul>
+            </li>
+
+            <li><a href="hoatdong.html">Hoạt động</a></li>
+            
+            <li><a href="lienhe.html">Liên hệ</a></li>
+            <li><a href="index.html#dangky" style="font-weight:bold;">Đăng ký</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-banner">
+        <div class="banner-overlay">
+            <h1>THỊ TRƯỜNG ĐÀI LOAN</h1>
+            <p>Phí thấp - Bay nhanh - Điều kiện dễ dàng</p>
+        </div>
+    </div>
+
+    <div class="content-container">
+        <h2>1. Tại sao nên chọn Đài Loan?</h2>
+        <p>Đài Loan là thị trường dễ tính nhất, phù hợp với nhiều đối tượng lao động. Chi phí đi thấp, thời gian xuất cảnh nhanh (chỉ từ 1-2 tháng) và không yêu cầu cao về ngoại ngữ hay tay nghề.</p>
+        
+        <div class="info-box">
+            <h3>📌 Thông tin cơ bản</h3>
+            <ul>
+                <li><strong>Thu nhập:</strong> 20 - 30 triệu VNĐ/tháng (Lương cơ bản + Làm thêm).</li>
+                <li><strong>Hợp đồng:</strong> 3 năm (Có thể gia hạn lên tới 12 năm).</li>
+                <li><strong>Chi phí:</strong> Thấp nhất trong các thị trường, thủ tục đơn giản.</li>
+                <li><strong>Tiến độ:</strong> Bay cực nhanh sau khi trúng tuyển.</li>
+            </ul>
+        </div>
+
+        <h2>2. Các ngành nghề tuyển dụng chính</h2>
+        <p>Đài Loan tuyển dụng đa dạng các ngành nghề cho cả Nam và Nữ:</p>
+        <ul>
+            <li><strong>Công xưởng:</strong> Điện tử, Cơ khí, Dệt may, Thực phẩm, Đóng gói.</li>
+            <li><strong>Hộ lý/Giúp việc:</strong> Chăm sóc người già (Lương tốt, lấy tuổi cao).</li>
+            <li><strong>Xây dựng:</strong> Thợ xây, sắt, cốp pha (Tuyển Nam sức khỏe tốt).</li>
+        </ul>
+
+        <h2>3. Điều kiện tham gia</h2>
+        <div class="info-box" style="background: #fff8e1; border-left-color: #ff6600;">
+            <h3>📋 Yêu cầu tuyển dụng</h3>
+            <ul>
+                <li><strong>Độ tuổi:</strong> 18 - 48 tuổi (Biên độ rộng nhất).</li>
+                <li><strong>Trình độ:</strong> Tốt nghiệp Cấp 2 (THCS) trở lên.</li>
+                <li><strong>Sức khỏe:</strong> Tốt, chấp nhận Viêm gan B (tùy đơn hàng).</li>
+            </ul>
+        </div>
+
+        <a href="index.html#dangky" class="btn-register">ĐĂNG KÝ TƯ VẤN NGAY</a>
+    </div>
+
+    <section style="background:#002b6f; color:white; padding:40px 20px; margin-top:40px;">
+        <div style="max-width:1100px; margin:auto; display:flex; gap:30px; align-items:center; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px;">
+                <h2 style="margin-top:0;">CÔNG TY CỔ PHẦN NHÂN LỰC QUỐC TẾ ICO</h2>
+                <p><strong>📌 Địa chỉ:</strong> Số 360, đường Phan Đình Phùng, Tỉnh Thái Nguyên</p>
+                <p><strong>📞 Hotline:</strong> 0822.314.555</p>
+            </div>
+            <div style="flex:1; min-width:300px; text-align: center;">
+                <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" style="background:white; padding:10px; border-radius:5px; height:60px; margin-bottom:10px;">
+                <p>© 2025 ICOGroup. All rights reserved.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function toggleMenu(id, arrowId){
+            document.querySelectorAll(".submenu").forEach(m => {
+                if(m.id !== id) m.style.display = "none";
+            });
+            document.querySelectorAll(".arrow").forEach(a => {
+                if(a.id !== arrowId) a.textContent = "▶";
+            });
+
+            let menu = document.getElementById(id);
+            let arrow = document.getElementById(arrowId);
+            if (menu.style.display === "block") {
+                menu.style.display = "none";
+                arrow.textContent = "▶";
+            } else {
+                menu.style.display = "block";
+                arrow.textContent = "▼";
+            }
+        }
+        
+        window.onclick = function(e) {
+            if (!e.target.closest('li')) {
+                document.querySelectorAll(".submenu").forEach(m => m.style.display = "none");
+                document.querySelectorAll(".arrow").forEach(a => a.textContent = "▶");
+            }
+        }
+    </script>
+
+</body>
+</html>
