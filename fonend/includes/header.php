@@ -12,16 +12,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="animations.css">
+    <!-- Load script.js in head for immediate feature initialization -->
+    <script src="script.js" defer></script>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOP BAR - Modern Design -->
 <div class="top-bar">
-    <span>📞 Hotline: 0822.314.555</span>
-    <a href="index.php#dangky">Đăng ký tìm hiểu</a>
+    <div class="top-bar-container">
+        <div class="top-bar-left">
+            <a href="tel:0822314555" class="top-bar-item">
+                <span class="material-symbols-outlined">call</span>
+                <span>0822.314.555</span>
+            </a>
+            <a href="mailto:info@icogroup.vn" class="top-bar-item">
+                <span class="material-symbols-outlined">mail</span>
+                <span>info@icogroup.vn</span>
+            </a>
+        </div>
+        <div class="top-bar-right">
+            <a href="https://facebook.com/icogroup" target="_blank" class="social-icon" title="Facebook">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://youtube.com/icogroup" target="_blank" class="social-icon" title="YouTube">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://zalo.me/icogroup" target="_blank" class="social-icon" title="Zalo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 5.28c-.096.288-.444.48-.756.48H9.892c-.312 0-.66-.192-.756-.48l-1.97-5.28c-.168-.456.144-.936.636-.936h.924c.312 0 .588.216.684.504l1.356 4.032h2.468l1.356-4.032c.096-.288.372-.504.684-.504h.924c.492 0 .804.48.636.936z"/></svg>
+            </a>
+            <a href="index.php#dangky" class="top-bar-cta">
+                <span class="material-symbols-outlined">app_registration</span>
+                <span>Đăng ký tư vấn</span>
+            </a>
+        </div>
+    </div>
 </div>
 
-<!-- NAVIGATION -->
+<!-- NAVIGATION - Modern Design -->
 <nav>
     <a href="index.php" class="nav-logo">
         <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" alt="ICOGroup Logo">
@@ -35,21 +62,21 @@
         </li>
 
         <li class="has-submenu">
-            <a href="#">Du học <span class="arrow">▼</span></a>
+            <a href="#">Du học <span class="material-symbols-outlined arrow-icon">expand_more</span></a>
             <ul class="submenu">
-                <li><a href="duc.php">Du học Đức</a></li>
-                <li><a href="nhat.php">Du học Nhật</a></li>
-                <li><a href="han.php">Du học Hàn Quốc</a></li>
+                <li><a href="duc.php"><span class="flag">🇩🇪</span> Du học Đức</a></li>
+                <li><a href="nhat.php"><span class="flag">🇯🇵</span> Du học Nhật</a></li>
+                <li><a href="han.php"><span class="flag">🇰🇷</span> Du học Hàn Quốc</a></li>
             </ul>
         </li>
 
         <li class="has-submenu">
-            <a href="#">Xuất khẩu lao động <span class="arrow">▼</span></a>
+            <a href="#">Xuất khẩu lao động <span class="material-symbols-outlined arrow-icon">expand_more</span></a>
             <ul class="submenu">
-                <li><a href="xkldjp.php">Nhật Bản</a></li>
-                <li><a href="xkldhan.php">Hàn Quốc</a></li>
-                <li><a href="xklddailoan.php">Đài Loan</a></li>
-                <li><a href="xkldchauau.php">Châu Âu</a></li>
+                <li><a href="xkldjp.php"><span class="flag">🇯🇵</span> Nhật Bản</a></li>
+                <li><a href="xkldhan.php"><span class="flag">🇰🇷</span> Hàn Quốc</a></li>
+                <li><a href="xklddailoan.php"><span class="flag">🇹🇼</span> Đài Loan</a></li>
+                <li><a href="xkldchauau.php"><span class="flag">🇪🇺</span> Châu Âu</a></li>
             </ul>
         </li>
 
@@ -60,7 +87,7 @@
     </ul>
 
     <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">
         <span class="material-symbols-outlined">menu</span>
     </button>
 </nav>
@@ -69,20 +96,31 @@
 <div id="mobileMenu" class="mobile-menu">
     <div class="mobile-menu-header">
         <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" alt="ICOGroup">
-        <button onclick="toggleMobileMenu()">
+        <button onclick="toggleMobileMenu()" aria-label="Đóng menu">
             <span class="material-symbols-outlined">close</span>
         </button>
     </div>
     <ul>
-        <li><a href="index.php">Trang chủ</a></li>
-        <li><a href="ve-icogroup.php">Về ICOGroup</a></li>
-        <li><a href="duc.php">Du học Đức</a></li>
-        <li><a href="nhat.php">Du học Nhật</a></li>
-        <li><a href="han.php">Du học Hàn Quốc</a></li>
-        <li><a href="xkldjp.php">XKLĐ Nhật Bản</a></li>
-        <li><a href="xkldhan.php">XKLĐ Hàn Quốc</a></li>
-        <li><a href="huong-nghiep.php">Hướng nghiệp</a></li>
-        <li><a href="hoatdong.php">Hoạt động</a></li>
-        <li><a href="lienhe.php">Liên hệ</a></li>
+        <li><a href="index.php">🏠 Trang chủ</a></li>
+        <li><a href="ve-icogroup.php">ℹ️ Về ICOGroup</a></li>
+        <li class="mobile-section-title">Du học</li>
+        <li><a href="duc.php">🇩🇪 Du học Đức</a></li>
+        <li><a href="nhat.php">🇯🇵 Du học Nhật</a></li>
+        <li><a href="han.php">🇰🇷 Du học Hàn Quốc</a></li>
+        <li class="mobile-section-title">Xuất khẩu lao động</li>
+        <li><a href="xkldjp.php">🇯🇵 XKLĐ Nhật Bản</a></li>
+        <li><a href="xkldhan.php">🇰🇷 XKLĐ Hàn Quốc</a></li>
+        <li><a href="xklddailoan.php">🇹🇼 XKLĐ Đài Loan</a></li>
+        <li><a href="xkldchauau.php">🇪🇺 XKLĐ Châu Âu</a></li>
+        <li class="mobile-section-title">Khác</li>
+        <li><a href="huong-nghiep.php">🎯 Hướng nghiệp</a></li>
+        <li><a href="hoatdong.php">📰 Hoạt động</a></li>
+        <li><a href="lienhe.php">📞 Liên hệ</a></li>
     </ul>
+    <div class="mobile-menu-footer">
+        <a href="index.php#dangky" class="mobile-register-btn">
+            <span class="material-symbols-outlined">app_registration</span>
+            Đăng ký tư vấn miễn phí
+        </a>
+    </div>
 </div>

@@ -53,41 +53,65 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- ABOUT SECTION -->
-<section class="section about-section" id="about">
+<!-- ABOUT SECTION - Hero Style with Background Image -->
+<section class="section about-hero-section" id="about" style="
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(99, 102, 241, 0.85) 100%), 
+                url('https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    padding: 100px 0;
+    position: relative;
+">
     <div class="container">
-        <div class="section-header">
-            <h2>Về ICOGroup</h2>
-            <p>Tổ chức Giáo dục và Nhân lực Quốc tế ICO - Hơn 15 năm xây dựng và phát triển</p>
+        <div class="section-header" style="margin-bottom: 50px;">
+            <h2 style="color: white; font-size: 48px; font-weight: 800; text-shadow: 0 4px 20px rgba(0,0,0,0.3);">Về ICOGroup</h2>
+            <p style="color: rgba(255,255,255,0.9); font-size: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">Tổ chức Giáo dục và Nhân lực Quốc tế ICO - Hơn 15 năm xây dựng và phát triển</p>
         </div>
         
-        <div class="about-grid">
-            <div class="about-image">
-                <img src="https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg" alt="ICOGroup">
-                <div class="about-badge">Thành lập 2008</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+            <!-- Left - History & Content -->
+            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.2);">
+                <h3 style="color: white; font-size: 28px; margin-bottom: 20px; font-weight: 700;">Lịch Sử Hình Thành & Phát Triển</h3>
+                <p style="color: rgba(255,255,255,0.9); line-height: 1.8; margin-bottom: 15px;">Với tầm nhìn dài hạn và quan điểm phát triển bền vững, ICOGroup đã trở thành một trong những thương hiệu uy tín về du học và xuất khẩu lao động tại Việt Nam.</p>
+                <p style="color: rgba(255,255,255,0.85); line-height: 1.8;">Hiện ICOGroup đã có mặt ở trên 60 tỉnh thành trong nước với cơ sở vật chất được đầu tư đồng bộ và hiện đại.</p>
+                
+                <a href="ve-icogroup.php" class="hero-btn" style="margin-top: 30px; display: inline-block;">Tìm hiểu thêm</a>
             </div>
             
-            <div class="about-content">
-                <h3>Lịch Sử Hình Thành & Phát Triển</h3>
-                <p>Với tầm nhìn dài hạn và quan điểm phát triển bền vững, ICOGroup đã trở thành một trong những thương hiệu uy tín về du học và xuất khẩu lao động tại Việt Nam.</p>
-                <p>Hiện ICOGroup đã có mặt ở trên 60 tỉnh thành trong nước với cơ sở vật chất được đầu tư đồng bộ và hiện đại phục vụ công tác tuyển dụng, đào tạo và hoàn thiện visa.</p>
-                
-                <div class="about-values">
-                    <div class="value-item">
-                        <span>🎯</span>
-                        <span>Sứ mệnh: Nâng cao chất lượng nguồn nhân lực Việt Nam</span>
-                    </div>
-                    <div class="value-item">
-                        <span>👁️</span>
-                        <span>Tầm nhìn: Tập đoàn phát triển nhân lực lớn nhất Việt Nam</span>
-                    </div>
-                    <div class="value-item">
-                        <span>💎</span>
-                        <span>Giá trị cốt lõi: Trí tuệ, Trung thực, Tận tâm</span>
+            <!-- Right - Values -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 25px 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 20px;">
+                    <span style="font-size: 40px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">🎯</span>
+                    <div>
+                        <strong style="color: #FCD34D; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Sứ mệnh</strong>
+                        <p style="color: white; font-size: 16px; margin-top: 5px;">Nâng cao chất lượng nguồn nhân lực Việt Nam</p>
                     </div>
                 </div>
                 
-                <a href="ve-icogroup.php" class="hero-btn" style="margin-top: 25px;">Tìm hiểu thêm</a>
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 25px 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 20px;">
+                    <span style="font-size: 40px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">👁️</span>
+                    <div>
+                        <strong style="color: #FCD34D; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Tầm nhìn</strong>
+                        <p style="color: white; font-size: 16px; margin-top: 5px;">Tập đoàn phát triển nhân lực lớn nhất Việt Nam</p>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 25px 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 20px;">
+                    <span style="font-size: 40px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">💎</span>
+                    <div>
+                        <strong style="color: #FCD34D; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Giá trị cốt lõi</strong>
+                        <p style="color: white; font-size: 16px; margin-top: 5px;">Trí tuệ, Trung thực, Tận tâm</p>
+                    </div>
+                </div>
+                
+                <!-- Badge -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <span style="background: linear-gradient(135deg, #F59E0B, #FBBF24); color: #1E293B; padding: 15px 35px; border-radius: 50px; font-weight: 800; font-size: 18px; display: inline-block; box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);">
+                        🏆 Thành lập 2008 - 15+ năm kinh nghiệm
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -103,31 +127,63 @@ include 'includes/header.php';
         
         <div class="ecosystem-grid">
             <div class="ecosystem-card">
-                <div class="ecosystem-icon">🌍</div>
-                <h3>Trung tâm Ngoại ngữ ICO</h3>
-                <p>Đào tạo tiếng Nhật, tiếng Đức, tiếng Hàn với đội ngũ giáo viên chất lượng cao</p>
-                <a href="#">Xem thêm →</a>
+                <div class="eco-card-image">
+                    <img src="https://icogroup.vn/vnt_upload/service/Linkedin_3.jpg" alt="Trung tâm Ngoại ngữ ICO">
+                </div>
+                <div class="eco-card-logo">
+                    <img src="https://icogroup.vn/vnt_upload/service/Logo_TTNN_ICO_24x_100.jpg" alt="Logo">
+                </div>
+                <div class="eco-card-content">
+                    <h3>Trung tâm Ngoại ngữ ICO</h3>
+                    <p class="eco-slogan">Học ngoại ngữ để lập nghiệp</p>
+                    <p>Đào tạo tiếng Nhật, tiếng Đức, tiếng Hàn với đội ngũ giáo viên chất lượng cao và phương pháp hiện đại.</p>
+                    <a href="ngoai-ngu-ico.php" class="eco-btn">Xem thêm</a>
+                </div>
             </div>
             
             <div class="ecosystem-card">
-                <div class="ecosystem-icon">🏫</div>
-                <h3>ICOSchool</h3>
-                <p>Hệ thống trường học với chương trình giáo dục tiên tiến, chuẩn quốc tế</p>
-                <a href="#">Xem thêm →</a>
+                <div class="eco-card-image">
+                    <img src="https://icogroup.vn/vnt_upload/service/khai_giang_icoschool.jpg" alt="ICOSchool">
+                </div>
+                <div class="eco-card-logo">
+                    <img src="https://icogroup.vn/vnt_upload/service/mmicon2.jpg" alt="Logo">
+                </div>
+                <div class="eco-card-content">
+                    <h3>ICOSchool</h3>
+                    <p class="eco-slogan">Go Global! - Hãy bước ra thế giới</p>
+                    <p>Trường THPT chất lượng cao, hoạt động theo mô hình chuyên ngữ với chương trình giáo dục chuẩn quốc tế.</p>
+                    <a href="icoschool.php" class="eco-btn">Xem thêm</a>
+                </div>
             </div>
             
             <div class="ecosystem-card">
-                <div class="ecosystem-icon">🎓</div>
-                <h3>ICOCollege</h3>
-                <p>Cao đẳng nghề chất lượng cao với cam kết việc làm sau tốt nghiệp</p>
-                <a href="#">Xem thêm →</a>
+                <div class="eco-card-image">
+                    <img src="https://icogroup.vn/vnt_upload/service/mmimg3.jpg" alt="ICOCollege">
+                </div>
+                <div class="eco-card-logo">
+                    <img src="https://icogroup.vn/vnt_upload/service/mmicon3.jpg" alt="Logo">
+                </div>
+                <div class="eco-card-content">
+                    <h3>ICOCollege</h3>
+                    <p class="eco-slogan">Go Global! - Hãy bước ra thế giới</p>
+                    <p>Cao đẳng nghề chất lượng cao với cam kết việc làm sau tốt nghiệp và đào tạo theo đơn đặt hàng.</p>
+                    <a href="icocollege.php" class="eco-btn">Xem thêm</a>
+                </div>
             </div>
             
             <div class="ecosystem-card">
-                <div class="ecosystem-icon">💼</div>
-                <h3>ICOCareer</h3>
-                <p>Hướng nghiệp, tư vấn nghề nghiệp và kết nối việc làm trong nước và quốc tế</p>
-                <a href="huong-nghiep.php">Xem thêm →</a>
+                <div class="eco-card-image">
+                    <img src="https://icogroup.vn/vnt_upload/service/mmimg4.jpg" alt="ICOCareer">
+                </div>
+                <div class="eco-card-logo">
+                    <img src="https://icogroup.vn/vnt_upload/service/mmicon3.jpg" alt="Logo">
+                </div>
+                <div class="eco-card-content">
+                    <h3>ICOCareer</h3>
+                    <p class="eco-slogan">Định hướng tương lai</p>
+                    <p>Hướng nghiệp, tư vấn nghề nghiệp và kết nối việc làm trong nước và quốc tế cho học viên.</p>
+                    <a href="icocareer.php" class="eco-btn">Xem thêm</a>
+                </div>
             </div>
         </div>
     </div>
@@ -155,12 +211,12 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- PROGRAMS SECTION -->
-<section class="section programs-section">
+<!-- PROGRAMS SECTION - Dark Theme -->
+<section class="section programs-section" style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); padding: 100px 0;">
     <div class="container">
         <div class="section-header">
-            <h2>Chương Trình Nổi Bật</h2>
-            <p>Đa dạng lựa chọn phù hợp với nhu cầu của bạn</p>
+            <h2 style="color: white;">Chương Trình Nổi Bật</h2>
+            <p style="color: rgba(255,255,255,0.7);">Đa dạng lựa chọn phù hợp với nhu cầu của bạn</p>
         </div>
         
         <div class="programs-grid">
@@ -212,8 +268,8 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- NEWS SECTION -->
-<section class="section news-section">
+<!-- NEWS SECTION - Light Theme with Top Divider -->
+<section class="section news-section" style="background: linear-gradient(180deg, #FAFAFA 0%, #FFFFFF 100%); padding: 100px 0; border-top: 4px solid #6366F1;">
     <div class="container">
         <div class="section-header">
             <h2>Tin Tức & Hoạt Động</h2>
@@ -259,8 +315,8 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- REGISTRATION FORM SECTION -->
-<section class="form-section" id="dangky">
+<!-- REGISTRATION FORM SECTION - With Background -->
+<section class="form-section" id="dangky" style="background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(99, 102, 241, 0.9) 100%), url('https://icogroup.vn/vnt_upload/news/02_2025/ICOGROUP_TUYEN_DUNG_23.jpg'); background-size: cover; background-position: center; padding: 100px 0;">
     <div class="form-container">
         <h3>🎯 ĐĂNG KÝ TƯ VẤN MIỄN PHÍ</h3>
         
