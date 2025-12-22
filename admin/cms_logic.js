@@ -1,0 +1,175 @@
+
+// CMS Logic Extension
+console.log("CMS Logic Loaded");
+
+// Handle Image Upload from Modal
+async function handleImageUpload(input) {
+    if (input.files && input.files[0]) {
+        const formData = new FormData();
+        formData.append('image', input.files[0]);
+
+        // Show loading state
+        const previewDiv = document.getElementById('cms-image-preview');
+        previewDiv.innerHTML = '<div class="spinner"></div>';
+
+        try {
+            const res = await fetch(API_BASE + 'upload_image.php', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+            if (result.status) {
+                document.getElementById('cms-image-url').value = result.url;
+                previewDiv.innerHTML = `<img src="${result.url}" style="width:100%; height:100%; object-fit:contain">`;
+            } else {
+                alert(result.message || 'Lỗi upload ảnh');
+                previewDiv.innerHTML = '<span style="color:red">Lỗi upload</span>';
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Lỗi kết nối server');
+            previewDiv.innerHTML = '<span style="color:red">Lỗi kết nối</span>';
+        }
+    }
+}
+
+// Override Open/Edit Functions to ensure they work
+window.openCMSEditModal = function (id, type) {
+    // Determine the type image/text if not passed or inferred
+    // We rely on 'findCMSItem' which uses allCMSData
+    // Ensure allCMSData is available
+    if (typeof allCMSData === 'undefined') {
+        alert("Dữ liệu chưa tải xong, vui lòng đợi...");
+        return;
+    }
+
+    const item = allCMSData.find(i => i.id == id);
+    if (!item) {
+        alert("Không tìm thấy dữ liệu (ID: " + id + ")");
+        return;
+    }
+
+    const modal = document.getElementById('cmsModal');
+    if (!modal) {
+        alert("Không tìm thấy Modal!");
+        return;
+    }
+
+    document.getElementById('cmsForm').reset();
+    document.getElementById('cms-id').value = item.id;
+    document.getElementById('cms-type').value = type;
+    document.getElementById('cms-key').value = type === 'images' ? item.image_key : item.text_key;
+    document.getElementById('cms-key').readOnly = true; // Key cannot be changed on edit
+
+    document.getElementById('cmsModalTitle').textContent = 'Chỉnh sửa ' + (type === 'images' ? 'Hình ảnh' : 'Văn bản');
+
+    document.getElementById('cms-page').value = item.page || 'all';
+    document.getElementById('cms-section').value = item.section || 'all';
+
+    if (type === 'images') {
+        document.getElementById('cms-image-fields').style.display = 'block';
+        document.getElementById('cms-text-fields').style.display = 'none';
+
+        document.getElementById('cms-image-url').value = item.image_url || '';
+        document.getElementById('cms-alt-text').value = item.alt_text || '';
+        if (item.image_url) {
+            document.getElementById('cms-image-preview').innerHTML = `<img src="${item.image_url}" style="width:100%; height:100%; object-fit:contain">`;
+        } else {
+            document.getElementById('cms-image-preview').innerHTML = '<span>No Image</span>';
+        }
+    } else {
+        document.getElementById('cms-image-fields').style.display = 'none';
+        document.getElementById('cms-text-fields').style.display = 'block';
+        document.getElementById('cms-text-value').value = item.text_value || '';
+    }
+
+    modal.style.display = 'block';
+};
+
+window.openAddCMSModal = function () {
+    // ... (rest of old code structure implied, just ensuring function name is distinct)
+    const modal = document.getElementById('cmsModal');
+    if (!modal) return;
+
+    document.getElementById('cmsForm').reset();
+    document.getElementById('cms-id').value = '';
+    document.getElementById('cms-key').readOnly = false;
+    document.getElementById('cmsModalTitle').textContent = 'Thêm Nội dung Mới';
+
+    // Default type based on current tab if variable exists, else generic
+    const type = (typeof currentCMSTab !== 'undefined') ? currentCMSTab : 'images';
+    document.getElementById('cms-type').value = type;
+
+    if (type === 'images') {
+        document.getElementById('cms-image-fields').style.display = 'block';
+        document.getElementById('cms-text-fields').style.display = 'none';
+    } else {
+        document.getElementById('cms-image-fields').style.display = 'none';
+        document.getElementById('cms-text-fields').style.display = 'block';
+    }
+
+    modal.style.display = 'block';
+};
+
+window.closeCMSModal = function () {
+    const modal = document.getElementById('cmsModal');
+    if (modal) modal.style.display = 'none';
+};
+
+// Form Submission
+const cmsForm = document.getElementById('cmsForm');
+if (cmsForm) {
+    // Remove old listeners by cloning (simple trick if not using jQuery)
+    // But we want to preserve internal inputs.
+    // We will just add a listener that handles default prevention and stopPropagation
+
+    cmsForm.onsubmit = async function (e) {
+        e.preventDefault();
+
+        const type = document.getElementById('cms-type').value;
+        const id = document.getElementById('cms-id').value;
+        const endpoint = type === 'images' ? 'image_api.php' : 'text_api.php';
+
+        const formData = {
+            page: document.getElementById('cms-page').value,
+            section: document.getElementById('cms-section').value
+        };
+
+        if (type === 'images') {
+            formData.image_key = document.getElementById('cms-key').value;
+            formData.image_url = document.getElementById('cms-image-url').value;
+            formData.alt_text = document.getElementById('cms-alt-text').value;
+        } else {
+            formData.text_key = document.getElementById('cms-key').value;
+            formData.text_value = document.getElementById('cms-text-value').value;
+        }
+
+        if (id) {
+            // Include ID for update? API might rely on KEY or ID. 
+            // My API implementation uses KEY for update/delete as per previous logic (upsert).
+            // But let's verify params.
+        }
+
+        try {
+            const res = await fetch(API_BASE + endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const result = await res.json();
+
+            if (result.status) {
+                alert('Lưu thành công!');
+                closeCMSModal();
+                if (typeof loadCMS === 'function') loadCMS(type);
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Lỗi kết nối!');
+        }
+
+        return false;
+    };
+}

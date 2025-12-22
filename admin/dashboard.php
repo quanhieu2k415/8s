@@ -1,0 +1,3079 @@
+<?php
+/**
+ * Admin Dashboard
+ */
+
+require_once __DIR__ . '/includes/auth_check.php';
+?>
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - ICOGroup</title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($csrfToken); ?>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        /* ===== CSS Variables ===== */
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E3A5F;
+            --primary-light: #3B82F6;
+            --accent: #F59E0B;
+            --accent-hover: #D97706;
+            --success: #10B981;
+            --success-light: #D1FAE5;
+            --danger: #EF4444;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --info: #3B82F6;
+            --info-light: #DBEAFE;
+            --bg-primary: #F8FAFC;
+            --bg-sidebar: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+            --surface: #FFFFFF;
+            --surface-hover: #F1F5F9;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --text-white: #FFFFFF;
+            --border-light: #E2E8F0;
+            --border-medium: #CBD5E1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 280px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-primary); min-height: 100vh; color: var(--text-primary); }
+
+        /* ===== Sidebar ===== */
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); color: var(--text-white); z-index: 100; display: flex; flex-direction: column; transition: transform var(--transition-normal); }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .sidebar-header img { height: 40px; filter: brightness(0) invert(1); margin-bottom: 12px; }
+        .sidebar-header h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+        .sidebar-header p { font-size: 13px; color: rgba(255, 255, 255, 0.6); margin-top: 4px; }
+        .sidebar-menu { flex: 1; padding: 16px 0; overflow-y: auto; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 14px; padding: 14px 24px; color: rgba(255, 255, 255, 0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: all var(--transition-fast); border-left: 3px solid transparent; margin: 2px 0; }
+        .sidebar-menu a:hover { background: rgba(255, 255, 255, 0.06); color: var(--text-white); }
+        .sidebar-menu a.active { background: rgba(37, 99, 235, 0.15); color: var(--text-white); border-left-color: var(--accent); }
+        .sidebar-menu a .material-icons-outlined { font-size: 20px; }
+        .sidebar-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 12px 24px; }
+        .user-info { padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #6366F1, #8B5CF6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .user-details p { font-size: 14px; font-weight: 600; }
+        .user-details span { font-size: 12px; color: rgba(255, 255, 255, 0.6); }
+
+        /* ===== Main Content ===== */
+        .main-content { margin-left: var(--sidebar-width); padding: 32px; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .header h1 { font-size: 28px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
+        .header-actions { display: flex; gap: 12px; }
+
+        /* ===== Buttons ===== */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all var(--transition-fast); }
+        .btn-primary { background: var(--primary); color: var(--text-white); }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-success { background: var(--success); color: var(--text-white); }
+        .btn-success:hover { background: #059669; transform: translateY(-1px); }
+        .btn-danger { background: var(--danger); color: var(--text-white); }
+        .btn-outline { background: transparent; border: 2px solid var(--border-medium); color: var(--text-secondary); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ===== Stats Grid ===== */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
+        .stat-card { background: var(--surface); padding: 24px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); display: flex; align-items: center; gap: 20px; transition: all var(--transition-normal); }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: transparent; }
+        .stat-icon { width: 56px; height: 56px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+        .stat-icon.blue { background: linear-gradient(135deg, #6366F1, #8B5CF6); }
+        .stat-icon.green { background: linear-gradient(135deg, #10B981, #34D399); }
+        .stat-icon.orange { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+        .stat-icon.purple { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
+        .stat-icon .material-icons-outlined { color: var(--text-white); font-size: 24px; }
+        .stat-info h3 { font-size: 28px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
+        .stat-info p { color: var(--text-secondary); font-size: 13px; font-weight: 500; margin-top: 4px; }
+
+        /* ===== Table Container ===== */
+        .table-container { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow: hidden; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; gap: 16px; }
+        .table-header h2 { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .table-filters { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-box { display: flex; align-items: center; gap: 10px; background: var(--bg-primary); padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-light); transition: all var(--transition-fast); }
+        .search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .search-box input { border: none; background: transparent; outline: none; font-size: 14px; width: 200px; font-family: inherit; }
+        .search-box .material-icons-outlined { color: var(--text-muted); font-size: 20px; }
+        .filter-select { padding: 10px 14px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 14px; font-family: inherit; background: var(--surface); cursor: pointer; }
+        .date-filter { display: flex; gap: 8px; align-items: center; }
+        .date-filter input { padding: 10px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 14px; font-family: inherit; }
+
+        /* ===== Table ===== */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { background: var(--bg-primary); font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+        tbody tr { transition: background var(--transition-fast); }
+        tbody tr:hover { background: var(--surface-hover); }
+        tbody tr:nth-child(even) { background: #FAFBFC; }
+        tbody tr:nth-child(even):hover { background: var(--surface-hover); }
+        td { font-size: 14px; }
+
+        /* ===== Badges ===== */
+        .badge { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-success { background: var(--success-light); color: #065F46; }
+        .badge-warning { background: var(--warning-light); color: #92400E; }
+        .badge-info { background: var(--info-light); color: #1E40AF; }
+
+        /* ===== Action Buttons ===== */
+        .action-btns { display: flex; gap: 8px; }
+        .action-btn { width: 36px; height: 36px; border: none; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast); }
+        .action-btn .material-icons-outlined { font-size: 18px; }
+        .action-btn.edit { background: var(--info-light); color: var(--primary); }
+        .action-btn.edit:hover { background: var(--primary); color: var(--text-white); }
+        .action-btn.delete { background: var(--danger-light); color: var(--danger); }
+        .action-btn.delete:hover { background: var(--danger); color: var(--text-white); }
+
+        /* ===== Loading & Empty States ===== */
+        .loading, .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .spinner { width: 40px; height: 40px; border: 3px solid var(--border-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state .material-icons-outlined { font-size: 64px; color: var(--border-medium); margin-bottom: 16px; }
+        .empty-state h3 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; }
+
+        /* ===== Modal ===== */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background: var(--surface); margin: 5% auto; padding: 0; border-radius: var(--radius-lg); width: 520px; max-width: 90%; max-height: 85vh; overflow: hidden; box-shadow: var(--shadow-xl); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-light); }
+        .modal-header h2 { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .modal-close { width: 36px; height: 36px; border: none; background: var(--bg-primary); border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all var(--transition-fast); }
+        .modal-close:hover { background: var(--danger-light); color: var(--danger); }
+        .modal-body { padding: 24px; max-height: 60vh; overflow-y: auto; }
+        .modal-body label { display: block; font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .modal-body input, .modal-body select, .modal-body textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 14px; font-family: inherit; margin-bottom: 16px; transition: all var(--transition-fast); }
+        .modal-body input:focus, .modal-body select:focus, .modal-body textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 12px; }
+
+        /* ===== Confirm Dialog ===== */
+        .confirm-dialog { text-align: center; padding: 32px 24px; }
+        .confirm-dialog .icon { width: 64px; height: 64px; border-radius: 50%; background: var(--danger-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .confirm-dialog .icon .material-icons-outlined { font-size: 32px; color: var(--danger); }
+        .confirm-dialog h3 { font-size: 18px; margin-bottom: 8px; }
+        .confirm-dialog p { color: var(--text-secondary); margin-bottom: 24px; }
+        .confirm-dialog .btn-group { display: flex; gap: 12px; justify-content: center; }
+
+        /* ===== Toast ===== */
+        .toast { position: fixed; bottom: 32px; right: 32px; padding: 16px 24px; border-radius: var(--radius-md); color: var(--text-white); font-weight: 500; display: none; align-items: center; gap: 12px; box-shadow: var(--shadow-lg); animation: toastIn 0.3s ease; z-index: 9999; max-width: 400px; }
+        .toast.show { display: flex; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== Sections ===== */
+        .section-panel { display: none; }
+        .section-panel.active { display: block; }
+
+        /* ===== Pagination ===== */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 20px; border-top: 1px solid var(--border-light); }
+        .pagination button { padding: 8px 16px; border: 1px solid var(--border-light); background: var(--surface); border-radius: var(--radius-sm); cursor: pointer; font-family: inherit; transition: all var(--transition-fast); }
+        .pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .pagination button.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 992px) { .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); } .main-content { margin-left: 0; } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .header { flex-direction: column; gap: 16px; align-items: flex-start; } .table-header { flex-direction: column; align-items: flex-start; } .banner-grid { grid-template-columns: 1fr; } }
+        
+        /* ===== Banner Grid ===== */
+        .banner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .banner-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg); overflow: hidden; transition: all var(--transition-normal); }
+        .banner-card:hover { box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .banner-preview { height: 120px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; position: relative; background-size: cover; background-position: center; }
+        .banner-preview.has-image { background-size: cover; }
+        .banner-preview .placeholder { color: rgba(255,255,255,0.7); font-size: 14px; text-align: center; }
+        .banner-preview .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .banner-card:hover .banner-preview .overlay { opacity: 1; }
+        .banner-info { padding: 16px; }
+        .banner-info h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .banner-info p { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+        .banner-actions { display: flex; gap: 8px; }
+        .banner-actions label, .banner-actions button { flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all var(--transition-fast); }
+        .banner-actions .btn-upload { background: var(--info-light); color: var(--primary); border: none; }
+        .banner-actions .btn-upload:hover { background: var(--primary); color: white; }
+        .banner-actions .btn-remove { background: var(--danger-light); color: var(--danger); border: none; }
+        .banner-actions .btn-remove:hover { background: var(--danger); color: white; }
+
+        /* ===== Visual CMS Editor ===== */
+        .visual-cms-container { padding: 24px; }
+        .visual-cms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .visual-cms-header h2 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .page-selector { display: flex; align-items: center; gap: 12px; }
+        .page-selector label { font-weight: 600; color: var(--text-secondary); }
+        .page-selector select { padding: 12px 40px 12px 16px; border: 2px solid var(--border-light); border-radius: var(--radius-md); font-size: 15px; font-weight: 600; background: var(--surface); cursor: pointer; min-width: 250px; }
+        .page-selector select:focus { border-color: var(--primary); outline: none; }
+        
+        .cms-section-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-lg); margin-bottom: 20px; overflow: hidden; transition: all 0.3s; }
+        .cms-section-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+        .cms-section-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: linear-gradient(135deg, var(--bg-primary), var(--surface)); border-bottom: 1px solid var(--border-light); cursor: pointer; }
+        .cms-section-header h3 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0; }
+        .cms-section-header h3 .icon { font-size: 22px; }
+        .cms-section-header .toggle-icon { color: var(--text-secondary); transition: transform 0.3s; }
+        .cms-section-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .cms-section-card.collapsed .cms-section-body { display: none; }
+        
+        .cms-section-body { padding: 20px; }
+        .cms-field-group { margin-bottom: 20px; }
+        .cms-field-group:last-child { margin-bottom: 0; }
+        .cms-field-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cms-field-input { width: 100%; padding: 14px 16px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 15px; font-family: inherit; transition: all 0.2s; background: var(--bg-primary); }
+        .cms-field-input:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .cms-field-input.modified { border-color: var(--warning); background: #fffbeb; }
+        textarea.cms-field-input { min-height: 100px; resize: vertical; }
+        
+        .cms-image-field { display: flex; gap: 16px; align-items: flex-start; }
+        .cms-image-preview { width: 120px; height: 80px; border-radius: var(--radius-md); background: var(--bg-primary); border: 2px dashed var(--border-light); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .cms-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .cms-image-preview .placeholder { color: var(--text-muted); font-size: 12px; text-align: center; }
+        .cms-image-actions { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .cms-image-url { flex: 1; }
+        .cms-image-upload { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: var(--info-light); color: var(--primary); border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s; }
+        .cms-image-upload:hover { background: var(--primary); color: white; }
+        
+        .cms-items-list { display: flex; flex-direction: column; gap: 12px; }
+        .cms-item-row { display: flex; gap: 12px; align-items: center; background: var(--bg-primary); padding: 12px 16px; border-radius: var(--radius-md); }
+        .cms-item-row .item-number { font-weight: 700; color: var(--primary); min-width: 24px; }
+        .cms-item-row input { flex: 1; }
+        
+        .cms-save-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 2px solid var(--primary); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); margin: 20px -24px -24px; }
+        .cms-save-bar .changes-info { color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        .cms-save-bar .changes-info .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning); }
+        .cms-save-bar .btn-save-all { padding: 14px 32px; font-size: 16px; font-weight: 600; }
+        
+        .cms-loading { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .cms-loading .spinner { margin-bottom: 16px; }
+        
+        .cms-empty { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .cms-empty .icon { font-size: 64px; color: var(--border-light); margin-bottom: 16px; }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="https://icogroup.vn/vnt_template/ico_vn/images/logo.svg" alt="ICOGroup">
+            <h2>Admin Panel</h2>
+            <p>Quản lý hệ thống</p>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#" class="active" data-section="dashboard">
+                <span class="material-icons-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" data-section="registrations">
+                <span class="material-icons-outlined">people</span>
+                <span>Đăng ký tư vấn</span>
+            </a>
+            <a href="#" data-section="news">
+                <span class="material-icons-outlined">article</span>
+                <span>Tin tức</span>
+            </a>
+            <a href="#" data-section="cms">
+                <span class="material-icons-outlined">edit_note</span>
+                <span>Quản lý nội dung</span>
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            <a href="../fonend/index.php">
+                <span class="material-icons-outlined">home</span>
+                <span>Về trang chủ</span>
+            </a>
+            <a href="logout.php">
+                <span class="material-icons-outlined">logout</span>
+                <span>Đăng xuất</span>
+            </a>
+        </nav>
+        <div class="user-info">
+            <div class="user-avatar"><?php echo strtoupper(substr($currentUser['username'], 0, 1)); ?></div>
+            <div class="user-details">
+                <p><?php echo htmlspecialchars($currentUser['username']); ?></p>
+                <span><?php echo htmlspecialchars(ucfirst($currentUser['role'])); ?></span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section-panel active">
+            <div class="header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="loadStats()">
+                        <span class="material-icons-outlined">refresh</span>
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <span class="material-icons-outlined">person_add</span>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statTotal">-</h3>
+                        <p>Tổng đăng ký</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <span class="material-icons-outlined">today</span>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statToday">-</h3>
+                        <p>Hôm nay</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <span class="material-icons-outlined">date_range</span>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statWeek">-</h3>
+                        <p>Tuần này</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <span class="material-icons-outlined">calendar_month</span>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="statMonth">-</h3>
+                        <p>Tháng này</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Đăng ký gần đây</h2>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Thời gian</th>
+                                <th>Họ tên</th>
+                                <th>SĐT</th>
+                                <th>Chương trình</th>
+                                <th>Quốc gia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentRegistrations">
+                            <tr><td colspan="6" class="loading"><div class="spinner"></div>Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Charts Section -->
+            <div class="analytics-section" style="margin-top: 30px;">
+                <div class="table-header" style="margin-bottom: 20px;">
+                    <h2>📊 Thống kê chi tiết</h2>
+                </div>
+                
+                <div class="charts-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <!-- Daily Trend Chart -->
+                    <div class="chart-card" style="background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md);">
+                        <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--text-primary);">
+                            📈 Đăng ký theo ngày (30 ngày gần nhất)
+                        </h3>
+                        <div style="height: 300px;">
+                            <canvas id="dailyChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Program Distribution -->
+                    <div class="chart-card" style="background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md);">
+                        <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--text-primary);">
+                            🎯 Theo chương trình
+                        </h3>
+                        <div style="height: 300px;">
+                            <canvas id="programChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Monthly Trend Chart -->
+                    <div class="chart-card" style="background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md);">
+                        <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--text-primary);">
+                            📅 Đăng ký theo tháng (12 tháng)
+                        </h3>
+                        <div style="height: 280px;">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Country Distribution -->
+                    <div class="chart-card" style="background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-md);">
+                        <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--text-primary);">
+                            🌏 Theo quốc gia
+                        </h3>
+                        <div style="height: 280px;">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registrations Section -->
+        <section id="registrations" class="section-panel">
+            <div class="header">
+                <h1>Quản lý đăng ký tư vấn</h1>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="exportData()">
+                        <span class="material-icons-outlined">download</span>
+                        Xuất Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Danh sách đăng ký</h2>
+                    <div class="table-filters">
+                        <div class="search-box">
+                            <span class="material-icons-outlined">search</span>
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm..." onkeyup="searchRegistrations()">
+                        </div>
+                        <select class="filter-select" id="filterProgram" onchange="filterRegistrations()">
+                            <option value="">Tất cả chương trình</option>
+                            <option value="Du học">Du học</option>
+                            <option value="Xuất khẩu lao động">Xuất khẩu lao động</option>
+                            <option value="Đào tạo ngoại ngữ">Đào tạo ngoại ngữ</option>
+                        </select>
+                        <div class="date-filter">
+                            <input type="date" id="dateFrom" onchange="filterRegistrations()">
+                            <span>đến</span>
+                            <input type="date" id="dateTo" onchange="filterRegistrations()">
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Thời gian</th>
+                                <th>Họ tên</th>
+                                <th>Năm sinh</th>
+                                <th>Địa chỉ</th>
+                                <th>Chương trình</th>
+                                <th>Quốc gia</th>
+                                <th>SĐT</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrationsList">
+                            <tr><td colspan="9" class="loading"><div class="spinner"></div>Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </section>
+
+        <!-- News Section -->
+        <section id="news" class="section-panel">
+            <div class="header">
+                <h1>Quản lý tin tức</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openAddNewsModal()">
+                        <span class="material-icons-outlined">add</span>
+                        Thêm tin mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Danh sách tin tức</h2>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Hình ảnh</th>
+                                <th>Tiêu đề</th>
+                                <th>Danh mục</th>
+                                <th>Ngày tạo</th>
+                                <th>Nổi bật</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newsList">
+                            <tr><td colspan="7" class="loading"><div class="spinner"></div>Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CMS Section -->
+        <section id="cms" class="section-panel">
+            <div class="header">
+                <h1>Quản lý nội dung</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openAddCMSModal()">
+                        <span class="material-icons-outlined">add</span>
+                        Thêm nội dung
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <h2>📝 Quản lý Nội dung Website</h2>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn btn-primary cms-tab active" id="tabVisual" onclick="switchCMSTab('visual')">
+                                <span class="material-icons-outlined">dashboard_customize</span> Chỉnh sửa trực quan
+                            </button>
+                            <button class="btn btn-outline cms-tab" id="tabAll" onclick="switchCMSTab('all')">
+                                <span class="material-icons-outlined">view_list</span> Tất cả
+                            </button>
+                            <button class="btn btn-outline cms-tab" id="tabImages" onclick="switchCMSTab('images')">
+                                <span class="material-icons-outlined">image</span> Hình ảnh
+                            </button>
+                            <button class="btn btn-outline cms-tab" id="tabTexts" onclick="switchCMSTab('texts')">
+                                <span class="material-icons-outlined">text_fields</span> Văn bản
+                            </button>
+                            <button class="btn btn-outline cms-tab" id="tabBanners" onclick="switchCMSTab('banners')">
+                                <span class="material-icons-outlined">wallpaper</span> Banner
+                            </button>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; background: var(--bg-primary); padding: 12px; border-radius: var(--radius-md); flex-wrap: wrap;">
+                        <select id="cmsPageFilter" class="filter-select" onchange="filterCMS()">
+                            <option value="all">Tất cả trang</option>
+                            <option value="global">Toàn trang (Global)</option>
+                            <option value="index">Trang chủ</option>
+                            <option value="nhat">Du học Nhật</option>
+                            <option value="duc">Du học Đức</option>
+                            <option value="han">Du học Hàn</option>
+                            <option value="xkldjp">XKLĐ Nhật Bản</option>
+                            <option value="xkldhan">XKLĐ Hàn Quốc</option>
+                            <option value="xklddailoan">XKLĐ Đài Loan</option>
+                            <option value="xkldchauau">XKLĐ Châu Âu</option>
+                            <option value="huongnghiep">Hướng nghiệp</option>
+                            <option value="veicogroup">Về ICOGroup</option>
+                            <option value="lienhe">Liên hệ</option>
+                            <option value="hoatdong">Hoạt động</option>
+                        </select>
+                        <select id="cmsSectionFilter" class="filter-select" onchange="filterCMS()">
+                            <option value="all">Tất cả Section</option>
+                            <option value="header">Header</option>
+                            <option value="hero">Banner/Hero</option>
+                            <option value="about">Giới thiệu</option>
+                            <option value="ecosystem">Hệ sinh thái</option>
+                            <option value="programs">Chương trình</option>
+                            <option value="footer">Footer</option>
+                        </select>
+                        <div class="search-box" style="flex: 1; min-width: 200px;">
+                            <span class="material-icons-outlined">search</span>
+                            <input type="text" id="cmsSearchInput" placeholder="Tìm theo key..." onkeyup="filterCMS()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="cmsContent" style="padding: 20px; display: none;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải nội dung...</p>
+                    </div>
+                </div>
+                
+                <!-- Banner Management Section -->
+                <div id="bannerContent" style="padding: 20px; display: none;">
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 8px;">🖼️ Quản lý Hình nền Banner các trang</h3>
+                        <p style="color: var(--text-secondary);">Upload hình nền cho phần Header các trang con của website</p>
+                    </div>
+                    <div id="bannerGrid" class="banner-grid">
+                        <!-- Banner items will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Visual CMS Editor -->
+                <div id="visualCmsContent" class="visual-cms-container" style="display: block;">
+                    <div class="visual-cms-header">
+                        <h2>✨ Chỉnh sửa nội dung trực quan</h2>
+                        <div class="page-selector">
+                            <label>Chọn trang:</label>
+                            <select id="visualPageSelect" onchange="loadVisualPage()">
+                                <option value="">-- Chọn trang để chỉnh sửa --</option>
+                                <option value="index">🏠 Trang chủ</option>
+                                <option value="nhat">🇯🇵 Du học Nhật Bản</option>
+                                <option value="duc">🇩🇪 Du học Đức</option>
+                                <option value="han">🇰🇷 Du học Hàn Quốc</option>
+                                <option value="xkldjp">💼 XKLĐ Nhật Bản</option>
+                                <option value="xkldhan">💼 XKLĐ Hàn Quốc</option>
+                                <option value="xklddailoan">💼 XKLĐ Đài Loan</option>
+                                <option value="xkldchauau">💼 XKLĐ Châu Âu</option>
+                                <option value="huongnghiep">🎯 Hướng nghiệp</option>
+                                <option value="veicogroup">ℹ️ Về ICOGroup</option>
+                                <option value="lienhe">📞 Liên hệ</option>
+                                <option value="hoatdong">📰 Hoạt động</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="visualSectionsContainer">
+                        <div class="cms-empty">
+                            <span class="material-icons-outlined icon">touch_app</span>
+                            <h3>Chọn trang để bắt đầu chỉnh sửa</h3>
+                            <p>Chọn một trang từ dropdown ở trên để xem và chỉnh sửa nội dung</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="editModalTitle">Chỉnh sửa thông tin</h2>
+                <button class="modal-close" onclick="closeModal('editModal')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    <label>Họ tên</label>
+                    <input type="text" id="editHoTen" required>
+                    <label>Năm sinh</label>
+                    <input type="text" id="editNamSinh">
+                    <label>Địa chỉ</label>
+                    <input type="text" id="editDiaChi">
+                    <label>Chương trình</label>
+                    <select id="editChuongTrinh">
+                        <option value="Du học">Du học</option>
+                        <option value="Xuất khẩu lao động">Xuất khẩu lao động</option>
+                        <option value="Đào tạo ngoại ngữ">Đào tạo ngoại ngữ</option>
+                    </select>
+                    <label>Quốc gia</label>
+                    <input type="text" id="editQuocGia">
+                    <label>Số điện thoại</label>
+                    <input type="text" id="editSdt">
+                    <label>Ghi chú</label>
+                    <textarea id="editGhiChu" rows="3"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('editModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveEdit()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="width: 400px;">
+            <div class="confirm-dialog">
+                <div class="icon">
+                    <span class="material-icons-outlined">delete_outline</span>
+                </div>
+                <h3>Xác nhận xóa</h3>
+                <p>Bạn có chắc chắn muốn xóa bản ghi này? Hành động này không thể hoàn tác.</p>
+                <div class="btn-group">
+                    <button class="btn btn-outline" onclick="closeModal('deleteModal')">Hủy</button>
+                    <button class="btn btn-danger" onclick="confirmDelete()">Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Modal -->
+    <div id="newsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="newsModalTitle">Thêm tin tức</h2>
+                <button class="modal-close" onclick="closeModal('newsModal')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh;">
+                <form id="newsForm">
+                    <input type="hidden" id="newsId">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label>Tiêu đề *</label>
+                            <input type="text" id="newsTitle" required placeholder="Nhập tiêu đề bài viết...">
+                        </div>
+                        <div>
+                            <label>Danh mục</label>
+                            <select id="newsCategory">
+                                <option value="tin-tuc">Tin tức</option>
+                                <option value="hoat-dong">Hoạt động</option>
+                                <option value="su-kien">Sự kiện</option>
+                                <option value="thong-bao">Thông báo</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <label>Mô tả ngắn</label>
+                    <textarea id="newsExcerpt" rows="2" placeholder="Tóm tắt nội dung bài viết..."></textarea>
+                    
+                    <!-- Rich Text Editor -->
+                    <label>Nội dung bài viết</label>
+                    <div class="editor-toolbar">
+                        <button type="button" onclick="formatText('bold')" title="In đậm">
+                            <span class="material-icons-outlined">format_bold</span>
+                        </button>
+                        <button type="button" onclick="formatText('italic')" title="In nghiêng">
+                            <span class="material-icons-outlined">format_italic</span>
+                        </button>
+                        <button type="button" onclick="formatText('underline')" title="Gạch chân">
+                            <span class="material-icons-outlined">format_underlined</span>
+                        </button>
+                        <span class="toolbar-divider"></span>
+                        <button type="button" onclick="formatText('insertUnorderedList')" title="Danh sách">
+                            <span class="material-icons-outlined">format_list_bulleted</span>
+                        </button>
+                        <button type="button" onclick="formatText('insertOrderedList')" title="Danh sách số">
+                            <span class="material-icons-outlined">format_list_numbered</span>
+                        </button>
+                        <span class="toolbar-divider"></span>
+                        <button type="button" onclick="formatText('justifyLeft')" title="Căn trái">
+                            <span class="material-icons-outlined">format_align_left</span>
+                        </button>
+                        <button type="button" onclick="formatText('justifyCenter')" title="Căn giữa">
+                            <span class="material-icons-outlined">format_align_center</span>
+                        </button>
+                        <button type="button" onclick="formatText('justifyRight')" title="Căn phải">
+                            <span class="material-icons-outlined">format_align_right</span>
+                        </button>
+                        <span class="toolbar-divider"></span>
+                        <button type="button" onclick="insertLink()" title="Chèn link">
+                            <span class="material-icons-outlined">link</span>
+                        </button>
+                        <button type="button" onclick="showImageInsertDialog()" title="Chèn ảnh" class="btn-highlight">
+                            <span class="material-icons-outlined">add_photo_alternate</span>
+                        </button>
+                        <span class="toolbar-divider"></span>
+                        <select onchange="formatHeading(this.value)" style="padding: 4px 8px; border: 1px solid var(--border-light); border-radius: 4px;">
+                            <option value="">Định dạng</option>
+                            <option value="h2">Tiêu đề lớn</option>
+                            <option value="h3">Tiêu đề vừa</option>
+                            <option value="h4">Tiêu đề nhỏ</option>
+                            <option value="p">Đoạn văn</option>
+                        </select>
+                    </div>
+                    <div id="newsContent" class="rich-editor" contenteditable="true" placeholder="Nhập nội dung bài viết tại đây. Bạn có thể chèn ảnh bằng nút trên toolbar..."></div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end;">
+                        <div>
+                            <label>Ảnh đại diện (thumbnail)</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="newsImageUrl" placeholder="https://... hoặc upload">
+                                <label class="btn btn-outline" style="padding: 10px 16px; cursor: pointer; white-space: nowrap;">
+                                    <span class="material-icons-outlined" style="font-size: 18px;">upload</span>
+                                    <input type="file" id="newsThumbnailFile" accept="image/*" style="display: none;" onchange="uploadNewsThumbnail(this)">
+                                </label>
+                            </div>
+                            <div id="thumbnailPreview" style="margin-top: 8px; display: none;">
+                                <img id="thumbPreviewImg" style="max-height: 80px; border-radius: 4px;">
+                            </div>
+                        </div>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--warning-light); border-radius: var(--radius-md); cursor: pointer;">
+                            <input type="checkbox" id="newsFeatured" style="width: auto; margin: 0;">
+                            <span class="material-icons-outlined" style="color: var(--warning);">star</span>
+                            Tin nổi bật
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('newsModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveNews()">
+                    <span class="material-icons-outlined">save</span>
+                    Lưu bài viết
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Insert Dialog -->
+    <div id="imageInsertDialog" class="modal" style="z-index: 1100;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Chèn hình ảnh</h2>
+                <button class="modal-close" onclick="closeModal('imageInsertDialog')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- URL Input -->
+                <label>📎 Dán URL hình ảnh</label>
+                <input type="text" id="insertImageUrl" placeholder="https://example.com/image.jpg" onchange="previewInsertImage()">
+                
+                <!-- File Upload -->
+                <label style="margin-top: 16px;">📤 Hoặc tải ảnh lên</label>
+                <div style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 20px; text-align: center; cursor: pointer;" 
+                     onclick="document.getElementById('insertImageFile').click()">
+                    <span class="material-icons-outlined" style="font-size: 40px; color: var(--text-muted);">cloud_upload</span>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">Click để chọn ảnh</p>
+                </div>
+                <input type="file" id="insertImageFile" accept="image/*" style="display: none;" onchange="handleInsertImageFile(this)">
+                
+                <!-- Preview -->
+                <div id="insertImagePreview" style="display: none; margin-top: 16px; text-align: center;">
+                    <img id="insertPreviewImg" style="max-width: 100%; max-height: 150px; border-radius: 4px;">
+                </div>
+                
+                <!-- Options -->
+                <div style="margin-top: 16px;">
+                    <label>Căn chỉnh</label>
+                    <select id="insertImageAlign">
+                        <option value="center">Căn giữa</option>
+                        <option value="left">Căn trái</option>
+                        <option value="right">Căn phải</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('imageInsertDialog')">Hủy</button>
+                <button class="btn btn-primary" onclick="confirmInsertImage()">
+                    <span class="material-icons-outlined">add</span>
+                    Chèn ảnh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span class="material-icons-outlined">check_circle</span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Global variables
+        const API_BASE = '../backend_api';
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
+        let allRegistrations = [];
+        let allNews = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let deleteId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initNavigation();
+            loadStats();
+            loadRecentRegistrations();
+        });
+
+        // Navigation
+        function initNavigation() {
+            document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    
+                    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
+                    document.getElementById(section).classList.add('active');
+                    
+                    if (section === 'registrations') loadRegistrations();
+                    if (section === 'news') loadNews();
+                    if (section === 'dashboard') { loadStats(); loadRecentRegistrations(); }
+                });
+            });
+        }
+
+        // Stats
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats_api.php`);
+                const stats = await response.json();
+                
+                document.getElementById('statTotal').textContent = stats.total || 0;
+                document.getElementById('statToday').textContent = stats.today || 0;
+                document.getElementById('statWeek').textContent = stats.week || 0;
+                document.getElementById('statMonth').textContent = stats.month || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Recent Registrations
+        async function loadRecentRegistrations() {
+            try {
+                const response = await fetch(`${API_BASE}/get.php`);
+                const data = await response.json();
+                
+                const recent = data.slice(0, 5);
+                const tbody = document.getElementById('recentRegistrations');
+                
+                if (recent.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><span class="material-icons-outlined">inbox</span><h3>Chưa có dữ liệu</h3></td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = recent.map(r => `
+                    <tr>
+                        <td>${r.id}</td>
+                        <td>${formatDate(r.ngay_nhan)}</td>
+                        <td>${escapeHtml(r.ho_ten)}</td>
+                        <td>${escapeHtml(r.sdt)}</td>
+                        <td><span class="badge badge-info">${escapeHtml(r.chuong_trinh)}</span></td>
+                        <td>${escapeHtml(r.quoc_gia)}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Registrations
+        async function loadRegistrations() {
+            try {
+                const response = await fetch(`${API_BASE}/get.php`);
+                allRegistrations = await response.json();
+                renderRegistrations();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderRegistrations() {
+            let filtered = [...allRegistrations];
+            
+            // Apply filters
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const program = document.getElementById('filterProgram').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            
+            if (search) {
+                filtered = filtered.filter(r => 
+                    r.ho_ten.toLowerCase().includes(search) ||
+                    r.sdt.includes(search) ||
+                    (r.dia_chi && r.dia_chi.toLowerCase().includes(search))
+                );
+            }
+            
+            if (program) {
+                filtered = filtered.filter(r => r.chuong_trinh === program);
+            }
+            
+            if (dateFrom) {
+                filtered = filtered.filter(r => r.ngay_nhan >= dateFrom);
+            }
+            
+            if (dateTo) {
+                filtered = filtered.filter(r => r.ngay_nhan.substring(0, 10) <= dateTo);
+            }
+            
+            // Pagination
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginated = filtered.slice(start, start + itemsPerPage);
+            
+            const tbody = document.getElementById('registrationsList');
+            
+            if (paginated.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><span class="material-icons-outlined">inbox</span><h3>Không có dữ liệu</h3></td></tr>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            tbody.innerHTML = paginated.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>${formatDate(r.ngay_nhan)}</td>
+                    <td>${escapeHtml(r.ho_ten)}</td>
+                    <td>${escapeHtml(r.nam_sinh || '')}</td>
+                    <td>${escapeHtml(r.dia_chi || '')}</td>
+                    <td><span class="badge badge-info">${escapeHtml(r.chuong_trinh)}</span></td>
+                    <td>${escapeHtml(r.quoc_gia)}</td>
+                    <td>${escapeHtml(r.sdt)}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="openEditModal(${r.id})" title="Sửa">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+                            <button class="action-btn delete" onclick="openDeleteModal(${r.id})" title="Xóa">
+                                <span class="material-icons-outlined">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Render pagination
+            let paginationHtml = '';
+            paginationHtml += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Trước</button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHtml += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+            }
+            paginationHtml += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Sau</button>`;
+            document.getElementById('pagination').innerHTML = paginationHtml;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderRegistrations();
+        }
+
+        function searchRegistrations() {
+            currentPage = 1;
+            renderRegistrations();
+        }
+
+        function filterRegistrations() {
+            currentPage = 1;
+            renderRegistrations();
+        }
+
+        // Edit
+        function openEditModal(id) {
+            const reg = allRegistrations.find(r => r.id == id);
+            if (!reg) return;
+            
+            document.getElementById('editId').value = reg.id;
+            document.getElementById('editHoTen').value = reg.ho_ten;
+            document.getElementById('editNamSinh').value = reg.nam_sinh || '';
+            document.getElementById('editDiaChi').value = reg.dia_chi || '';
+            document.getElementById('editChuongTrinh').value = reg.chuong_trinh;
+            document.getElementById('editQuocGia').value = reg.quoc_gia || '';
+            document.getElementById('editSdt').value = reg.sdt;
+            document.getElementById('editGhiChu').value = reg.ghi_chu || '';
+            
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        async function saveEdit() {
+            const data = {
+                id: parseInt(document.getElementById('editId').value),
+                ho_ten: document.getElementById('editHoTen').value,
+                nam_sinh: document.getElementById('editNamSinh').value,
+                dia_chi: document.getElementById('editDiaChi').value,
+                chuong_trinh: document.getElementById('editChuongTrinh').value,
+                quoc_gia: document.getElementById('editQuocGia').value,
+                sdt: document.getElementById('editSdt').value,
+                ghi_chu: document.getElementById('editGhiChu').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/update.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    closeModal('editModal');
+                    showToast('Cập nhật thành công!', 'success');
+                    loadRegistrations();
+                } else {
+                    showToast(result.message || 'Lỗi cập nhật', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        // Delete
+        function openDeleteModal(id) {
+            deleteId = id;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        async function confirmDelete() {
+            try {
+                const response = await fetch(`${API_BASE}/delete.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({ id: deleteId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    closeModal('deleteModal');
+                    showToast('Xóa thành công!', 'success');
+                    loadRegistrations();
+                    loadStats();
+                } else {
+                    showToast(result.message || 'Lỗi xóa', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        // Export
+        function exportData() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            
+            let url = `${API_BASE}/export.php?`;
+            if (dateFrom) url += `from=${dateFrom}&`;
+            if (dateTo) url += `to=${dateTo}&`;
+            
+            window.location.href = url;
+        }
+
+        // News
+        async function loadNews() {
+            try {
+                const response = await fetch(`${API_BASE}/news_api.php?limit=100`);
+                const news = await response.json();
+                
+                // Store globally for edit/delete functions
+                allNews = news || [];
+                
+                const tbody = document.getElementById('newsList');
+                
+                if (!news || news.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><span class="material-icons-outlined">article</span><h3>Chưa có tin tức</h3></td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = news.map(n => `
+                    <tr>
+                        <td>${n.id}</td>
+                        <td><img src="${escapeHtml(n.image_url || 'https://via.placeholder.com/60x40')}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;"></td>
+                        <td>${escapeHtml(n.title)}</td>
+                        <td><span class="badge badge-info">${escapeHtml(n.category)}</span></td>
+                        <td>${formatDate(n.created_at)}</td>
+                        <td>${n.is_featured ? '<span class="badge badge-success">Có</span>' : '<span class="badge badge-warning">Không</span>'}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn edit" onclick="openEditNewsModal(${n.id})" title="Sửa">
+                                    <span class="material-icons-outlined">edit</span>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteNews(${n.id})" title="Xóa">
+                                    <span class="material-icons-outlined">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function openAddNewsModal() {
+            document.getElementById('newsModalTitle').textContent = 'Thêm tin tức';
+            document.getElementById('newsId').value = '';
+            document.getElementById('newsForm').reset();
+            document.getElementById('newsModal').style.display = 'block';
+        }
+
+        async function openEditNewsModal(id) {
+            try {
+                const response = await fetch(`${API_BASE}/news_api.php?id=${id}`);
+                const news = await response.json();
+                
+                document.getElementById('newsModalTitle').textContent = 'Sửa tin tức';
+                document.getElementById('newsId').value = news.id;
+                document.getElementById('newsTitle').value = news.title;
+                document.getElementById('newsExcerpt').value = news.excerpt || '';
+                document.getElementById('newsContent').value = news.content || '';
+                document.getElementById('newsImageUrl').value = news.image_url || '';
+                document.getElementById('newsCategory').value = news.category;
+                document.getElementById('newsFeatured').checked = news.is_featured == 1;
+                
+                document.getElementById('newsModal').style.display = 'block';
+            } catch (error) {
+                showToast('Lỗi tải tin tức', 'error');
+            }
+        }
+
+        async function saveNews() {
+            const newsId = document.getElementById('newsId').value;
+            const data = {
+                title: document.getElementById('newsTitle').value,
+                excerpt: document.getElementById('newsExcerpt').value,
+                content: document.getElementById('newsContent').value,
+                image_url: document.getElementById('newsImageUrl').value,
+                category: document.getElementById('newsCategory').value,
+                is_featured: document.getElementById('newsFeatured').checked ? 1 : 0
+            };
+            
+            if (newsId) data.id = parseInt(newsId);
+            
+            try {
+                const response = await fetch(`${API_BASE}/news_api.php`, {
+                    method: newsId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    closeModal('newsModal');
+                    showToast(newsId ? 'Cập nhật thành công!' : 'Thêm tin thành công!', 'success');
+                    loadNews();
+                } else {
+                    showToast(result.message || 'Lỗi lưu tin', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        async function deleteNews(id) {
+            if (!confirm('Bạn có chắc muốn xóa tin này?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/news_api.php`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({ id })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    showToast('Xóa tin thành công!', 'success');
+                    loadNews();
+                } else {
+                    showToast(result.message || 'Lỗi xóa', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        // Utilities
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // ==================== CMS FUNCTIONS ====================
+        let allCMSContent = [];
+        let currentCMSTab = 'all';
+
+        async function loadCMS() {
+            try {
+                const response = await fetch(`${API_BASE}/get_content.php`);
+                allCMSContent = await response.json();
+                renderCMS();
+            } catch (error) {
+                console.error('Error loading CMS:', error);
+                document.getElementById('cmsContent').innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons-outlined">error_outline</span>
+                        <h3>Lỗi tải nội dung</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function switchCMSTab(tab) {
+            currentCMSTab = tab;
+            document.querySelectorAll('.cms-tab').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline');
+            });
+            const activeBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                if (tab === 'visual') {
+                    activeBtn.classList.remove('btn-outline');
+                    activeBtn.classList.add('btn-primary');
+                }
+            }
+            
+            // Show/hide sections based on tab
+            const cmsContent = document.getElementById('cmsContent');
+            const bannerContent = document.getElementById('bannerContent');
+            const visualContent = document.getElementById('visualCmsContent');
+            const filterBar = document.querySelector('.table-header > div:nth-child(2)'); // Filter bar
+            
+            if (tab === 'visual') {
+                cmsContent.style.display = 'none';
+                bannerContent.style.display = 'none';
+                visualContent.style.display = 'block';
+                if (filterBar) filterBar.style.display = 'none';
+            } else if (tab === 'banners') {
+                cmsContent.style.display = 'none';
+                bannerContent.style.display = 'block';
+                visualContent.style.display = 'none';
+                if (filterBar) filterBar.style.display = 'none';
+                loadBanners();
+            } else {
+                cmsContent.style.display = 'block';
+                bannerContent.style.display = 'none';
+                visualContent.style.display = 'none';
+                if (filterBar) filterBar.style.display = 'flex';
+                renderCMS();
+            }
+        }
+
+        function filterCMS() {
+            renderCMS();
+        }
+
+        function renderCMS() {
+            let filtered = [...allCMSContent];
+            
+            // Filter by tab
+            if (currentCMSTab === 'images') {
+                filtered = filtered.filter(c => isImageContent(c.section_key));
+            } else if (currentCMSTab === 'texts') {
+                filtered = filtered.filter(c => !isImageContent(c.section_key));
+            }
+            
+            // Filter by page
+            const pageFilter = document.getElementById('cmsPageFilter').value;
+            if (pageFilter !== 'all') {
+                filtered = filtered.filter(c => c.section_key.includes(pageFilter + '_') || c.section_key.startsWith(pageFilter));
+            }
+            
+            // Filter by section
+            const sectionFilter = document.getElementById('cmsSectionFilter').value;
+            if (sectionFilter !== 'all') {
+                filtered = filtered.filter(c => c.section_key.includes('_' + sectionFilter) || c.section_key.includes(sectionFilter + '_'));
+            }
+            
+            // Search
+            const search = document.getElementById('cmsSearchInput').value.toLowerCase();
+            if (search) {
+                filtered = filtered.filter(c => c.section_key.toLowerCase().includes(search) || 
+                                                 (c.content_value && c.content_value.toLowerCase().includes(search)));
+            }
+            
+            const container = document.getElementById('cmsContent');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons-outlined">inbox</span>
+                        <h3>Không có nội dung</h3>
+                        <p>Thử thay đổi bộ lọc hoặc thêm nội dung mới</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Render as cards grid
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+                    ${filtered.map(c => renderCMSCard(c)).join('')}
+                </div>
+            `;
+        }
+
+        function isImageContent(key) {
+            return key.includes('_image') || key.includes('_img') || key.includes('_logo') || 
+                   key.includes('_bg') || key.includes('_banner') || key.includes('_icon') ||
+                   key.endsWith('_src') || key.includes('_photo');
+        }
+
+        function renderCMSCard(content) {
+            const isImage = isImageContent(content.section_key);
+            const value = content.content_value || '';
+            const truncatedValue = value.length > 100 ? value.substring(0, 100) + '...' : value;
+            
+            return `
+                <div class="cms-card" style="background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden;">
+                    <div style="padding: 16px; border-bottom: 1px solid var(--border-light); background: var(--bg-primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 600; color: var(--text-primary); font-size: 13px; font-family: monospace; background: var(--info-light); padding: 4px 8px; border-radius: 4px;">
+                                ${escapeHtml(content.section_key)}
+                            </span>
+                            <span class="badge ${isImage ? 'badge-warning' : 'badge-info'}">
+                                ${isImage ? '🖼️ Hình ảnh' : '📝 Văn bản'}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="padding: 16px; min-height: 80px;">
+                        ${isImage && value ? 
+                            `<img src="${escapeHtml(value)}" style="max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/300x150?text=Không+tải+được'">` :
+                            `<p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${escapeHtml(truncatedValue) || '<em style="color: var(--text-muted);">Chưa có nội dung</em>'}</p>`
+                        }
+                    </div>
+                    <div style="padding: 12px 16px; border-top: 1px solid var(--border-light); display: flex; gap: 8px; justify-content: flex-end;">
+                        <button class="btn btn-outline" style="padding: 8px 12px; font-size: 13px;" onclick="openEditCMSModal('${escapeHtml(content.section_key)}')">
+                            <span class="material-icons-outlined" style="font-size: 16px;">edit</span>
+                            Sửa
+                        </button>
+                        <button class="btn btn-danger" style="padding: 8px 12px; font-size: 13px;" onclick="deleteCMS('${escapeHtml(content.section_key)}')">
+                            <span class="material-icons-outlined" style="font-size: 16px;">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openAddCMSModal() {
+            document.getElementById('cmsModalTitle').textContent = 'Thêm nội dung mới';
+            document.getElementById('cmsKey').value = '';
+            document.getElementById('cmsKey').disabled = false;
+            document.getElementById('cmsValue').value = '';
+            document.getElementById('cmsModal').style.display = 'block';
+        }
+
+        function openEditCMSModal(key) {
+            const content = allCMSContent.find(c => c.section_key === key);
+            if (!content) return;
+            
+            document.getElementById('cmsModalTitle').textContent = 'Chỉnh sửa nội dung';
+            document.getElementById('cmsKey').value = content.section_key;
+            document.getElementById('cmsKey').disabled = true;
+            document.getElementById('cmsValue').value = content.content_value || '';
+            document.getElementById('cmsModal').style.display = 'block';
+        }
+
+        async function saveCMS() {
+            const key = document.getElementById('cmsKey').value.trim();
+            const value = document.getElementById('cmsValue').value;
+            
+            if (!key) {
+                showToast('Vui lòng nhập key nội dung', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/save_content.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        section_key: key,
+                        content_value: value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    closeModal('cmsModal');
+                    showToast('Lưu nội dung thành công!', 'success');
+                    loadCMS();
+                } else {
+                    showToast(result.message || 'Lỗi lưu nội dung', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        async function deleteCMS(key) {
+            if (!confirm(`Bạn có chắc muốn xóa nội dung "${key}"?`)) return;
+            
+            // Note: The current API doesn't have delete, so we'll just clear the value
+            try {
+                const response = await fetch(`${API_BASE}/save_content.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        section_key: key,
+                        content_value: ''
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    showToast('Đã xóa nội dung!', 'success');
+                    loadCMS();
+                } else {
+                    showToast(result.message || 'Lỗi xóa', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
+        // Update navigation to load CMS
+        const originalInitNav = initNavigation;
+        initNavigation = function() {
+            document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    
+                    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
+                    document.getElementById(section).classList.add('active');
+                    
+                    if (section === 'registrations') loadRegistrations();
+                    if (section === 'news') loadNews();
+                    if (section === 'cms') loadCMS();
+                    if (section === 'dashboard') { loadStats(); loadRecentRegistrations(); }
+                });
+            });
+        };
+        
+        // Re-init navigation
+        initNavigation();
+    </script>
+
+    <!-- CMS Modal -->
+    <div id="cmsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="cmsModalTitle">Thêm nội dung</h2>
+                <button class="modal-close" onclick="closeModal('cmsModal')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="cmsForm">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    
+                    <label>Key nội dung *</label>
+                    <input type="text" id="cmsKey" placeholder="vd: index_hero_title" required>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: -12px 0 16px;">
+                        Quy tắc: [trang]_[section]_[loại]. VD: index_hero_slide_1_img, nhat_about_title
+                    </p>
+                    
+                    <!-- Content Type Selection -->
+                    <label>Loại nội dung</label>
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-light); border-radius: var(--radius-md); flex: 1;">
+                            <input type="radio" name="cmsType" value="text" checked onchange="toggleCMSType('text')" style="width: auto;">
+                            <span class="material-icons-outlined" style="color: var(--primary);">text_fields</span>
+                            <span>Văn bản</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-light); border-radius: var(--radius-md); flex: 1;">
+                            <input type="radio" name="cmsType" value="image" onchange="toggleCMSType('image')" style="width: auto;">
+                            <span class="material-icons-outlined" style="color: var(--warning);">image</span>
+                            <span>Hình ảnh</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Text Input -->
+                    <div id="cmsTextInput">
+                        <label>Nội dung văn bản</label>
+                        <textarea id="cmsValue" rows="5" placeholder="Nhập nội dung văn bản..."></textarea>
+                    </div>
+                    
+                    <!-- Image Input -->
+                    <div id="cmsImageInput" style="display: none;">
+                        <label>Chọn cách nhập hình ảnh</label>
+                        
+                        <!-- URL Input -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size: 13px; color: var(--text-secondary);">📎 Dán URL hình ảnh</label>
+                            <input type="text" id="cmsImageUrl" placeholder="https://example.com/image.jpg" onchange="previewImageUrl()">
+                        </div>
+                        
+                        <!-- File Upload -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size: 13px; color: var(--text-secondary);">📤 Hoặc tải ảnh lên</label>
+                            <div style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s;" 
+                                 id="uploadArea"
+                                 onclick="document.getElementById('cmsImageFile').click()"
+                                 ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <span class="material-icons-outlined" style="font-size: 48px; color: var(--text-muted);">cloud_upload</span>
+                                <p style="margin: 8px 0 0; color: var(--text-secondary);">Kéo thả ảnh vào đây hoặc <strong style="color: var(--primary);">click để chọn</strong></p>
+                                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">PNG, JPG, WEBP (max 5MB)</p>
+                            </div>
+                            <input type="file" id="cmsImageFile" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div id="cmsImagePreview" style="display: none; padding: 16px; background: var(--bg-primary); border-radius: var(--radius-md); text-align: center;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Xem trước:</p>
+                            <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
+                            <button type="button" class="btn btn-outline" style="margin-top: 12px; padding: 6px 12px; font-size: 12px;" onclick="clearImagePreview()">
+                                <span class="material-icons-outlined" style="font-size: 14px;">close</span> Xóa ảnh
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('cmsModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveCMS()">
+                    <span class="material-icons-outlined">save</span>
+                    Lưu nội dung
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CMS Modal Functions
+        function toggleCMSType(type) {
+            document.getElementById('cmsTextInput').style.display = type === 'text' ? 'block' : 'none';
+            document.getElementById('cmsImageInput').style.display = type === 'image' ? 'block' : 'none';
+        }
+
+        function previewImageUrl() {
+            const url = document.getElementById('cmsImageUrl').value;
+            if (url) {
+                document.getElementById('previewImg').src = url;
+                document.getElementById('cmsImagePreview').style.display = 'block';
+            }
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('cmsImagePreview').style.display = 'block';
+                    document.getElementById('cmsImageUrl').value = ''; // Clear URL if file uploaded
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearImagePreview() {
+            document.getElementById('previewImg').src = '';
+            document.getElementById('cmsImagePreview').style.display = 'none';
+            document.getElementById('cmsImageUrl').value = '';
+            document.getElementById('cmsImageFile').value = '';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').style.borderColor = 'var(--primary)';
+            document.getElementById('uploadArea').style.background = 'var(--info-light)';
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').style.borderColor = 'var(--border-light)';
+            document.getElementById('uploadArea').style.background = 'transparent';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            handleDragLeave(e);
+            const files = e.dataTransfer.files;
+            if (files.length && files[0].type.startsWith('image/')) {
+                document.getElementById('cmsImageFile').files = files;
+                previewImage(document.getElementById('cmsImageFile'));
+            }
+        }
+
+        // Override saveCMS to handle file upload
+        const originalSaveCMS = saveCMS;
+        saveCMS = async function() {
+            const key = document.getElementById('cmsKey').value.trim();
+            const type = document.querySelector('input[name="cmsType"]:checked').value;
+            
+            if (!key) {
+                showToast('Vui lòng nhập key nội dung', 'error');
+                return;
+            }
+            
+            let value = '';
+            
+            if (type === 'text') {
+                value = document.getElementById('cmsValue').value;
+            } else {
+                // Check for file upload first
+                const fileInput = document.getElementById('cmsImageFile');
+                if (fileInput.files && fileInput.files[0]) {
+                    // Upload file
+                    const formData = new FormData();
+                    formData.append('image', fileInput.files[0]);
+                    formData.append('csrf_token', CSRF_TOKEN);
+                    
+                    try {
+                        const uploadResponse = await fetch(`${API_BASE}/upload_image.php`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const uploadResult = await uploadResponse.json();
+                        
+                        if (uploadResult.status && uploadResult.url) {
+                            value = uploadResult.url;
+                        } else {
+                            showToast(uploadResult.message || 'Lỗi upload ảnh', 'error');
+                            return;
+                        }
+                    } catch (error) {
+                        showToast('Lỗi upload ảnh: ' + error.message, 'error');
+                        return;
+                    }
+                } else {
+                    // Use URL
+                    value = document.getElementById('cmsImageUrl').value;
+                }
+            }
+            
+            // Save content
+            try {
+                const response = await fetch(`${API_BASE}/save_content.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        section_key: key,
+                        content_value: value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    closeModal('cmsModal');
+                    showToast('Lưu nội dung thành công!', 'success');
+                    loadCMS();
+                } else {
+                    showToast(result.message || 'Lỗi lưu nội dung', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        };
+
+        // Reset modal when opening
+        const originalOpenAddCMS = openAddCMSModal;
+        openAddCMSModal = function() {
+            document.getElementById('cmsModalTitle').textContent = 'Thêm nội dung mới';
+            document.getElementById('cmsKey').value = '';
+            document.getElementById('cmsKey').disabled = false;
+            document.getElementById('cmsValue').value = '';
+            document.getElementById('cmsImageUrl').value = '';
+            document.getElementById('cmsImageFile').value = '';
+            clearImagePreview();
+            document.querySelector('input[name="cmsType"][value="text"]').checked = true;
+            toggleCMSType('text');
+            document.getElementById('cmsModal').style.display = 'block';
+        };
+
+        const originalOpenEditCMS = openEditCMSModal;
+        openEditCMSModal = function(key) {
+            const content = allCMSContent.find(c => c.section_key === key);
+            if (!content) return;
+            
+            document.getElementById('cmsModalTitle').textContent = 'Chỉnh sửa nội dung';
+            document.getElementById('cmsKey').value = content.section_key;
+            document.getElementById('cmsKey').disabled = true;
+            
+            const isImage = isImageContent(content.section_key);
+            
+            if (isImage) {
+                document.querySelector('input[name="cmsType"][value="image"]').checked = true;
+                toggleCMSType('image');
+                document.getElementById('cmsImageUrl').value = content.content_value || '';
+                document.getElementById('cmsValue').value = '';
+                if (content.content_value) {
+                    document.getElementById('previewImg').src = content.content_value;
+                    document.getElementById('cmsImagePreview').style.display = 'block';
+                }
+            } else {
+                document.querySelector('input[name="cmsType"][value="text"]').checked = true;
+                toggleCMSType('text');
+                document.getElementById('cmsValue').value = content.content_value || '';
+                clearImagePreview();
+            }
+            
+            document.getElementById('cmsModal').style.display = 'block';
+        };
+    </script>
+
+    <style>
+        .cms-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        #uploadArea:hover { border-color: var(--primary); }
+        input[type="radio"]:checked + .material-icons-outlined + span { font-weight: 600; }
+        
+        /* Rich Text Editor Styles */
+        .editor-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-bottom: none;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .editor-toolbar button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        .editor-toolbar button:hover {
+            background: var(--surface);
+            color: var(--primary);
+        }
+        .editor-toolbar button .material-icons-outlined {
+            font-size: 18px;
+        }
+        .editor-toolbar .btn-highlight {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        .editor-toolbar .btn-highlight:hover {
+            background: var(--success);
+            color: white;
+        }
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-light);
+            margin: 0 4px;
+        }
+        .rich-editor {
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            background: var(--surface);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .rich-editor:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .rich-editor:empty:before {
+            content: attr(placeholder);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        .rich-editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 12px 0;
+        }
+        .rich-editor h2, .rich-editor h3, .rich-editor h4 {
+            margin: 16px 0 8px;
+        }
+    </style>
+
+    <script>
+        // ==================== RICH TEXT EDITOR ====================
+        let pendingImageUrl = '';
+        
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('newsContent').focus();
+        }
+        
+        function formatHeading(tag) {
+            if (tag) {
+                document.execCommand('formatBlock', false, tag);
+                document.getElementById('newsContent').focus();
+            }
+        }
+        
+        function insertLink() {
+            const url = prompt('Nhập URL:', 'https://');
+            if (url) {
+                document.execCommand('createLink', false, url);
+            }
+        }
+        
+        function showImageInsertDialog() {
+            document.getElementById('insertImageUrl').value = '';
+            document.getElementById('insertImageFile').value = '';
+            document.getElementById('insertImagePreview').style.display = 'none';
+            pendingImageUrl = '';
+            document.getElementById('imageInsertDialog').style.display = 'block';
+        }
+        
+        function previewInsertImage() {
+            const url = document.getElementById('insertImageUrl').value;
+            if (url) {
+                document.getElementById('insertPreviewImg').src = url;
+                document.getElementById('insertImagePreview').style.display = 'block';
+                pendingImageUrl = url;
+            }
+        }
+        
+        async function handleInsertImageFile(input) {
+            if (input.files && input.files[0]) {
+                // Upload the file first
+                const formData = new FormData();
+                formData.append('image', input.files[0]);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/upload_image.php`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status && result.url) {
+                        document.getElementById('insertPreviewImg').src = result.url;
+                        document.getElementById('insertImagePreview').style.display = 'block';
+                        pendingImageUrl = result.url;
+                        document.getElementById('insertImageUrl').value = result.url;
+                    } else {
+                        showToast(result.message || 'Lỗi upload ảnh', 'error');
+                    }
+                } catch (error) {
+                    showToast('Lỗi upload: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        function confirmInsertImage() {
+            const url = pendingImageUrl || document.getElementById('insertImageUrl').value;
+            if (!url) {
+                showToast('Vui lòng chọn hoặc nhập URL ảnh', 'error');
+                return;
+            }
+            
+            const align = document.getElementById('insertImageAlign').value;
+            const alignStyle = align === 'center' ? 'margin: 12px auto; display: block;' :
+                              align === 'left' ? 'float: left; margin: 0 16px 12px 0;' :
+                              'float: right; margin: 0 0 12px 16px;';
+            
+            const imgHtml = `<img src="${url}" style="max-width: 100%; ${alignStyle}" alt=""><br>`;
+            
+            document.getElementById('newsContent').focus();
+            document.execCommand('insertHTML', false, imgHtml);
+            
+            closeModal('imageInsertDialog');
+            showToast('Đã chèn ảnh!', 'success');
+        }
+        
+        async function uploadNewsThumbnail(input) {
+            if (input.files && input.files[0]) {
+                const formData = new FormData();
+                formData.append('image', input.files[0]);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/upload_image.php`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status && result.url) {
+                        document.getElementById('newsImageUrl').value = result.url;
+                        document.getElementById('thumbPreviewImg').src = result.url;
+                        document.getElementById('thumbnailPreview').style.display = 'block';
+                        showToast('Upload thành công!', 'success');
+                    } else {
+                        showToast(result.message || 'Lỗi upload', 'error');
+                    }
+                } catch (error) {
+                    showToast('Lỗi: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Update saveNews to get content from contenteditable
+        const originalSaveNews = saveNews;
+        saveNews = async function() {
+            const newsId = document.getElementById('newsId').value;
+            const content = document.getElementById('newsContent').innerHTML;
+            
+            const data = {
+                title: document.getElementById('newsTitle').value,
+                excerpt: document.getElementById('newsExcerpt').value,
+                content: content,
+                image_url: document.getElementById('newsImageUrl').value,
+                category: document.getElementById('newsCategory').value,
+                is_featured: document.getElementById('newsFeatured').checked ? 1 : 0
+            };
+            
+            if (newsId) data.id = parseInt(newsId);
+            
+            try {
+                const response = await fetch(`${API_BASE}/news_api.php`, {
+                    method: newsId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    closeModal('newsModal');
+                    showToast(newsId ? 'Cập nhật thành công!' : 'Thêm tin thành công!', 'success');
+                    loadNews();
+                } else {
+                    showToast(result.message || 'Lỗi lưu tin', 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối', 'error');
+            }
+        };
+        
+        // Update openEditNews to populate contenteditable
+        const originalOpenEditNews = openEditNewsModal;
+        openEditNewsModal = function(id) {
+            const news = allNews.find(n => n.id == id);
+            if (!news) return;
+            
+            document.getElementById('newsModalTitle').textContent = 'Sửa tin tức';
+            document.getElementById('newsId').value = news.id;
+            document.getElementById('newsTitle').value = news.title;
+            document.getElementById('newsExcerpt').value = news.excerpt || '';
+            document.getElementById('newsContent').innerHTML = news.content || '';
+            document.getElementById('newsImageUrl').value = news.image_url || '';
+            document.getElementById('newsCategory').value = news.category || 'tin-tuc';
+            document.getElementById('newsFeatured').checked = news.is_featured == 1;
+            
+            if (news.image_url) {
+                document.getElementById('thumbPreviewImg').src = news.image_url;
+                document.getElementById('thumbnailPreview').style.display = 'block';
+            } else {
+                document.getElementById('thumbnailPreview').style.display = 'none';
+            }
+            
+            document.getElementById('newsModal').style.display = 'block';
+        };
+        
+        // Update openAddNewsModal to clear contenteditable
+        const originalOpenAddNews = openAddNewsModal;
+        openAddNewsModal = function() {
+            document.getElementById('newsModalTitle').textContent = 'Thêm tin tức mới';
+            document.getElementById('newsId').value = '';
+            document.getElementById('newsTitle').value = '';
+            document.getElementById('newsExcerpt').value = '';
+            document.getElementById('newsContent').innerHTML = '';
+            document.getElementById('newsImageUrl').value = '';
+            document.getElementById('newsCategory').value = 'tin-tuc';
+            document.getElementById('newsFeatured').checked = false;
+            document.getElementById('thumbnailPreview').style.display = 'none';
+            document.getElementById('newsModal').style.display = 'block';
+        };
+        
+        // ==================== BANNER MANAGEMENT ====================
+        const bannerPages = [
+            { key: 'nhat_header_bg', name: 'Du học Nhật Bản', page: 'nhat.php', color: '#BC002D' },
+            { key: 'duc_header_bg', name: 'Du học Đức', page: 'duc.php', color: '#DD0000' },
+            { key: 'han_header_bg', name: 'Du học Hàn Quốc', page: 'han.php', color: '#0047A0' },
+            { key: 'xkldjp_header_bg', name: 'XKLĐ Nhật Bản', page: 'xkldjp.php', color: '#BC002D' },
+            { key: 'xkldhan_header_bg', name: 'XKLĐ Hàn Quốc', page: 'xkldhan.php', color: '#0047A0' },
+            { key: 'xklddailoan_header_bg', name: 'XKLĐ Đài Loan', page: 'xklddailoan.php', color: '#E60012' },
+            { key: 'xkldchauau_header_bg', name: 'XKLĐ Châu Âu', page: 'xkldchauau.php', color: '#003399' },
+            { key: 'huongnghiep_header_bg', name: 'Hướng nghiệp', page: 'huong-nghiep.php', color: '#F59E0B' },
+            { key: 'about_header_bg', name: 'Về ICOGroup', page: 've-icogroup.php', color: '#2563EB' },
+            { key: 'contact_header_bg', name: 'Liên hệ', page: 'lienhe.php', color: '#10B981' },
+            { key: 'hoatdong_header_bg', name: 'Hoạt động', page: 'hoatdong.php', color: '#8B5CF6' }
+        ];
+        
+        async function loadBanners() {
+            const grid = document.getElementById('bannerGrid');
+            grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Đang tải...</p></div>';
+            
+            try {
+                // Load existing banner images from CMS
+                const response = await fetch(`${API_BASE}/get_content.php`);
+                const content = await response.json();
+                const bannerData = {};
+                content.forEach(c => {
+                    if (c.section_key.endsWith('_header_bg')) {
+                        bannerData[c.section_key] = c.content_value;
+                    }
+                });
+                
+                // Render banner cards
+                grid.innerHTML = bannerPages.map(banner => {
+                    const imageUrl = bannerData[banner.key] || '';
+                    const hasImage = imageUrl && imageUrl.length > 0;
+                    const bgStyle = hasImage 
+                        ? `background-image: url('${imageUrl}'); background-size: cover; background-position: center;`
+                        : `background: linear-gradient(135deg, ${banner.color}, ${adjustColor(banner.color, 40)});`;
+                    
+                    return `
+                        <div class="banner-card" data-key="${banner.key}">
+                            <div class="banner-preview ${hasImage ? 'has-image' : ''}" style="${bgStyle}">
+                                ${!hasImage ? `<div class="placeholder"><span class="material-icons-outlined" style="font-size: 32px;">image</span><br>Chưa có hình</div>` : ''}
+                                <div class="overlay">
+                                    <span class="material-icons-outlined" style="color: white; font-size: 32px;">visibility</span>
+                                </div>
+                            </div>
+                            <div class="banner-info">
+                                <h4>${banner.name}</h4>
+                                <p><code>${banner.page}</code></p>
+                                <div class="banner-actions">
+                                    <label class="btn-upload">
+                                        <span class="material-icons-outlined">cloud_upload</span>
+                                        Upload
+                                        <input type="file" accept="image/*" style="display: none;" onchange="uploadBanner('${banner.key}', this)">
+                                    </label>
+                                    ${hasImage ? `<button class="btn-remove" onclick="removeBanner('${banner.key}')">
+                                        <span class="material-icons-outlined">delete</span>
+                                        Xóa
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading banners:', error);
+                grid.innerHTML = '<div class="empty-state"><span class="material-icons-outlined">error</span><h3>Lỗi tải banner</h3></div>';
+            }
+        }
+        
+        function adjustColor(hex, percent) {
+            // Lighten a hex color
+            const num = parseInt(hex.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+        
+        async function uploadBanner(key, input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                showToast('Đang tải lên...', 'success');
+                
+                // Upload image
+                const uploadResponse = await fetch(`${API_BASE}/upload_image.php`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': CSRF_TOKEN },
+                    body: formData
+                });
+                
+                const uploadResult = await uploadResponse.json();
+                
+                if (!uploadResult.status || !uploadResult.url) {
+                    throw new Error(uploadResult.message || 'Upload thất bại');
+                }
+                
+                // Save to CMS content
+                const saveResponse = await fetch(`${API_BASE}/save_content.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        section_key: key,
+                        content_value: uploadResult.url
+                    })
+                });
+                
+                const saveResult = await saveResponse.json();
+                
+                if (saveResult.status) {
+                    showToast('Cập nhật banner thành công!', 'success');
+                    loadBanners();
+                } else {
+                    throw new Error(saveResult.message || 'Lỗi lưu');
+                }
+            } catch (error) {
+                console.error('Error uploading banner:', error);
+                showToast('Lỗi: ' + error.message, 'error');
+            }
+            
+            input.value = '';
+        }
+        
+        async function removeBanner(key) {
+            if (!confirm('Bạn có chắc muốn xóa hình nền banner này?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/save_content.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        section_key: key,
+                        content_value: ''
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status) {
+                    showToast('Đã xóa banner!', 'success');
+                    loadBanners();
+                } else {
+                    throw new Error(result.message || 'Lỗi xóa');
+                }
+            } catch (error) {
+                console.error('Error removing banner:', error);
+                showToast('Lỗi: ' + error.message, 'error');
+            }
+        }
+
+        // ===== VISUAL CMS EDITOR =====
+        const pageConfigs = {
+            index: {
+                name: 'Trang chủ',
+                sections: [
+                    { title: '🖼️ Hero Slider', icon: 'image', fields: [
+                        { key: 'index_hero_slide_1_img', label: 'Slide 1 - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg' },
+                        { key: 'index_hero_slide_1_title', label: 'Slide 1 - Tiêu đề', type: 'text', defaultValue: 'ICOGroup - Nền Tảng Giáo Dục & Việc Làm Quốc Tế' },
+                        { key: 'index_hero_slide_1_subtitle', label: 'Slide 1 - Mô tả', type: 'text', defaultValue: '15 năm đồng hành cùng thế hệ trẻ Việt Nam' },
+                        { key: 'index_hero_slide_2_img', label: 'Slide 2 - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' },
+                        { key: 'index_hero_slide_2_title', label: 'Slide 2 - Tiêu đề', type: 'text', defaultValue: 'Du Học Nhật - Hàn - Đức' },
+                        { key: 'index_hero_slide_2_subtitle', label: 'Slide 2 - Mô tả', type: 'text', defaultValue: 'Học bổng lên đến 100%, visa cao' },
+                        { key: 'index_hero_slide_3_img', label: 'Slide 3 - Ảnh', type: 'image', defaultValue: 'https://www.icogroup.vn/vnt_upload/news/02_2025/ICOGROUP_TUYEN_DUNG_23.jpg' },
+                        { key: 'index_hero_slide_3_title', label: 'Slide 3 - Tiêu đề', type: 'text', defaultValue: 'Xuất Khẩu Lao Động' },
+                        { key: 'index_hero_slide_3_subtitle', label: 'Slide 3 - Mô tả', type: 'text', defaultValue: 'Thu nhập 30-50 triệu/tháng' },
+                        { key: 'index_hero_btn_text', label: 'Text nút CTA', type: 'text', defaultValue: 'Đăng ký tư vấn miễn phí' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'index_about_bg', label: 'Ảnh nền section', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg' },
+                        { key: 'index_about_title', label: 'Tiêu đề', type: 'text', defaultValue: 'Về ICOGroup' },
+                        { key: 'index_about_history_title', label: 'Tiêu đề lịch sử', type: 'text', defaultValue: 'Lịch Sử Phát Triển' },
+                        { key: 'index_about_history_desc', label: 'Mô tả lịch sử', type: 'textarea', defaultValue: 'Được thành lập từ năm 2009, ICOGroup đã trở thành một trong những tập đoàn giáo dục hàng đầu Việt Nam.' }
+                    ]},
+                    { title: '📊 Thống Kê', icon: 'analytics', fields: [
+                        { key: 'index_stat_1_number', label: 'Số 1 (vd: 15+)', type: 'text', defaultValue: '15+' },
+                        { key: 'index_stat_1_label', label: 'Nhãn 1', type: 'text', defaultValue: 'Năm kinh nghiệm' },
+                        { key: 'index_stat_2_number', label: 'Số 2', type: 'text', defaultValue: '50,000+' },
+                        { key: 'index_stat_2_label', label: 'Nhãn 2', type: 'text', defaultValue: 'Du học sinh' },
+                        { key: 'index_stat_3_number', label: 'Số 3', type: 'text', defaultValue: '100+' },
+                        { key: 'index_stat_3_label', label: 'Nhãn 3', type: 'text', defaultValue: 'Đối tác quốc tế' },
+                        { key: 'index_stat_4_number', label: 'Số 4', type: 'text', defaultValue: '20+' },
+                        { key: 'index_stat_4_label', label: 'Nhãn 4', type: 'text', defaultValue: 'Chi nhánh toàn quốc' }
+                    ]},
+                    { title: '🏢 Hệ Sinh Thái', icon: 'business', fields: [
+                        { key: 'index_eco_1_name', label: 'Đơn vị 1 - Tên', type: 'text', defaultValue: 'Tiếng Nhật ICO' },
+                        { key: 'index_eco_1_desc', label: 'Đơn vị 1 - Mô tả', type: 'textarea', defaultValue: 'Trung tâm đào tạo tiếng Nhật hàng đầu Việt Nam' },
+                        { key: 'index_eco_1_img', label: 'Đơn vị 1 - Ảnh nền', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/Linkedin_3.jpg' },
+                        { key: 'index_eco_1_logo', label: 'Đơn vị 1 - Logo', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/Logo_TTNN_ICO_24x_100.jpg' },
+                        { key: 'index_eco_2_name', label: 'Đơn vị 2 - Tên', type: 'text', defaultValue: 'ICOSchool' },
+                        { key: 'index_eco_2_desc', label: 'Đơn vị 2 - Mô tả', type: 'textarea', defaultValue: 'Trường dạy nghề ICO' },
+                        { key: 'index_eco_2_img', label: 'Đơn vị 2 - Ảnh nền', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/khai_giang_icoschool.jpg' },
+                        { key: 'index_eco_2_logo', label: 'Đơn vị 2 - Logo', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/mmicon2.jpg' },
+                        { key: 'index_eco_3_name', label: 'Đơn vị 3 - Tên', type: 'text', defaultValue: 'ICOCollege' },
+                        { key: 'index_eco_3_desc', label: 'Đơn vị 3 - Mô tả', type: 'textarea', defaultValue: 'Cao đẳng nghề ICO' },
+                        { key: 'index_eco_3_img', label: 'Đơn vị 3 - Ảnh nền', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/mmimg3.jpg' },
+                        { key: 'index_eco_3_logo', label: 'Đơn vị 3 - Logo', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/mmicon3.jpg' },
+                        { key: 'index_eco_4_name', label: 'Đơn vị 4 - Tên', type: 'text', defaultValue: 'ICOCareer' },
+                        { key: 'index_eco_4_desc', label: 'Đơn vị 4 - Mô tả', type: 'textarea', defaultValue: 'Việc làm trong nước và quốc tế' },
+                        { key: 'index_eco_4_img', label: 'Đơn vị 4 - Ảnh nền', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/service/mmimg4.jpg' }
+                    ]},
+                    { title: '📚 Chương Trình Nổi Bật', icon: 'school', fields: [
+                        { key: 'index_program_1_title', label: 'CT 1 - Tiêu đề', type: 'text', defaultValue: 'Du Học Nhật Bản' },
+                        { key: 'index_program_1_desc', label: 'CT 1 - Mô tả', type: 'textarea', defaultValue: 'Học bổng lên đến 100%, làm thêm 28h/tuần' },
+                        { key: 'index_program_1_img', label: 'CT 1 - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_02.jpg' },
+                        { key: 'index_program_2_title', label: 'CT 2 - Tiêu đề', type: 'text', defaultValue: 'Du Học Đức' },
+                        { key: 'index_program_2_desc', label: 'CT 2 - Mô tả', type: 'textarea', defaultValue: 'Miễn học phí, học nghề hưởng lương' },
+                        { key: 'index_program_2_img', label: 'CT 2 - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_03.jpg' },
+                        { key: 'index_program_3_title', label: 'CT 3 - Tiêu đề', type: 'text', defaultValue: 'XKLĐ Nhật Bản' },
+                        { key: 'index_program_3_desc', label: 'CT 3 - Mô tả', type: 'textarea', defaultValue: 'Thu nhập 30-40 triệu/tháng, chương trình thực tập sinh kỹ năng' },
+                        { key: 'index_program_3_img', label: 'CT 3 - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' }
+                    ]}
+                ]
+            },
+            nhat: {
+                name: 'Du học Nhật Bản',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'nhat_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_nhat.jpg' },
+                        { key: 'nhat_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Du Học Nhật Bản 🇯🇵' },
+                        { key: 'nhat_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Hành trình chinh phục xứ sở hoa anh đào' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'nhat_why_title', label: 'Tiêu đề phần "Tại sao chọn"', type: 'text', defaultValue: 'Tại Sao Chọn Du Học Nhật Bản?' },
+                        { key: 'nhat_about_img', label: 'Ảnh giới thiệu', type: 'image', defaultValue: 'https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png' },
+                        { key: 'nhat_reason_title', label: 'Tiêu đề lý do', type: 'text', defaultValue: 'Lý Do Nên Du Học Nhật Bản' },
+                        { key: 'nhat_reason_desc', label: 'Mô tả lý do', type: 'textarea', defaultValue: 'Nhật Bản là quốc gia có nền giáo dục tiên tiến, công nghệ phát triển và nền văn hóa độc đáo.' }
+                    ]},
+                    { title: '✨ Lợi Ích', icon: 'star', fields: [
+                        { key: 'nhat_benefit_1', label: 'Lợi ích 1', type: 'text', defaultValue: 'Giáo dục đẳng cấp thế giới' },
+                        { key: 'nhat_benefit_2', label: 'Lợi ích 2', type: 'text', defaultValue: 'Làm thêm 28h/tuần hợp pháp' },
+                        { key: 'nhat_benefit_3', label: 'Lợi ích 3', type: 'text', defaultValue: 'Học bổng lên đến 100%' },
+                        { key: 'nhat_benefit_4', label: 'Lợi ích 4', type: 'text', defaultValue: 'An ninh và an toàn cao' },
+                        { key: 'nhat_benefit_5', label: 'Lợi ích 5', type: 'text', defaultValue: 'Cơ hội việc làm sau tốt nghiệp' },
+                        { key: 'nhat_benefit_6', label: 'Lợi ích 6', type: 'text', defaultValue: 'Văn hóa độc đáo, hấp dẫn' }
+                    ]},
+                    { title: '📚 Chương Trình', icon: 'school', fields: [
+                        { key: 'nhat_program_1_title', label: 'Chương trình 1 - Tiêu đề', type: 'text', defaultValue: 'Du Học Tiếng Nhật' },
+                        { key: 'nhat_program_1_desc', label: 'Chương trình 1 - Mô tả', type: 'textarea', defaultValue: 'Chương trình học tiếng Nhật từ 6 tháng - 2 năm tại các trường Nhật ngữ uy tín.' },
+                        { key: 'nhat_program_2_title', label: 'Chương trình 2 - Tiêu đề', type: 'text', defaultValue: 'Du Học Cao Đẳng - Đại Học' },
+                        { key: 'nhat_program_2_desc', label: 'Chương trình 2 - Mô tả', type: 'textarea', defaultValue: 'Học tại các trường Cao đẳng, Đại học tại Nhật Bản với nhiều ngành học đa dạng.' },
+                        { key: 'nhat_program_3_title', label: 'Chương trình 3 - Tiêu đề', type: 'text', defaultValue: 'Du Học Nghề (Senmon)' },
+                        { key: 'nhat_program_3_desc', label: 'Chương trình 3 - Mô tả', type: 'textarea', defaultValue: 'Học tại các trường chuyên môn với thời gian 2 năm.' }
+                    ]},
+                    { title: '📞 Liên Hệ', icon: 'call', fields: [
+                        { key: 'nhat_cta_title', label: 'Tiêu đề nút đăng ký', type: 'text', defaultValue: 'Đăng Ký Tư Vấn Du Học Nhật Bản' },
+                        { key: 'nhat_cta_desc', label: 'Mô tả', type: 'text', defaultValue: 'Nhận tư vấn miễn phí từ đội ngũ chuyên gia với 15 năm kinh nghiệm' }
+                    ]}
+                ]
+            },
+            duc: {
+                name: 'Du học Đức',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'duc_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_duc.jpg' },
+                        { key: 'duc_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Du Học Đức' },
+                        { key: 'duc_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình du học miễn học phí với cơ hội việc làm và định cư' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'duc_why_title', label: 'Tiêu đề phần "Tại sao chọn"', type: 'text', defaultValue: 'Tại Sao Chọn Du Học Đức?' },
+                        { key: 'duc_about_img', label: 'Ảnh giới thiệu', type: 'image', defaultValue: 'https://icogroupvn.wordpress.com/wp-content/uploads/2017/03/du-hoc-duc-ico-cho-tuong-lai-tuoi-sang-01.jpg' },
+                        { key: 'duc_advantage_title', label: 'Tiêu đề ưu điểm', type: 'text', defaultValue: 'Ưu Điểm Vượt Trội' },
+                        { key: 'duc_advantage_desc', label: 'Mô tả ưu điểm', type: 'textarea', defaultValue: 'Đức là một trong những quốc gia có nền giáo dục hàng đầu thế giới.' }
+                    ]},
+                    { title: '✨ Lợi Ích', icon: 'star', fields: [
+                        { key: 'duc_benefit_1', label: 'Lợi ích 1', type: 'text', defaultValue: 'Miễn học phí tại đại học công lập' },
+                        { key: 'duc_benefit_2', label: 'Lợi ích 2', type: 'text', defaultValue: 'Học nghề hưởng lương 800-1200€/tháng' },
+                        { key: 'duc_benefit_3', label: 'Lợi ích 3', type: 'text', defaultValue: 'Cơ hội định cư sau khi tốt nghiệp' },
+                        { key: 'duc_benefit_4', label: 'Lợi ích 4', type: 'text', defaultValue: 'Bằng cấp được công nhận toàn cầu' },
+                        { key: 'duc_benefit_5', label: 'Lợi ích 5', type: 'text', defaultValue: 'Du lịch tự do trong khối Schengen' }
+                    ]},
+                    { title: '📚 Chương Trình', icon: 'school', fields: [
+                        { key: 'duc_program_1_title', label: 'Đại học - Tiêu đề', type: 'text', defaultValue: 'Du Học Đại Học' },
+                        { key: 'duc_program_1_desc', label: 'Đại học - Mô tả', type: 'textarea', defaultValue: 'Học tại các trường đại học công lập hàng đầu nước Đức với học phí 0€.' },
+                        { key: 'duc_program_2_title', label: 'Ausbildung - Tiêu đề', type: 'text', defaultValue: 'Du Học Nghề (Ausbildung)' },
+                        { key: 'duc_program_2_desc', label: 'Ausbildung - Mô tả', type: 'textarea', defaultValue: 'Chương trình đào tạo kép: Học + thực hành. Lương 800-1200€/tháng.' },
+                        { key: 'duc_program_3_title', label: 'Du học hè - Tiêu đề', type: 'text', defaultValue: 'Du Học Hè' },
+                        { key: 'duc_program_3_desc', label: 'Du học hè - Mô tả', type: 'textarea', defaultValue: 'Chương trình trải nghiệm ngắn hạn 2-4 tuần.' }
+                    ]}
+                ]
+            },
+            han: {
+                name: 'Du học Hàn Quốc',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'han_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_han.jpg' },
+                        { key: 'han_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Du Học Hàn Quốc 🇰🇷' },
+                        { key: 'han_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Khám phá xứ sở kim chi - Điểm đến du học hấp dẫn' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'han_about_img', label: 'Ảnh giới thiệu', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/news/11_2024/TRUONG_DAI_HOC_PUKYONG.jpg' }
+                    ]},
+                    { title: '✨ Lợi Ích', icon: 'star', fields: [
+                        { key: 'han_benefit_1', label: 'Lợi ích 1', type: 'text', defaultValue: 'Chi phí hợp lý, học bổng đa dạng' },
+                        { key: 'han_benefit_2', label: 'Lợi ích 2', type: 'text', defaultValue: 'Nền giáo dục tiên tiến hàng đầu châu Á' },
+                        { key: 'han_benefit_3', label: 'Lợi ích 3', type: 'text', defaultValue: 'Cơ hội làm thêm hợp pháp' },
+                        { key: 'han_benefit_4', label: 'Lợi ích 4', type: 'text', defaultValue: 'Văn hóa K-pop, Hallyu hấp dẫn' },
+                        { key: 'han_benefit_5', label: 'Lợi ích 5', type: 'text', defaultValue: 'Cơ hội việc làm sau tốt nghiệp' }
+                    ]},
+                    { title: '📚 Chương Trình', icon: 'school', fields: [
+                        { key: 'han_program_1_title', label: 'Tiếng Hàn - Tiêu đề', type: 'text', defaultValue: 'Du Học Tiếng Hàn' },
+                        { key: 'han_program_1_desc', label: 'Tiếng Hàn - Mô tả', type: 'textarea', defaultValue: 'Học tiếng Hàn tại các trường đại học hàng đầu Hàn Quốc.' },
+                        { key: 'han_program_2_title', label: 'Đại học - Tiêu đề', type: 'text', defaultValue: 'Du Học Đại Học' },
+                        { key: 'han_program_2_desc', label: 'Đại học - Mô tả', type: 'textarea', defaultValue: 'Học cử nhân tại các trường đại học danh tiếng với học bổng hấp dẫn.' },
+                        { key: 'han_program_3_title', label: 'Thạc sĩ - Tiêu đề', type: 'text', defaultValue: 'Du Học Sau Đại Học' },
+                        { key: 'han_program_3_desc', label: 'Thạc sĩ - Mô tả', type: 'textarea', defaultValue: 'Chương trình Thạc sĩ, Tiến sĩ với nhiều học bổng toàn phần.' }
+                    ]}
+                ]
+            },
+            xkldhan: {
+                name: 'XKLĐ Hàn Quốc',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'xkldhan_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xkldhan.jpg' },
+                        { key: 'xkldhan_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Hàn Quốc 🇰🇷' },
+                        { key: 'xkldhan_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình EPS - Cơ hội việc làm tại Hàn Quốc' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'xkldhan_main_img', label: 'Ảnh giới thiệu', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/news/11_2024/TRUONG_DAI_HOC_PUKYONG.jpg' }
+                    ]},
+                    { title: '📋 Chương Trình EPS', icon: 'work', fields: [
+                        { key: 'xkldhan_program_title', label: 'Tiêu đề chương trình', type: 'text', defaultValue: 'Chương Trình EPS (Employment Permit System)' },
+                        { key: 'xkldhan_program_desc', label: 'Mô tả chương trình', type: 'textarea', defaultValue: 'Chương trình hợp tác lao động giữa Việt Nam và Hàn Quốc, mang đến cơ hội việc làm ổn định với mức lương hấp dẫn.' }
+                    ]},
+                    { title: '✨ Quyền Lợi', icon: 'star', fields: [
+                        { key: 'xkldhan_benefit_1', label: 'Thu nhập', type: 'text', defaultValue: 'Thu nhập 35-50 triệu VNĐ/tháng' },
+                        { key: 'xkldhan_benefit_2', label: 'Hợp đồng', type: 'text', defaultValue: 'Hợp đồng 4 năm 10 tháng' },
+                        { key: 'xkldhan_benefit_3', label: 'Bảo hiểm', type: 'text', defaultValue: 'Bảo hiểm đầy đủ theo luật Hàn Quốc' }
+                    ]}
+                ]
+            },
+            huongnghiep: {
+                name: 'Hướng nghiệp',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'huongnghiep_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_huongnghiep.jpg' },
+                        { key: 'huongnghiep_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Hướng Nghiệp - Định Hướng Tương Lai' },
+                        { key: 'huongnghiep_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Khám phá cơ hội nghề nghiệp phù hợp với bạn' }
+                    ]},
+                    { title: '📚 Chương Trình', icon: 'school', fields: [
+                        { key: 'huongnghiep_programs_title', label: 'Tiêu đề phần chương trình', type: 'text', defaultValue: 'Các Chương Trình Hướng Nghiệp' },
+                        { key: 'huongnghiep_program_1_title', label: 'Du học - Tiêu đề', type: 'text', defaultValue: 'Du Học Quốc Tế' },
+                        { key: 'huongnghiep_program_1_desc', label: 'Du học - Mô tả', type: 'textarea', defaultValue: 'Cơ hội học tập tại các nước phát triển như Nhật Bản, Hàn Quốc, Đức, Đài Loan.' },
+                        { key: 'huongnghiep_program_1_img', label: 'Du học - Ảnh', type: 'image', defaultValue: 'https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png' },
+                        { key: 'huongnghiep_program_2_title', label: 'Lao động QT - Tiêu đề', type: 'text', defaultValue: 'Lao Động Quốc Tế' },
+                        { key: 'huongnghiep_program_2_desc', label: 'Lao động QT - Mô tả', type: 'textarea', defaultValue: 'Chương trình xuất khẩu lao động với thu nhập cao và môi trường làm việc chuyên nghiệp.' },
+                        { key: 'huongnghiep_program_2_img', label: 'Lao động QT - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' },
+                        { key: 'huongnghiep_program_3_title', label: 'Việc làm VN - Tiêu đề', type: 'text', defaultValue: 'Việc Làm Trong Nước' },
+                        { key: 'huongnghiep_program_3_desc', label: 'Việc làm VN - Mô tả', type: 'textarea', defaultValue: 'Kết nối với các doanh nghiệp uy tín trong nước, cơ hội việc làm ổn định.' },
+                        { key: 'huongnghiep_program_3_img', label: 'Việc làm VN - Ảnh', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/news/11_2024/43_NAM_NGAY_NHA_GIAO_VN_1.jpg' }
+                    ]}
+                ]
+            },
+            xkldjp: {
+                name: 'XKLĐ Nhật Bản',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'xkldjp_hero_img', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xkldjp.jpg' },
+                        { key: 'xkldjp_hero_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Nhật Bản 🇯🇵' },
+                        { key: 'xkldjp_hero_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình thực tập sinh kỹ năng - Thu nhập cao, tương lai ổn định' }
+                    ]},
+                    { title: '📋 Chương Trình', icon: 'work', fields: [
+                        { key: 'xkldjp_about_title', label: 'Tiêu đề giới thiệu', type: 'text', defaultValue: 'Chương Trình Thực Tập Sinh Kỹ Năng' },
+                        { key: 'xkldjp_about_desc', label: 'Mô tả', type: 'textarea', defaultValue: 'Chương trình đào tạo và làm việc tại Nhật Bản trong 3-5 năm với mức thu nhập hấp dẫn và cơ hội phát triển nghề nghiệp.' }
+                    ]},
+                    { title: '✨ Quyền Lợi', icon: 'star', fields: [
+                        { key: 'xkldjp_benefit_1', label: 'Quyền lợi 1', type: 'text', defaultValue: 'Thu nhập 30-40 triệu VNĐ/tháng' },
+                        { key: 'xkldjp_benefit_2', label: 'Quyền lợi 2', type: 'text', defaultValue: 'Hỗ trợ nhà ở, tiền về nước' },
+                        { key: 'xkldjp_benefit_3', label: 'Quyền lợi 3', type: 'text', defaultValue: 'Bảo hiểm y tế, bảo hiểm lao động' }
+                    ]}
+                ]
+            },
+            xklddailoan: {
+                name: 'XKLĐ Đài Loan',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'xklddailoan_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xklddailoan.jpg' },
+                        { key: 'xklddailoan_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Đài Loan 🇹🇼' },
+                        { key: 'xklddailoan_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Cơ hội việc làm tại Đài Loan với thu nhập hấp dẫn' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'xklddailoan_main_img', label: 'Ảnh giới thiệu', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' }
+                    ]},
+                    { title: '📋 Chương Trình', icon: 'work', fields: [
+                        { key: 'xklddailoan_program_title', label: 'Tiêu đề chương trình', type: 'text', defaultValue: 'Chương Trình Lao Động Đài Loan' },
+                        { key: 'xklddailoan_program_desc', label: 'Mô tả', type: 'textarea', defaultValue: 'Chương trình xuất khẩu lao động sang Đài Loan trong các ngành sản xuất, chế tạo, điện tử với thu nhập ổn định.' }
+                    ]},
+                    { title: '✨ Quyền Lợi', icon: 'star', fields: [
+                        { key: 'xklddailoan_benefit_1', label: 'Quyền lợi 1', type: 'text', defaultValue: 'Thu nhập 20-30 triệu VNĐ/tháng' },
+                        { key: 'xklddailoan_benefit_2', label: 'Quyền lợi 2', type: 'text', defaultValue: 'Hợp đồng 3 năm, có thể gia hạn' },
+                        { key: 'xklddailoan_benefit_3', label: 'Quyền lợi 3', type: 'text', defaultValue: 'Hỗ trợ nhà ở, ăn uống' }
+                    ]}
+                ]
+            },
+            xkldchauau: {
+                name: 'XKLĐ Châu Âu',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'xkldchauau_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xkldchauau.jpg' },
+                        { key: 'xkldchauau_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Châu Âu 🇪🇺' },
+                        { key: 'xkldchauau_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Cơ hội việc làm tại các nước Châu Âu với mức lương cao' }
+                    ]},
+                    { title: 'ℹ️ Giới Thiệu', icon: 'info', fields: [
+                        { key: 'xkldchauau_main_img', label: 'Ảnh giới thiệu', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' }
+                    ]},
+                    { title: '📋 Chương Trình', icon: 'work', fields: [
+                        { key: 'xkldchauau_program_title', label: 'Tiêu đề chương trình', type: 'text', defaultValue: 'Chương Trình Lao Động Châu Âu' },
+                        { key: 'xkldchauau_program_desc', label: 'Mô tả', type: 'textarea', defaultValue: 'Chương trình xuất khẩu lao động sang các nước Châu Âu như Ba Lan, Romania, Séc với thu nhập cao và môi trường làm việc hiện đại.' }
+                    ]},
+                    { title: '✨ Quyền Lợi', icon: 'star', fields: [
+                        { key: 'xkldchauau_benefit_1', label: 'Quyền lợi 1', type: 'text', defaultValue: 'Thu nhập 25-40 triệu VNĐ/tháng' },
+                        { key: 'xkldchauau_benefit_2', label: 'Quyền lợi 2', type: 'text', defaultValue: 'Visa lao động dài hạn' },
+                        { key: 'xkldchauau_benefit_3', label: 'Quyền lợi 3', type: 'text', defaultValue: 'Bảo hiểm y tế, xã hội đầy đủ' }
+                    ]},
+                    { title: '🌍 Quốc Gia', icon: 'public', fields: [
+                        { key: 'xkldchauau_country_1_name', label: 'Quốc gia 1', type: 'text', defaultValue: 'Ba Lan 🇵🇱' },
+                        { key: 'xkldchauau_country_1_desc', label: 'Mô tả 1', type: 'textarea', defaultValue: 'Thị trường lao động phát triển với nhiều cơ hội việc làm trong ngành sản xuất, xây dựng.' },
+                        { key: 'xkldchauau_country_2_name', label: 'Quốc gia 2', type: 'text', defaultValue: 'Romania 🇷🇴' },
+                        { key: 'xkldchauau_country_2_desc', label: 'Mô tả 2', type: 'textarea', defaultValue: 'Chi phí sinh hoạt thấp, thu nhập ổn định trong các ngành nông nghiệp, chế tạo.' },
+                        { key: 'xkldchauau_country_3_name', label: 'Quốc gia 3', type: 'text', defaultValue: 'Séc 🇨🇿' },
+                        { key: 'xkldchauau_country_3_desc', label: 'Mô tả 3', type: 'textarea', defaultValue: 'Môi trường làm việc hiện đại, thu nhập cao trong ngành ô tô, điện tử.' }
+                    ]}
+                ]
+            },
+            veicogroup: {
+                name: 'Về ICOGroup',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'about_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg' },
+                        { key: 'about_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Về ICOGroup' },
+                        { key: 'about_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Tổ chức Giáo dục và Nhân lực Quốc tế ICO' }
+                    ]},
+                    { title: '📜 Lịch Sử', icon: 'history', fields: [
+                        { key: 'about_history_title', label: 'Tiêu đề', type: 'text', defaultValue: 'Lịch Sử Hình Thành & Phát Triển' },
+                        { key: 'about_history_image', label: 'Ảnh lịch sử', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg' },
+                        { key: 'about_founded_date', label: 'Ngày thành lập', type: 'text', defaultValue: 'Thành lập 29/4/2008' },
+                        { key: 'about_history_desc', label: 'Mô tả lịch sử', type: 'textarea', defaultValue: 'Tổ chức Giáo dục và Nhân lực Quốc tế ICO được thành lập vào ngày 29/4/2008, hoạt động chuyên nghiệp trong lĩnh vực Du học và Xuất khẩu lao động.' }
+                    ]},
+                    { title: '🎯 Giá Trị Cốt Lõi', icon: 'star', fields: [
+                        { key: 'about_mission', label: 'Sứ mệnh', type: 'textarea', defaultValue: 'Nâng cao chất lượng nguồn nhân lực Việt Nam, tạo cầu nối giữa người lao động Việt Nam với các cơ hội việc làm và học tập quốc tế.' },
+                        { key: 'about_vision', label: 'Tầm nhìn', type: 'textarea', defaultValue: 'Trở thành tập đoàn phát triển nhân lực lớn nhất Việt Nam, vươn xa ra khu vực và thế giới.' },
+                        { key: 'about_core_values', label: 'Giá trị cốt lõi', type: 'text', defaultValue: 'Trí tuệ - Trung thực - Tận tâm' },
+                        { key: 'about_slogan', label: 'Slogan', type: 'text', defaultValue: 'ICOGroup - Nơi tạo dựng tương lai' }
+                    ]},
+                    { title: '📊 Thống Kê', icon: 'analytics', fields: [
+                        { key: 'about_stat_students', label: 'Số du học sinh', type: 'text', defaultValue: '17000' },
+                        { key: 'about_stat_workers', label: 'Số lao động', type: 'text', defaultValue: '38000' },
+                        { key: 'about_stat_provinces', label: 'Số tỉnh thành', type: 'text', defaultValue: '60' },
+                        { key: 'about_stat_partners', label: 'Số trường đối tác', type: 'text', defaultValue: '100' }
+                    ]}
+                ]
+            },
+            lienhe: {
+                name: 'Liên Hệ',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'contact_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_lienhe.jpg' },
+                        { key: 'contact_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Liên Hệ Với Chúng Tôi' },
+                        { key: 'contact_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chúng tôi luôn sẵn sàng hỗ trợ bạn' }
+                    ]},
+                    { title: '📍 Thông Tin Liên Hệ', icon: 'location_on', fields: [
+                        { key: 'contact_address', label: 'Địa chỉ', type: 'text', defaultValue: 'Số 360, đường Phan Đình Phùng, tỉnh Thái Nguyên' },
+                        { key: 'contact_hotline', label: 'Hotline', type: 'text', defaultValue: '0822.314.555' },
+                        { key: 'contact_email', label: 'Email', type: 'text', defaultValue: 'info@icogroup.vn' },
+                        { key: 'contact_working_hours', label: 'Giờ làm việc', type: 'textarea', defaultValue: 'Thứ 2 - Thứ 6: 8:00 - 17:30\nThứ 7: 8:00 - 12:00' }
+                    ]},
+                    { title: '🔗 Mạng Xã Hội', icon: 'share', fields: [
+                        { key: 'contact_facebook', label: 'Facebook URL', type: 'text', defaultValue: 'https://facebook.com/icogroup.vn' },
+                        { key: 'contact_zalo', label: 'Zalo URL', type: 'text', defaultValue: 'https://zalo.me/0822314555' }
+                    ]}
+                ]
+            },
+            hoatdong: {
+                name: 'Hoạt Động & Tin Tức',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'hoatdong_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_hoatdong.jpg' },
+                        { key: 'hoatdong_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Tin Tức & Hoạt Động' },
+                        { key: 'hoatdong_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Cập nhật những thông tin mới nhất từ ICOGroup' }
+                    ]}
+                ]
+            }
+        };
+
+        let visualCmsData = {};
+        let modifiedFields = new Set();
+
+        async function loadVisualPage() {
+            const page = document.getElementById('visualPageSelect').value;
+            const container = document.getElementById('visualSectionsContainer');
+            
+            if (!page || !pageConfigs[page]) {
+                container.innerHTML = `
+                    <div class="cms-empty">
+                        <span class="material-icons-outlined icon">touch_app</span>
+                        <h3>Chọn trang để bắt đầu chỉnh sửa</h3>
+                        <p>Chọn một trang từ dropdown ở trên để xem và chỉnh sửa nội dung</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="cms-loading">
+                    <div class="spinner"></div>
+                    <p>Đang tải nội dung trang ${pageConfigs[page].name}...</p>
+                </div>`;
+
+            try {
+                const response = await fetch(`${API_BASE}/get_content.php`);
+                const result = await response.json();
+                
+                visualCmsData = {};
+                // Handle both array response and wrapped response
+                const dataArray = Array.isArray(result) ? result : (result.data || []);
+                dataArray.forEach(item => {
+                    if (item.section_key && item.content_value) {
+                        visualCmsData[item.section_key] = item.content_value;
+                    }
+                });
+                console.log('Loaded CMS data:', visualCmsData); // Debug log
+
+                renderVisualSections(page);
+                modifiedFields.clear();
+            } catch (error) {
+                console.error('Error loading visual page:', error);
+                container.innerHTML = `<div class="cms-empty"><p>Lỗi tải dữ liệu</p></div>`;
+            }
+        }
+
+        function renderVisualSections(page) {
+            const config = pageConfigs[page];
+            const container = document.getElementById('visualSectionsContainer');
+            
+            let html = '';
+            
+            config.sections.forEach((section, sIdx) => {
+                html += `
+                    <div class="cms-section-card" id="section-${sIdx}">
+                        <div class="cms-section-header" onclick="toggleSection(${sIdx})">
+                            <h3><span class="icon">${section.title.split(' ')[0]}</span> ${section.title.substring(section.title.indexOf(' ') + 1)}</h3>
+                            <span class="material-icons-outlined toggle-icon">expand_more</span>
+                        </div>
+                        <div class="cms-section-body">`;
+                
+                section.fields.forEach(field => {
+                    const value = visualCmsData[field.key] || field.defaultValue || '';
+                    
+                    if (field.type === 'image') {
+                        html += `
+                            <div class="cms-field-group">
+                                <label class="cms-field-label">${field.label}</label>
+                                <div class="cms-image-field">
+                                    <div class="cms-image-preview" id="preview-${field.key}">
+                                        ${value ? `<img src="${value}" alt="Preview">` : '<span class="placeholder">Chưa có ảnh</span>'}
+                                    </div>
+                                    <div class="cms-image-actions">
+                                        <input type="text" class="cms-field-input cms-image-url" 
+                                            data-key="${field.key}" 
+                                            value="${escapeHtml(value)}" 
+                                            placeholder="URL hình ảnh hoặc upload bên dưới"
+                                            onchange="markModified(this); updateImagePreview('${field.key}', this.value)">
+                                        <label class="cms-image-upload">
+                                            <span class="material-icons-outlined">cloud_upload</span> Upload ảnh
+                                            <input type="file" accept="image/*" style="display:none" onchange="uploadVisualImage('${field.key}', this)">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>`;
+                    } else if (field.type === 'textarea') {
+                        html += `
+                            <div class="cms-field-group">
+                                <label class="cms-field-label">${field.label}</label>
+                                <textarea class="cms-field-input" data-key="${field.key}" 
+                                    placeholder="Nhập nội dung..." 
+                                    onchange="markModified(this)">${escapeHtml(value)}</textarea>
+                            </div>`;
+                    } else {
+                        html += `
+                            <div class="cms-field-group">
+                                <label class="cms-field-label">${field.label}</label>
+                                <input type="text" class="cms-field-input" data-key="${field.key}" 
+                                    value="${escapeHtml(value)}" 
+                                    placeholder="Nhập nội dung..."
+                                    onchange="markModified(this)">
+                            </div>`;
+                    }
+                });
+                
+                html += `</div></div>`;
+            });
+
+            html += `
+                <div class="cms-save-bar" id="saveBar" style="display: none;">
+                    <div class="changes-info">
+                        <span class="dot"></span>
+                        <span id="changesCount">0 thay đổi chưa lưu</span>
+                    </div>
+                    <button class="btn btn-primary btn-save-all" onclick="saveAllVisualChanges()">
+                        <span class="material-icons-outlined">save</span>
+                        Lưu tất cả thay đổi
+                    </button>
+                </div>`;
+
+            container.innerHTML = html;
+        }
+
+        function toggleSection(idx) {
+            const card = document.getElementById(`section-${idx}`);
+            card.classList.toggle('collapsed');
+        }
+
+        function markModified(input) {
+            input.classList.add('modified');
+            modifiedFields.add(input.dataset.key);
+            updateSaveBar();
+        }
+
+        function updateSaveBar() {
+            const saveBar = document.getElementById('saveBar');
+            const count = modifiedFields.size;
+            if (count > 0) {
+                saveBar.style.display = 'flex';
+                document.getElementById('changesCount').textContent = `${count} thay đổi chưa lưu`;
+            } else {
+                saveBar.style.display = 'none';
+            }
+        }
+
+        function updateImagePreview(key, url) {
+            const preview = document.getElementById(`preview-${key}`);
+            if (url) {
+                preview.innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>Lỗi ảnh</span>'">`;
+            } else {
+                preview.innerHTML = '<span class="placeholder">Chưa có ảnh</span>';
+            }
+        }
+
+        async function uploadVisualImage(key, input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const formData = new FormData();
+            formData.append('image', input.files[0]);
+            
+            try {
+                const response = await fetch(`${API_BASE}/upload_image.php`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': CSRF_TOKEN },
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.status && result.url) {
+                    const urlInput = document.querySelector(`input[data-key="${key}"]`);
+                    urlInput.value = result.url;
+                    markModified(urlInput);
+                    updateImagePreview(key, result.url);
+                    showToast('Upload thành công!', 'success');
+                } else {
+                    throw new Error(result.message || 'Upload thất bại');
+                }
+            } catch (error) {
+                showToast('Lỗi upload: ' + error.message, 'error');
+            }
+        }
+
+        async function saveAllVisualChanges() {
+            const inputs = document.querySelectorAll('.cms-field-input.modified');
+            if (inputs.length === 0) {
+                showToast('Không có thay đổi để lưu', 'error');
+                return;
+            }
+
+            const saveBtn = document.querySelector('.btn-save-all');
+            saveBtn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:2px;"></span> Đang lưu...';
+            saveBtn.disabled = true;
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const input of inputs) {
+                const key = input.dataset.key;
+                const value = input.value;
+
+                try {
+                    const response = await fetch(`${API_BASE}/save_content.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': CSRF_TOKEN
+                        },
+                        body: JSON.stringify({
+                            section_key: key,
+                            content_value: value
+                        })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status) {
+                        input.classList.remove('modified');
+                        modifiedFields.delete(key);
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    errorCount++;
+                }
+            }
+
+            saveBtn.innerHTML = '<span class="material-icons-outlined">save</span> Lưu tất cả thay đổi';
+            saveBtn.disabled = false;
+            updateSaveBar();
+
+            if (errorCount === 0) {
+                showToast(`Đã lưu ${successCount} thay đổi thành công!`, 'success');
+            } else {
+                showToast(`Lưu ${successCount} thành công, ${errorCount} thất bại`, 'error');
+            }
+        }
+
+        // ============================================
+        // ANALYTICS CHARTS
+        // ============================================
+        let dailyChart, monthlyChart, programChart, countryChart;
+
+        async function loadAnalyticsCharts() {
+            await Promise.all([
+                loadDailyChart(),
+                loadMonthlyChart(),
+                loadProgramChart(),
+                loadCountryChart()
+            ]);
+        }
+
+        async function loadDailyChart() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics_api.php?type=daily&days=30`);
+                const result = await response.json();
+                
+                if (result.status && result.data) {
+                    const ctx = document.getElementById('dailyChart');
+                    if (!ctx) return;
+
+                    if (dailyChart) dailyChart.destroy();
+                    
+                    dailyChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: result.data.map(d => d.label),
+                            datasets: [{
+                                label: 'Đăng ký',
+                                data: result.data.map(d => d.count),
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1 }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading daily chart:', error);
+            }
+        }
+
+        async function loadMonthlyChart() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics_api.php?type=monthly&months=12`);
+                const result = await response.json();
+                
+                if (result.status && result.data) {
+                    const ctx = document.getElementById('monthlyChart');
+                    if (!ctx) return;
+
+                    if (monthlyChart) monthlyChart.destroy();
+                    
+                    monthlyChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: result.data.map(d => d.label),
+                            datasets: [{
+                                label: 'Đăng ký',
+                                data: result.data.map(d => d.count),
+                                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                                borderColor: '#10B981',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1 }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading monthly chart:', error);
+            }
+        }
+
+        async function loadProgramChart() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics_api.php?type=by_program`);
+                const result = await response.json();
+                
+                if (result.status && result.data && result.data.length > 0) {
+                    const ctx = document.getElementById('programChart');
+                    if (!ctx) return;
+
+                    if (programChart) programChart.destroy();
+                    
+                    const colors = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+                    
+                    programChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: result.data.map(d => d.program),
+                            datasets: [{
+                                data: result.data.map(d => d.count),
+                                backgroundColor: colors.slice(0, result.data.length),
+                                borderWidth: 2,
+                                borderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: { usePointStyle: true, padding: 15 }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading program chart:', error);
+            }
+        }
+
+        async function loadCountryChart() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics_api.php?type=by_country`);
+                const result = await response.json();
+                
+                if (result.status && result.data && result.data.length > 0) {
+                    const ctx = document.getElementById('countryChart');
+                    if (!ctx) return;
+
+                    if (countryChart) countryChart.destroy();
+                    
+                    const colors = ['#F59E0B', '#10B981', '#2563EB', '#EF4444', '#8B5CF6', '#EC4899'];
+                    
+                    countryChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: result.data.map(d => d.country),
+                            datasets: [{
+                                data: result.data.map(d => d.count),
+                                backgroundColor: colors.slice(0, result.data.length),
+                                borderWidth: 2,
+                                borderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: { usePointStyle: true, padding: 15 }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading country chart:', error);
+            }
+        }
+
+        // Load charts when switching to dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Override showSection if it exists
+            if (typeof showSection === 'function') {
+                const originalShowSection = showSection;
+                window.showSection = function(sectionId) {
+                    originalShowSection(sectionId);
+                    if (sectionId === 'dashboard') {
+                        setTimeout(loadAnalyticsCharts, 100);
+                    }
+                };
+            }
+            
+            // Load charts on initial page load if dashboard is active
+            if (document.querySelector('#dashboard.active')) {
+                setTimeout(loadAnalyticsCharts, 500);
+            }
+        });
+    </script>
+</body>
+
+</html>

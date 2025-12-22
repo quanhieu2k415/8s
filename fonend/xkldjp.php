@@ -1,11 +1,17 @@
 <?php
+include_once 'includes/content_helper.php';
 $pageTitle = "XKLĐ Nhật Bản";
 $pageDescription = "Xuất khẩu lao động Nhật Bản - Chương trình thực tập sinh kỹ năng với thu nhập 30-40 triệu/tháng.";
 include 'includes/header.php';
 ?>
 
 <!-- PAGE BANNER -->
-<section class="page-banner" style="background: linear-gradient(135deg, #BC002D, #fff);">
+<!-- PAGE BANNER -->
+<?php
+$header_bg = get_image('xkldjp_header_bg', '');
+$header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #BC002D, #fff);";
+?>
+<section class="page-banner" style="<?php echo $header_style; ?>">
     <h1>Xuất Khẩu Lao Động Nhật Bản 🇯🇵</h1>
     <p>Chương trình thực tập sinh kỹ năng - Thu nhập cao, môi trường làm việc tốt</p>
     <div class="breadcrumb">

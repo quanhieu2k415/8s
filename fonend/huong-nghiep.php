@@ -1,13 +1,18 @@
 <?php
+include_once 'includes/content_helper.php';
 $pageTitle = "Hướng Nghiệp - ICOCareer";
 $pageDescription = "ICOCareer - Chương trình hướng nghiệp của ICOGroup. Tư vấn du học, lao động quốc tế, định hướng nghề nghiệp cho học viên.";
 include 'includes/header.php';
 ?>
 
 <!-- PAGE BANNER -->
-<section class="page-banner">
-    <h1>ICOCareer - Hướng Nghiệp</h1>
-    <p>Định hướng tương lai, khai phá tiềm năng</p>
+<?php
+$header_bg = get_image('huongnghiep_header_bg', '');
+$header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "";
+?>
+<section class="page-banner" style="<?php echo $header_style; ?>">
+    <h1><?php echo get_text('huongnghiep_title', 'ICOCareer - Hướng Nghiệp'); ?></h1>
+    <p><?php echo get_text('huongnghiep_subtitle', 'Định hướng tương lai, khai phá tiềm năng'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
         <span>/</span>
@@ -65,23 +70,23 @@ include 'includes/header.php';
 <section class="section programs-section">
     <div class="container">
         <div class="section-header">
-            <h2>Chương Trình Hướng Nghiệp</h2>
-            <p>Ba hướng đi chính dành cho học viên ICOGroup</p>
+            <h2><?php echo get_text('huongnghiep_programs_title', 'Chương Trình Hướng Nghiệp'); ?></h2>
+            <p><?php echo get_text('huongnghiep_programs_subtitle', 'Ba hướng đi chính dành cho học viên ICOGroup'); ?></p>
         </div>
         
         <div class="programs-grid">
             <div class="program-card">
                 <div class="program-image">
-                    <img src="https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png" alt="Du học">
+                    <img src="<?php echo get_image('huongnghiep_program_1_img', 'https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png'); ?>" alt="Du học">
                 </div>
                 <div class="program-content">
-                    <span class="program-tag">Du học</span>
-                    <h3>Du Học Quốc Tế</h3>
-                    <p>Chương trình du học tại Nhật Bản, Đức, Hàn Quốc, Đài Loan với học bổng hấp dẫn và hỗ trợ visa toàn diện.</p>
+                    <span class="program-tag"><?php echo get_text('huongnghiep_program_1_tag', 'Du học'); ?></span>
+                    <h3><?php echo get_text('huongnghiep_program_1_title', 'Du Học Quốc Tế'); ?></h3>
+                    <p><?php echo get_text('huongnghiep_program_1_desc', 'Chương trình du học tại Nhật Bản, Đức, Hàn Quốc, Đài Loan với học bổng hấp dẫn và hỗ trợ visa toàn diện.'); ?></p>
                     <ul style="margin: 15px 0; color: #666; font-size: 14px;">
-                        <li>✓ Học bổng lên đến 100%</li>
-                        <li>✓ Hỗ trợ visa, ký túc xá</li>
-                        <li>✓ Việc làm thêm hợp pháp</li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_1_benefit_1', 'Học bổng lên đến 100%'); ?></li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_1_benefit_2', 'Hỗ trợ visa, ký túc xá'); ?></li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_1_benefit_3', 'Việc làm thêm hợp pháp'); ?></li>
                     </ul>
                     <a href="nhat.php" class="program-link">
                         Xem chi tiết
@@ -92,16 +97,16 @@ include 'includes/header.php';
             
             <div class="program-card">
                 <div class="program-image">
-                    <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Lao động quốc tế">
+                    <img src="<?php echo get_image('huongnghiep_program_2_img', 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg'); ?>" alt="Lao động quốc tế">
                 </div>
                 <div class="program-content">
-                    <span class="program-tag">Lao động</span>
-                    <h3>Lao Động Quốc Tế</h3>
-                    <p>Chương trình xuất khẩu lao động tại Nhật Bản, Hàn Quốc, Đài Loan, Đức với thu nhập cao và cam kết việc làm.</p>
+                    <span class="program-tag"><?php echo get_text('huongnghiep_program_2_tag', 'Lao động'); ?></span>
+                    <h3><?php echo get_text('huongnghiep_program_2_title', 'Lao Động Quốc Tế'); ?></h3>
+                    <p><?php echo get_text('huongnghiep_program_2_desc', 'Chương trình xuất khẩu lao động tại Nhật Bản, Hàn Quốc, Đài Loan, Đức với thu nhập cao và cam kết việc làm.'); ?></p>
                     <ul style="margin: 15px 0; color: #666; font-size: 14px;">
-                        <li>✓ Thu nhập 30-50 triệu/tháng</li>
-                        <li>✓ Hợp đồng lao động rõ ràng</li>
-                        <li>✓ Bảo hiểm y tế đầy đủ</li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_2_benefit_1', 'Thu nhập 30-50 triệu/tháng'); ?></li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_2_benefit_2', 'Hợp đồng lao động rõ ràng'); ?></li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_2_benefit_3', 'Bảo hiểm y tế đầy đủ'); ?></li>
                     </ul>
                     <a href="xkldjp.php" class="program-link">
                         Xem chi tiết
@@ -112,16 +117,16 @@ include 'includes/header.php';
             
             <div class="program-card">
                 <div class="program-image">
-                    <img src="https://icogroup.vn/vnt_upload/news/11_2024/43_NAM_NGAY_NHA_GIAO_VN_1.jpg" alt="Việc làm trong nước">
+                    <img src="<?php echo get_image('huongnghiep_program_3_img', 'https://icogroup.vn/vnt_upload/news/11_2024/43_NAM_NGAY_NHA_GIAO_VN_1.jpg'); ?>" alt="Việc làm trong nước">
                 </div>
                 <div class="program-content">
-                    <span class="program-tag">Việc làm</span>
-                    <h3>Lao Động Trong Nước</h3>
-                    <p>Kết nối việc làm tại các doanh nghiệp trong nước, đặc biệt là doanh nghiệp FDI với chế độ đãi ngộ tốt.</p>
+                    <span class="program-tag"><?php echo get_text('huongnghiep_program_3_tag', 'Việc làm'); ?></span>
+                    <h3><?php echo get_text('huongnghiep_program_3_title', 'Lao Động Trong Nước'); ?></h3>
+                    <p><?php echo get_text('huongnghiep_program_3_desc', 'Kết nối việc làm tại các doanh nghiệp trong nước, đặc biệt là doanh nghiệp FDI với chế độ đãi ngộ tốt.'); ?></p>
                     <ul style="margin: 15px 0; color: #666; font-size: 14px;">
-                        <li>✓ Doanh nghiệp Nhật, Hàn tại VN</li>
-                        <li>✓ Mức lương cạnh tranh</li>
-                        <li>✓ Cơ hội thăng tiến</li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_3_benefit_1', 'Doanh nghiệp Nhật, Hàn tại VN'); ?></li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_3_benefit_2', 'Mức lương cạnh tranh'); ?></li>
+                        <li>✓ <?php echo get_text('huongnghiep_program_3_benefit_3', 'Cơ hội thăng tiến'); ?></li>
                     </ul>
                     <a href="lienhe.php" class="program-link">
                         Liên hệ tư vấn

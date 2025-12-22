@@ -1,0 +1,19 @@
+{
+    "name": "icogroup/web8s",
+    "description": "ICOGroup Website Refactor",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.0"
+    },
+    "suggest": {
+        "phpoffice/phpspreadsheet": "For Excel export functionality"
+    },
+    "scripts": {
+        "test": "echo \"No tests configured yet\""
+    }
+}

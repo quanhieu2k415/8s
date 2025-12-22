@@ -1285,9 +1285,15 @@
     // REGISTRATION FORM (Enhanced)
     // ============================================
     const RegistrationForm = {
+        isSubmitting: false,
+
         init() {
             const form = document.getElementById('userRegistrationForm');
             if (!form) return;
+
+            // Prevent binding multiple times
+            if (form.hasAttribute('data-submit-bound')) return;
+            form.setAttribute('data-submit-bound', 'true');
 
             this.bindCountryToggle();
             this.bindFormSubmit(form);
@@ -1305,8 +1311,16 @@
         },
 
         bindFormSubmit(form) {
+            const self = this;
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // Prevent double submission
+                if (self.isSubmitting) {
+                    console.log('Already submitting, ignoring duplicate');
+                    return;
+                }
+                self.isSubmitting = true;
 
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
@@ -1339,7 +1353,7 @@
                 };
 
                 try {
-                    const res = await fetch('/web8s/backend_api/insert.php', {
+                    const res = await fetch('../backend_api/insert.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
@@ -1361,6 +1375,7 @@
 
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
+                self.isSubmitting = false; // Reset for next submission
             });
         }
     };

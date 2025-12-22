@@ -705,7 +705,7 @@ nav ul li.has-submenu:hover>.submenu {
 }
 
 .mobile-menu {
-    display: none;
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
@@ -717,6 +717,7 @@ nav ul li.has-submenu:hover>.submenu {
     box-shadow: var(--shadow-hard);
     transform: translateX(-100%);
     transition: transform var(--transition-normal);
+    overflow-y: auto;
 }
 
 .mobile-menu.active {

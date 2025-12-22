@@ -1,11 +1,18 @@
 <?php
-// Statistics API - ICOGroup
+/**
+ * Statistics API - ICOGroup
+ * Returns registration statistics and custom statistics
+ */
+
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, PUT');
 header('Access-Control-Allow-Headers: Content-Type');
 
-require_once 'db_config.php';
+require_once __DIR__ . '/../autoloader.php';
+
+use App\Repositories\RegistrationRepository;
+use App\Core\Database;
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -21,50 +28,52 @@ switch ($method) {
 }
 
 function getStats() {
-    global $conn;
-    
-    $result = $conn->query("SELECT * FROM statistics ORDER BY id");
-    $stats = [];
-    
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $stats[] = $row;
-        }
+    try {
+        $registrationRepo = new RegistrationRepository();
+        $stats = $registrationRepo->getStats();
+        
+        // Return in format expected by dashboard
+        echo json_encode($stats);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => false,
+            'message' => 'Lỗi lấy thống kê: ' . $e->getMessage(),
+            'total' => 0,
+            'today' => 0,
+            'week' => 0,
+            'month' => 0
+        ]);
     }
-    
-    echo json_encode($stats);
 }
 
 function updateStats() {
-    global $conn;
-    
-    $data = json_decode(file_get_contents("php://input"), true);
-    
-    if (empty($data['stat_key']) || !isset($data['stat_value'])) {
-        echo json_encode(['status' => false, 'message' => 'Thiếu thông tin']);
-        return;
-    }
-    
-    $key = $data['stat_key'];
-    $value = intval($data['stat_value']);
-    $label = isset($data['stat_label']) ? $data['stat_label'] : null;
-    
-    if ($label) {
-        $stmt = $conn->prepare("UPDATE statistics SET stat_value = ?, stat_label = ? WHERE stat_key = ?");
-        $stmt->bind_param("iss", $value, $label, $key);
-    } else {
-        $stmt = $conn->prepare("UPDATE statistics SET stat_value = ? WHERE stat_key = ?");
-        $stmt->bind_param("is", $value, $key);
-    }
-    
-    if ($stmt->execute()) {
+    try {
+        $db = Database::getInstance();
+        
+        $data = json_decode(file_get_contents("php://input"), true);
+        
+        if (empty($data['stat_key']) || !isset($data['stat_value'])) {
+            echo json_encode(['status' => false, 'message' => 'Thiếu thông tin']);
+            return;
+        }
+        
+        $key = $data['stat_key'];
+        $value = (int) $data['stat_value'];
+        $label = $data['stat_label'] ?? null;
+        
+        if ($label) {
+            $sql = "UPDATE statistics SET stat_value = :value, stat_label = :label WHERE stat_key = :key";
+            $db->query($sql, [':value' => $value, ':label' => $label, ':key' => $key]);
+        } else {
+            $sql = "UPDATE statistics SET stat_value = :value WHERE stat_key = :key";
+            $db->query($sql, [':value' => $value, ':key' => $key]);
+        }
+        
         echo json_encode(['status' => true, 'message' => 'Cập nhật thống kê thành công']);
-    } else {
-        echo json_encode(['status' => false, 'message' => 'Lỗi: ' . $stmt->error]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['status' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
     }
-    
-    $stmt->close();
 }
 
-closeConnection($conn);
-?>

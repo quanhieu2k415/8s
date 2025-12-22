@@ -1,11 +1,17 @@
 <?php
+include_once 'includes/content_helper.php';
 $pageTitle = "Liên hệ";
 $pageDescription = "Liên hệ với ICOGroup - Hotline: 0822.314.555. Địa chỉ: Số 360, đường Phan Đình Phùng, tỉnh Thái Nguyên.";
 include 'includes/header.php';
 ?>
 
 <!-- PAGE BANNER -->
-<section class="page-banner">
+<!-- PAGE BANNER -->
+<?php
+$header_bg = get_image('contact_header_bg', '');
+$header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "";
+?>
+<section class="page-banner" style="<?php echo $header_style; ?>">
     <h1>Liên Hệ Với Chúng Tôi</h1>
     <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
     <div class="breadcrumb">

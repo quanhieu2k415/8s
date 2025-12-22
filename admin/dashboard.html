@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -774,6 +774,10 @@
                 <span class="material-icons-outlined">article</span>
                 <span>Tin tức</span>
             </a>
+            <a href="#" data-section="cms">
+                <span class="material-icons-outlined">edit_note</span>
+                <span>Quản lý nội dung</span>
+            </a>
             <a href="#" data-section="stats">
                 <span class="material-icons-outlined">analytics</span>
                 <span>Thống kê</span>
@@ -856,9 +860,28 @@
         <div class="table-container" id="registrationsTable">
             <div class="table-header">
                 <h2>📋 Danh sách đăng ký tư vấn</h2>
-                <div class="search-box">
-                    <span class="material-icons-outlined">search</span>
-                    <input type="text" placeholder="Tìm kiếm..." id="searchInput" onkeyup="searchTable()">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div class="search-box">
+                        <span class="material-icons-outlined">search</span>
+                        <input type="text" placeholder="Tìm kiếm..." id="searchInput" onkeyup="searchTable()">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">Từ:</label>
+                        <input type="date" id="dateFrom"
+                            style="padding: 8px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 13px;"
+                            onchange="filterByDate()">
+                        <label style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">Đến:</label>
+                        <input type="date" id="dateTo"
+                            style="padding: 8px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 13px;"
+                            onchange="filterByDate()">
+                        <button class="btn btn-outline" onclick="clearDateFilter()" style="padding: 8px 12px;">
+                            <span class="material-icons-outlined" style="font-size: 16px;">clear</span>
+                        </button>
+                    </div>
+                    <button class="btn btn-success" onclick="exportByDateRange()" style="padding: 8px 14px;">
+                        <span class="material-icons-outlined" style="font-size: 16px;">download</span>
+                        Xuất Excel theo ngày
+                    </button>
                 </div>
             </div>
             <div id="tableContent">
@@ -884,6 +907,58 @@
                         <div class="spinner"></div>
                         <p>Đang tải tin tức...</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CMS Section -->
+        <div class="section-panel" id="cmsSection">
+            <div class="table-container">
+                <div class="table-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>📝 Quản lý Nội dung Website</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn btn-outline active-tab" id="tabImages" onclick="switchCMSTab('images')">
+                                <span class="material-icons-outlined">image</span> Hình ảnh
+                            </button>
+                            <button class="btn btn-outline" id="tabTexts" onclick="switchCMSTab('texts')">
+                                <span class="material-icons-outlined">text_fields</span> Văn bản
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        style="display: flex; gap: 12px; background: var(--bg-primary); padding: 12px; border-radius: var(--radius-md);">
+                        <select id="cmsPageFilter" class="form-select" onchange="filterCMS()"
+                            style="padding: 8px; border-radius: 4px; border: 1px solid var(--border-light);">
+                            <option value="all">Tất cả trang</option>
+                            <option value="global">Toàn trang (Global)</option>
+                            <option value="index">Trang chủ</option>
+                            <option value="nhat">Du học Nhật</option>
+                            <option value="duc">Du học Đức</option>
+                            <option value="han">Du học Hàn</option>
+                            <option value="xkldjp">XKLĐ Nhật</option>
+                        </select>
+                        <select id="cmsSectionFilter" class="form-select" onchange="filterCMS()"
+                            style="padding: 8px; border-radius: 4px; border: 1px solid var(--border-light);">
+                            <option value="all">Tất cả Section</option>
+                            <option value="header">Header</option>
+                            <option value="hero">Banner/Hero</option>
+                            <option value="about">Giới thiệu</option>
+                            <option value="ecosystem">Hệ sinh thái</option>
+                            <option value="programs">Chương trình</option>
+                            <option value="footer">Footer</option>
+                        </select>
+                        <div style="flex:1"></div>
+                        <button class="btn btn-primary" onclick="openAddCMSModal()">
+                            <span class="material-icons-outlined">add</span>
+                            Thêm mới
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cmsContent" style="padding: 20px;">
+                    <!-- CMS Content loaded here -->
                 </div>
             </div>
         </div>
@@ -1137,6 +1212,7 @@
                     'dashboard': '📊 Dashboard',
                     'registrations': '👥 Đăng ký tư vấn',
                     'news': '📰 Quản lý Tin tức',
+                    'cms': '📝 Quản lý Nội dung',
                     'stats': '📈 Thống kê',
                     'settings': '⚙️ Cài đặt'
                 };
@@ -1149,6 +1225,9 @@
                 } else if (section === 'news') {
                     document.getElementById('newsSection').classList.add('active');
                     loadNews();
+                } else if (section === 'cms') {
+                    document.getElementById('cmsSection').classList.add('active');
+                    loadCMS('images'); // Default tab
                 } else if (section === 'stats') {
                     document.getElementById('statsGrid').style.display = 'grid';
                     document.getElementById('statsSection').classList.add('active');
@@ -1180,11 +1259,321 @@
                 showToast('Không thể kết nối đến server!', 'error');
                 document.getElementById('tableContent').innerHTML = `
                     <div class="empty-state">
-                        <span class="material-icons-outlined">error</span>
+                        <span class="material-icons-outlined">error_outline</span>
                         <h3>Lỗi kết nối</h3>
-                        <p>Vui lòng kiểm tra XAMPP đã chạy chưa</p>
-                    </div>
+                        <p>Vui lòng kiểm tra API server.</p>
+                    </div>`;
+            }
+        }
+
+        // ==================== CMS LOGIC ====================
+        let currentCMSTab = 'images';
+        let allCMSData = [];
+
+        function switchCMSTab(tab) {
+            currentCMSTab = tab;
+            // Update buttons
+            document.getElementById('tabImages').className = `btn btn-outline ${tab === 'images' ? 'active-tab' : ''}`;
+            document.getElementById('tabTexts').className = `btn btn-outline ${tab === 'texts' ? 'active-tab' : ''}`;
+
+            // Highlight active tab style
+            if (tab === 'images') {
+                document.getElementById('tabImages').style.borderColor = 'var(--primary)';
+                document.getElementById('tabImages').style.color = 'var(--primary)';
+                document.getElementById('tabTexts').style.borderColor = 'var(--border-medium)';
+                document.getElementById('tabTexts').style.color = 'var(--text-secondary)';
+            } else {
+                document.getElementById('tabTexts').style.borderColor = 'var(--primary)';
+                document.getElementById('tabTexts').style.color = 'var(--primary)';
+                document.getElementById('tabImages').style.borderColor = 'var(--border-medium)';
+                document.getElementById('tabImages').style.color = 'var(--text-secondary)';
+            }
+
+            loadCMS(tab);
+        }
+
+        async function loadCMS(type) {
+            const container = document.getElementById('cmsContent');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Đang tải dữ liệu...</p></div>';
+
+            try {
+                const endpoint = type === 'images' ? 'image_api.php' : 'text_api.php';
+                const res = await fetch(API_BASE + endpoint);
+                const result = await res.json();
+
+                if (result.status) {
+                    allCMSData = result.data;
+                    filterCMS();
+                } else {
+                    container.innerHTML = `<p class="empty-state">Lỗi: ${result.message}</p>`;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p class="empty-state">Lỗi kết nối server</p>`;
+            }
+        }
+
+        function filterCMS() {
+            const pageFilter = document.getElementById('cmsPageFilter').value;
+            const sectionFilter = document.getElementById('cmsSectionFilter').value;
+
+            const filtered = allCMSData.filter(item => {
+                const matchPage = pageFilter === 'all' || item.page === pageFilter;
+                const matchSection = sectionFilter === 'all' || item.section === sectionFilter;
+                return matchPage && matchSection;
+            });
+
+            renderCMS(filtered);
+        }
+
+        function renderCMS(data) {
+            const container = document.getElementById('cmsContent');
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons-outlined">search_off</span>
+                        <h3>Không tìm thấy nội dung</h3>
+                        <p>Thử thay đổi bộ lọc hoặc thêm nội dung mới.</p>
+                    </div>`;
+                return;
+            }
+
+            if (currentCMSTab === 'images') {
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">';
+                data.forEach(item => {
+                    html += `
+                        <div style="border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; background: #fff;">
+                            <div style="height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <img src="${item.image_url}" alt="${item.alt_text}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                            </div>
+                            <div style="padding: 12px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:8px">
+                                    <span class="badge badge-info">${item.page}</span>
+                                    <span class="badge badge-warning">${item.section}</span>
+                                </div>
+                                <h4 style="font-size: 14px; margin-bottom: 4px; word-break: break-all;">${item.image_key}</h4>
+                                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; height: 32px; overflow: hidden;">${item.alt_text || 'Chưa có mô tả'}</p>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" style="flex:1; padding: 6px; font-size: 13px;" onclick="openCMSEditModal('${item.id}', 'images')">
+                                        <span class="material-icons-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">edit</span> Sửa
+                                    </button>
+                                    <button class="btn btn-danger" style="padding: 6px;" onclick="deleteCMSItem('${item.image_key}', 'images')"><span class="material-icons-outlined" style="font-size:16px">delete</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } else {
+                let html = `
+                    <table style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Nội dung</th>
+                                <th>Loại</th>
+                                <th>Trang/Section</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
+                data.forEach(item => {
+                    const valuePreview = item.text_value.length > 50 ? item.text_value.substring(0, 50) + '...' : item.text_value;
+                    html += `
+                        <tr>
+                            <td><strong>${item.text_key}</strong></td>
+                            <td>${valuePreview}</td>
+                            <td><span class="badge">${item.text_type}</span></td>
+                            <td>${item.page} / ${item.section}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn edit" onclick="openCMSEditModal('${item.id}', 'texts')">
+                                        <span class="material-icons-outlined">edit</span>
+                                    </button>
+                                    <button class="action-btn delete" onclick="deleteCMSItem('${item.text_key}', 'texts')">
+                                        <span class="material-icons-outlined">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            }
+        }
+
+        function openAddCMSModal() {
+            document.getElementById('cmsForm').reset();
+            document.getElementById('cms-id').value = '';
+            document.getElementById('cms-key').readOnly = false;
+            document.getElementById('cmsModalTitle').textContent = 'Thêm Nội dung Mới';
+            document.getElementById('cms-type').value = currentCMSTab;
+
+            // Show/Hide fields
+            if (currentCMSTab === 'images') {
+                document.getElementById('cms-image-fields').style.display = 'block';
+                document.getElementById('cms-text-fields').style.display = 'none';
+                document.getElementById('cms-image-preview').innerHTML = '<span style="color: #999">Preview</span>';
+            } else {
+                document.getElementById('cms-image-fields').style.display = 'none';
+                document.getElementById('cms-text-fields').style.display = 'block';
+            }
+
+            document.getElementById('cmsModal').style.display = 'block';
+        }
+
+        function closeCMSModal() {
+            document.getElementById('cmsModal').style.display = 'none';
+        }
+
+        function findCMSItem(id, type) {
+            const keyProp = type === 'images' ? 'image_key' : 'text_key'; // Fallback lookup by key not implemented, using ID
+            // Note: allCMSData is a flat array, we can use find
+            // However, ID might be string or int
+            return allCMSData.find(i => i.id == id);
+        }
+
+        function editCMSItem(id, type) {
+            const item = findCMSItem(id, type);
+            if (!item) {
+                console.error("Item not found", id);
+                return;
+            }
+
+            document.getElementById('cmsForm').reset();
+            document.getElementById('cms-type').value = type;
+            document.getElementById('cms-id').value = item.id;
+
+            document.getElementById('cms-key').value = type === 'images' ? item.image_key : item.text_key;
+            document.getElementById('cms-key').readOnly = true; // Key cannot be changed
+            document.getElementById('cms-page').value = item.page;
+            document.getElementById('cms-section').value = item.section;
+
+            document.getElementById('cmsModalTitle').textContent = `Sửa ${type === 'images' ? 'Hình ảnh' : 'Văn bản'}`;
+
+            if (type === 'images') {
+                document.getElementById('cms-image-fields').style.display = 'block';
+                document.getElementById('cms-text-fields').style.display = 'none';
+                document.getElementById('cms-image-url').value = item.image_url;
+                document.getElementById('cms-alt').value = item.alt_text;
+                updateImagePreview(item.image_url);
+            } else {
+                document.getElementById('cms-image-fields').style.display = 'none';
+                document.getElementById('cms-text-fields').style.display = 'block';
+                document.getElementById('cms-value').value = item.text_value;
+                document.getElementById('cms-text-type').value = item.text_type;
+            }
+
+            document.getElementById('cmsModal').style.display = 'block';
+        }
+
+        // Listen to image URL changes for preview
+        document.getElementById('cms-image-url').addEventListener('input', function () {
+            updateImagePreview(this.value);
+        });
+
+        function updateImagePreview(url) {
+            const preview = document.getElementById('cms-image-preview');
+            if (url) {
+                preview.innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:contain;">`;
+            } else {
+                preview.innerHTML = '<span style="color: #999">Preview</span>';
+            }
+        }
+
+        async function uploadCMSImage(input) {
+            if (input.files && input.files[0]) {
+                const formData = new FormData();
+                formData.append('image', input.files[0]);
+
+                try {
+                    const res = await fetch(API_BASE + 'upload_image.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+
+                    if (data.status) {
+                        document.getElementById('cms-image-url').value = data.url;
+                        updateImagePreview(data.url);
+                        showToast('Upload ảnh thành công!', 'success');
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Lỗi upload file', 'error');
+                }
+            }
+        }
+
+        document.getElementById('cmsForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            const type = data.type; // images or texts
+
+            const endpoint = type === 'images' ? 'image_api.php' : 'text_api.php';
+
+            // Map fields based on type
+            const payload = {
+                section: data.section,
+                page: data.page
+            };
+
+            if (type === 'images') {
+                payload.image_key = data.key;
+                payload.image_url = data.image_url;
+                payload.alt_text = data.alt_text;
+            } else {
+                payload.text_key = data.key;
+                payload.text_value = data.text_value;
+                payload.text_type = data.text_type;
+            }
+
+            try {
+                const res = await fetch(API_BASE + endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (result.status) {
+                    showToast('Lưu thành công!', 'success');
+                    closeCMSModal();
+                    loadCMS(type);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi lưu dữ liệu', 'error');
+            }
+        });
+
+        async function deleteCMSItem(key, type) {
+            if (!confirm('Bạn có chắc chắn muốn xóa mục này?')) return;
+
+            const endpoint = type === 'images' ? 'image_api.php' : 'text_api.php';
+            try {
+                const res = await fetch(`${API_BASE}${endpoint}?key=${key}`, {
+                    method: 'DELETE'
+                });
+                const result = await res.json();
+
+                if (result.status) {
+                    showToast('Xóa thành công!', 'success');
+                    loadCMS(type);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi xóa dữ liệu', 'error');
             }
         }
 
@@ -1196,16 +1585,17 @@
                         <h3>Chưa có dữ liệu</h3>
                         <p>Chưa có đăng ký nào trong hệ thống</p>
                     </div>
-                `;
+            `;
                 return;
             }
 
             let html = `
-                <table>
+            <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Ngày</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Thời gian</th>
                             <th>Họ tên</th>
                             <th>Năm sinh</th>
                             <th>Địa chỉ</th>
@@ -1219,7 +1609,9 @@
             `;
 
             data.forEach(row => {
-                const date = row.ngay_nhan ? new Date(row.ngay_nhan).toLocaleDateString('vi-VN') : 'N/A';
+                const dateObj = row.ngay_nhan ? new Date(row.ngay_nhan) : null;
+                const date = dateObj ? dateObj.toLocaleDateString('vi-VN') : 'N/A';
+                const time = dateObj ? dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A';
                 const program = row.chuong_trinh || 'N/A';
                 let badgeClass = 'badge-info';
                 if (program.toLowerCase().includes('du học')) badgeClass = 'badge-success';
@@ -1229,6 +1621,7 @@
                     <tr>
                         <td><strong>#${row.id}</strong></td>
                         <td>${date}</td>
+                        <td><span style="color: var(--text-secondary); font-size: 13px;">${time}</span></td>
                         <td>${row.ho_ten || ''}</td>
                         <td>${row.nam_sinh || ''}</td>
                         <td>${row.dia_chi || ''}</td>
@@ -1249,7 +1642,7 @@
                 `;
             });
 
-            html += '</tbody></table>';
+            html += '</tbody></table > ';
             document.getElementById('tableContent').innerHTML = html;
         }
 
@@ -1290,6 +1683,74 @@
                     (d.dia_chi || '').toLowerCase().includes(query);
             });
             renderTable(filtered);
+        }
+
+        // ==================== DATE FILTERING ====================
+        function filterByDate() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const query = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = allData;
+
+            // First apply text search if any
+            if (query) {
+                filtered = filtered.filter(d => {
+                    return (d.ho_ten || '').toLowerCase().includes(query) ||
+                        (d.sdt || '').includes(query) ||
+                        (d.dia_chi || '').toLowerCase().includes(query);
+                });
+            }
+
+            // Then apply date filter
+            if (dateFrom || dateTo) {
+                filtered = filtered.filter(d => {
+                    if (!d.ngay_nhan) return false;
+                    const rowDate = new Date(d.ngay_nhan);
+                    const rowDateStr = rowDate.toISOString().split('T')[0];
+
+                    if (dateFrom && dateTo) {
+                        return rowDateStr >= dateFrom && rowDateStr <= dateTo;
+                    } else if (dateFrom) {
+                        return rowDateStr >= dateFrom;
+                    } else if (dateTo) {
+                        return rowDateStr <= dateTo;
+                    }
+                    return true;
+                });
+            }
+
+            renderTable(filtered);
+        }
+
+        function clearDateFilter() {
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('searchInput').value = '';
+            renderTable(allData);
+        }
+
+        function exportByDateRange() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            let url = API_BASE + 'export.php';
+            const params = [];
+
+            if (dateFrom) params.push('from=' + dateFrom);
+            if (dateTo) params.push('to=' + dateTo);
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            window.open(url, '_blank');
+
+            if (dateFrom || dateTo) {
+                showToast(`Đang xuất dữ liệu từ ${dateFrom || 'đầu'} đến ${dateTo || 'nay'}...`, 'success');
+            } else {
+                showToast('Đang tải file CSV toàn bộ...', 'success');
+            }
         }
 
         // ==================== CRUD OPERATIONS ====================
@@ -1627,13 +2088,259 @@
 
         // Close modals with Escape key
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.style.display = 'none';
-                });
+            if (e.key === "Escape") {
+                document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
             }
         });
     </script>
+
+    <!-- CMS Modal -->
+    <div id="cmsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="cmsModalTitle">Chỉnh sửa Nội dung</h2>
+                <button class="modal-close" onclick="closeCMSModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <form id="cmsForm">
+                <div class="modal-body">
+                    <input type="hidden" id="cms-id" name="id">
+                    <input type="hidden" id="cms-type" name="type">
+
+                    <label for="cms-key">Key (Mã định danh)</label>
+                    <input type="text" id="cms-key" name="key" required placeholder="Ví dụ: index_hero_title">
+
+                    <!-- Image Fields -->
+                    <div id="cms-image-fields" style="display:none">
+                        <label for="cms-image-url">URL Hình ảnh</label>
+                        <div style="display:flex; gap:8px">
+                            <input type="text" id="cms-image-url" name="image_url" placeholder="https://..."
+                                style="flex:1">
+                            <input type="file" id="cms-image-upload" accept="image/*" style="display:none"
+                                onchange="handleImageUpload(this)">
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('cms-image-upload').click()">
+                                <span class="material-icons-outlined">upload</span>
+                            </button>
+                        </div>
+                        <div id="cms-image-preview"
+                            style="margin-top:8px; height:100px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; border-radius:4px; overflow:hidden">
+                            <span style="color:#999">Preview</span>
+                        </div>
+
+                        <label for="cms-alt-text" style="margin-top:12px">Mô tả ảnh (Alt Text)</label>
+                        <input type="text" id="cms-alt-text" name="alt_text">
+                    </div>
+
+                    <!-- Text Fields -->
+                    <div id="cms-text-fields" style="display:none">
+                        <label for="cms-text-value">Nội dung văn bản</label>
+                        <textarea id="cms-text-value" name="text_value" rows="5"></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                        <div>
+                            <label for="cms-page">Trang (Page)</label>
+                            <select id="cms-page" name="page"
+                                style="width:100%; padding:10px; border:1px solid var(--border-light); border-radius:4px">
+                                <option value="global">Global</option>
+                                <option value="index">Trang chủ (Index)</option>
+                                <option value="nhat">Nhật Bản</option>
+                                <option value="duc">Đức</option>
+                                <option value="han">Hàn Quốc</option>
+                                <option value="xkldjp">XKLĐ Nhật</option>
+                                <option value="about">Về ICOGroup</option>
+                                <option value="contact">Liên hệ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cms-section">Section</label>
+                            <input type="text" id="cms-section" name="section" list="sectionList"
+                                placeholder="header, hero, ...">
+                            <datalist id="sectionList">
+                                <option value="header">
+                                <option value="hero">
+                                <option value="about">
+                                <option value="programs">
+                                <option value="ecosystem">
+                                <option value="footer">
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeCMSModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-icons-outlined">save</span>
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    // CMS Logic Extension - Inlined to prevent caching issues
+    console.log("CMS Logic Loaded (Inline)");
+
+    // Handle Image Upload from Modal
+    async function handleImageUpload(input) {
+        if (input.files && input.files[0]) {
+            const formData = new FormData();
+            formData.append('image', input.files[0]);
+
+            // Show loading state
+            const previewDiv = document.getElementById('cms-image-preview');
+            previewDiv.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const res = await fetch(API_BASE + 'upload_image.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+                if (result.status) {
+                    document.getElementById('cms-image-url').value = result.url;
+                    previewDiv.innerHTML = `<img src="${result.url}" style="width:100%; height:100%; object-fit:contain">`;
+                } else {
+                    alert(result.message || 'Lá»—i upload áº£nh');
+                    previewDiv.innerHTML = '<span style="color:red">Lá»—i upload</span>';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lá»—i káº¿t ná»‘i server');
+                previewDiv.innerHTML = '<span style="color:red">Lá»—i káº¿t ná»‘i</span>';
+            }
+        }
+    }
+
+    // Override Open/Edit Functions to ensure they work
+    window.openCMSEditModal = function (id, type) {
+        if (typeof allCMSData === 'undefined') {
+            alert("Dá»¯ liá»‡u chÆ°a táº£i xong, vui lÃ²ng Ä‘á»£i...");
+            return;
+        }
+
+        const item = allCMSData.find(i => i.id == id);
+        if (!item) {
+            alert("KhÃ´ng tÃ¬m tháº¥y dá»¯ liá»‡u (ID: " + id + ")");
+            return;
+        }
+
+        const modal = document.getElementById('cmsModal');
+        if (!modal) {
+            alert("KhÃ´ng tÃ¬m tháº¥y Modal!");
+            return;
+        }
+
+        document.getElementById('cmsForm').reset();
+        document.getElementById('cms-id').value = item.id;
+        document.getElementById('cms-type').value = type;
+        document.getElementById('cms-key').value = type === 'images' ? item.image_key : item.text_key;
+        document.getElementById('cms-key').readOnly = true;
+
+        document.getElementById('cmsModalTitle').textContent = 'Chá»‰nh sá»­a ' + (type === 'images' ? 'HÃ¬nh áº£nh' : 'VÄƒn báº£n');
+        document.getElementById('cms-page').value = item.page || 'all';
+        document.getElementById('cms-section').value = item.section || 'all';
+
+        if (type === 'images') {
+            document.getElementById('cms-image-fields').style.display = 'block';
+            document.getElementById('cms-text-fields').style.display = 'none';
+
+            document.getElementById('cms-image-url').value = item.image_url || '';
+            document.getElementById('cms-alt-text').value = item.alt_text || '';
+            if (item.image_url) {
+                document.getElementById('cms-image-preview').innerHTML = `<img src="${item.image_url}" style="width:100%; height:100%; object-fit:contain">`;
+            } else {
+                document.getElementById('cms-image-preview').innerHTML = '<span>No Image</span>';
+            }
+        } else {
+            document.getElementById('cms-image-fields').style.display = 'none';
+            document.getElementById('cms-text-fields').style.display = 'block';
+            document.getElementById('cms-text-value').value = item.text_value || '';
+        }
+
+        modal.style.display = 'block';
+    };
+
+    window.openAddCMSModal = function () {
+        const modal = document.getElementById('cmsModal');
+        if (!modal) return;
+
+        document.getElementById('cmsForm').reset();
+        document.getElementById('cms-id').value = '';
+        document.getElementById('cms-key').readOnly = false;
+        document.getElementById('cmsModalTitle').textContent = 'ThÃªm Ná»™i dung Má»›i';
+
+        const type = (typeof currentCMSTab !== 'undefined') ? currentCMSTab : 'images';
+        document.getElementById('cms-type').value = type;
+
+        if (type === 'images') {
+            document.getElementById('cms-image-fields').style.display = 'block';
+            document.getElementById('cms-text-fields').style.display = 'none';
+        } else {
+            document.getElementById('cms-image-fields').style.display = 'none';
+            document.getElementById('cms-text-fields').style.display = 'block';
+        }
+
+        modal.style.display = 'block';
+    };
+
+    window.closeCMSModal = function () {
+        const modal = document.getElementById('cmsModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    // Form Submission
+    const cmsForm = document.getElementById('cmsForm');
+    if (cmsForm) {
+        cmsForm.onsubmit = async function (e) {
+            e.preventDefault();
+
+            const type = document.getElementById('cms-type').value;
+            const id = document.getElementById('cms-id').value;
+            const endpoint = type === 'images' ? 'image_api.php' : 'text_api.php';
+
+            const formData = {
+                page: document.getElementById('cms-page').value,
+                section: document.getElementById('cms-section').value
+            };
+
+            if (type === 'images') {
+                formData.image_key = document.getElementById('cms-key').value;
+                formData.image_url = document.getElementById('cms-image-url').value;
+                formData.alt_text = document.getElementById('cms-alt-text').value;
+            } else {
+                formData.text_key = document.getElementById('cms-key').value;
+                formData.text_value = document.getElementById('cms-text-value').value;
+                formData.text_type = document.getElementById('cms-text-type') ? document.getElementById('cms-text-type').value : 'paragraph';
+            }
+
+            try {
+                const res = await fetch(API_BASE + endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const result = await res.json();
+
+                if (result.status) {
+                    alert('LÆ°u thÃ nh cÃ´ng!');
+                    closeCMSModal();
+                    if (typeof loadCMS === 'function') loadCMS(type);
+                } else {
+                    alert('Lá»—i: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lá»—i káº¿t ná»‘i!');
+            }
+
+            return false;
+        };
+    }
+</script>
 </body>
 
 </html>

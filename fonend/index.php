@@ -2,37 +2,38 @@
 $pageTitle = "Trang chủ";
 $pageDescription = "ICOGroup - Tập đoàn Giáo dục và Đào tạo nghề hàng đầu Việt Nam. Du học Nhật Bản, Đức, Hàn Quốc. Xuất khẩu lao động uy tín.";
 include 'includes/header.php';
+include_once 'includes/content_helper.php';
 ?>
 
 <!-- HERO SECTION -->
 <section class="hero-section">
     <div class="hero-slider">
         <div class="hero-slide">
-            <img src="https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg" alt="ICOGroup - Nơi tạo dựng tương lai">
+            <img src="<?php echo get_image('index_hero_slide_1_img', 'https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg'); ?>" alt="ICOGroup">
             <div class="hero-overlay">
                 <div class="hero-content">
-                    <h1>ICOGroup - Nơi Tạo Dựng Tương Lai</h1>
-                    <p>Tập đoàn Giáo dục và Đào tạo nghề hàng đầu Việt Nam với hơn 15 năm kinh nghiệm</p>
+                    <h1><?php echo get_text('index_hero_slide_1_title', 'ICOGroup - Nơi Tạo Dựng Tương Lai'); ?></h1>
+                    <p><?php echo get_text('index_hero_slide_1_subtitle', 'Tập đoàn Giáo dục và Đào tạo nghề hàng đầu Việt Nam với hơn 15 năm kinh nghiệm'); ?></p>
                     <a href="#dangky" class="hero-btn">Đăng ký tư vấn miễn phí</a>
                 </div>
             </div>
         </div>
         <div class="hero-slide">
-            <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Du học quốc tế">
+            <img src="<?php echo get_image('index_hero_slide_2_img', 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg'); ?>" alt="Du học">
             <div class="hero-overlay">
                 <div class="hero-content">
-                    <h1>Chương Trình Du Học Quốc Tế</h1>
-                    <p>Nhật Bản • Đức • Hàn Quốc • Đài Loan</p>
+                    <h1><?php echo get_text('index_hero_slide_2_title', 'Chương Trình Du Học Quốc Tế'); ?></h1>
+                    <p><?php echo get_text('index_hero_slide_2_subtitle', 'Nhật Bản • Đức • Hàn Quốc • Đài Loan'); ?></p>
                     <a href="nhat.php" class="hero-btn">Tìm hiểu ngay</a>
                 </div>
             </div>
         </div>
         <div class="hero-slide">
-            <img src="https://www.icogroup.vn/vnt_upload/news/02_2025/ICOGROUP_TUYEN_DUNG_23.jpg" alt="Xuất khẩu lao động">
+            <img src="<?php echo get_image('index_hero_slide_3_img', 'https://www.icogroup.vn/vnt_upload/news/02_2025/ICOGROUP_TUYEN_DUNG_23.jpg'); ?>" alt="XKLĐ">
             <div class="hero-overlay">
                 <div class="hero-content">
-                    <h1>Xuất Khẩu Lao Động Uy Tín</h1>
-                    <p>Cơ hội việc làm với thu nhập cao tại nước ngoài</p>
+                    <h1><?php echo get_text('index_hero_slide_3_title', 'Xuất Khẩu Lao Động Uy Tín'); ?></h1>
+                    <p><?php echo get_text('index_hero_slide_3_subtitle', 'Cơ hội việc làm với thu nhập cao tại nước ngoài'); ?></p>
                     <a href="xkldjp.php" class="hero-btn">Xem chi tiết</a>
                 </div>
             </div>
@@ -56,7 +57,7 @@ include 'includes/header.php';
 <!-- ABOUT SECTION - Hero Style with Background Image -->
 <section class="section about-hero-section" id="about" style="
     background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(99, 102, 241, 0.85) 100%), 
-                url('https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg');
+                url('<?php echo get_image('index_about_bg', 'https://icogroup.vn/vnt_upload/weblink/banner_trang_chu_01.jpg'); ?>');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -73,9 +74,9 @@ include 'includes/header.php';
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
             <!-- Left - History & Content -->
             <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="color: white; font-size: 28px; margin-bottom: 20px; font-weight: 700;">Lịch Sử Hình Thành & Phát Triển</h3>
-                <p style="color: rgba(255,255,255,0.9); line-height: 1.8; margin-bottom: 15px;">Với tầm nhìn dài hạn và quan điểm phát triển bền vững, ICOGroup đã trở thành một trong những thương hiệu uy tín về du học và xuất khẩu lao động tại Việt Nam.</p>
-                <p style="color: rgba(255,255,255,0.85); line-height: 1.8;">Hiện ICOGroup đã có mặt ở trên 60 tỉnh thành trong nước với cơ sở vật chất được đầu tư đồng bộ và hiện đại.</p>
+                <h3 style="color: white; font-size: 28px; margin-bottom: 20px; font-weight: 700;"><?php echo get_text('index_about_history_title', 'Lịch Sử Hình Thành & Phát Triển'); ?></h3>
+                <p style="color: rgba(255,255,255,0.9); line-height: 1.8; margin-bottom: 15px;"><?php echo get_text('index_about_history_desc', 'Với tầm nhìn dài hạn và quan điểm phát triển bền vững, ICOGroup đã trở thành một trong những thương hiệu uy tín về du học và xuất khẩu lao động tại Việt Nam.'); ?></p>
+                <p style="color: rgba(255,255,255,0.85); line-height: 1.8;"><?php echo get_text('index_about_history_desc_2', 'Hiện ICOGroup đã có mặt ở trên 60 tỉnh thành trong nước với cơ sở vật chất được đầu tư đồng bộ và hiện đại.'); ?></p>
                 
                 <a href="ve-icogroup.php" class="hero-btn" style="margin-top: 30px; display: inline-block;">Tìm hiểu thêm</a>
             </div>
@@ -125,67 +126,67 @@ include 'includes/header.php';
             <p>Hệ thống giáo dục và đào tạo toàn diện</p>
         </div>
         
-        <div class="ecosystem-grid">
-            <div class="ecosystem-card">
-                <div class="eco-card-image">
-                    <img src="https://icogroup.vn/vnt_upload/service/Linkedin_3.jpg" alt="Trung tâm Ngoại ngữ ICO">
-                </div>
-                <div class="eco-card-logo">
-                    <img src="https://icogroup.vn/vnt_upload/service/Logo_TTNN_ICO_24x_100.jpg" alt="Logo">
-                </div>
-                <div class="eco-card-content">
-                    <h3>Trung tâm Ngoại ngữ ICO</h3>
-                    <p class="eco-slogan">Học ngoại ngữ để lập nghiệp</p>
-                    <p>Đào tạo tiếng Nhật, tiếng Đức, tiếng Hàn với đội ngũ giáo viên chất lượng cao và phương pháp hiện đại.</p>
-                    <a href="ngoai-ngu-ico.php" class="eco-btn">Xem thêm</a>
-                </div>
+    <div class="ecosystem-grid">
+        <div class="ecosystem-card">
+            <div class="eco-card-image">
+                <img src="<?php echo get_image('index_eco_1_img', 'https://icogroup.vn/vnt_upload/service/Linkedin_3.jpg'); ?>" alt="Trung tâm Ngoại ngữ ICO">
             </div>
-            
-            <div class="ecosystem-card">
-                <div class="eco-card-image">
-                    <img src="https://icogroup.vn/vnt_upload/service/khai_giang_icoschool.jpg" alt="ICOSchool">
-                </div>
-                <div class="eco-card-logo">
-                    <img src="https://icogroup.vn/vnt_upload/service/mmicon2.jpg" alt="Logo">
-                </div>
-                <div class="eco-card-content">
-                    <h3>ICOSchool</h3>
-                    <p class="eco-slogan">Go Global! - Hãy bước ra thế giới</p>
-                    <p>Trường THPT chất lượng cao, hoạt động theo mô hình chuyên ngữ với chương trình giáo dục chuẩn quốc tế.</p>
-                    <a href="icoschool.php" class="eco-btn">Xem thêm</a>
-                </div>
+            <div class="eco-card-logo">
+                <img src="<?php echo get_image('index_eco_1_logo', 'https://icogroup.vn/vnt_upload/service/Logo_TTNN_ICO_24x_100.jpg'); ?>" alt="Logo">
             </div>
-            
-            <div class="ecosystem-card">
-                <div class="eco-card-image">
-                    <img src="https://icogroup.vn/vnt_upload/service/mmimg3.jpg" alt="ICOCollege">
-                </div>
-                <div class="eco-card-logo">
-                    <img src="https://icogroup.vn/vnt_upload/service/mmicon3.jpg" alt="Logo">
-                </div>
-                <div class="eco-card-content">
-                    <h3>ICOCollege</h3>
-                    <p class="eco-slogan">Go Global! - Hãy bước ra thế giới</p>
-                    <p>Cao đẳng nghề chất lượng cao với cam kết việc làm sau tốt nghiệp và đào tạo theo đơn đặt hàng.</p>
-                    <a href="icocollege.php" class="eco-btn">Xem thêm</a>
-                </div>
-            </div>
-            
-            <div class="ecosystem-card">
-                <div class="eco-card-image">
-                    <img src="https://icogroup.vn/vnt_upload/service/mmimg4.jpg" alt="ICOCareer">
-                </div>
-                <div class="eco-card-logo">
-                    <img src="https://icogroup.vn/vnt_upload/service/mmicon3.jpg" alt="Logo">
-                </div>
-                <div class="eco-card-content">
-                    <h3>ICOCareer</h3>
-                    <p class="eco-slogan">Định hướng tương lai</p>
-                    <p>Hướng nghiệp, tư vấn nghề nghiệp và kết nối việc làm trong nước và quốc tế cho học viên.</p>
-                    <a href="icocareer.php" class="eco-btn">Xem thêm</a>
-                </div>
+            <div class="eco-card-content">
+                <h3><?php echo get_text('index_eco_1_name', 'Trung tâm Ngoại ngữ ICO'); ?></h3>
+                <p class="eco-slogan"><?php echo get_text('index_eco_1_slogan', 'Học ngoại ngữ để lập nghiệp'); ?></p>
+                <p><?php echo get_text('index_eco_1_desc', 'Đào tạo tiếng Nhật, tiếng Đức, tiếng Hàn với đội ngũ giáo viên chất lượng cao và phương pháp hiện đại.'); ?></p>
+                <a href="ngoai-ngu-ico.php" class="eco-btn">Xem thêm</a>
             </div>
         </div>
+        
+        <div class="ecosystem-card">
+            <div class="eco-card-image">
+                <img src="<?php echo get_image('index_eco_2_img', 'https://icogroup.vn/vnt_upload/service/khai_giang_icoschool.jpg'); ?>" alt="ICOSchool">
+            </div>
+            <div class="eco-card-logo">
+                <img src="<?php echo get_image('index_eco_2_logo', 'https://icogroup.vn/vnt_upload/service/mmicon2.jpg'); ?>" alt="Logo">
+            </div>
+            <div class="eco-card-content">
+                <h3><?php echo get_text('index_eco_2_name', 'ICOSchool'); ?></h3>
+                <p class="eco-slogan"><?php echo get_text('index_eco_2_slogan', 'Go Global! - Hãy bước ra thế giới'); ?></p>
+                <p><?php echo get_text('index_eco_2_desc', 'Trường THPT chất lượng cao, hoạt động theo mô hình chuyên ngữ với chương trình giáo dục chuẩn quốc tế.'); ?></p>
+                <a href="icoschool.php" class="eco-btn">Xem thêm</a>
+            </div>
+        </div>
+        
+        <div class="ecosystem-card">
+            <div class="eco-card-image">
+                <img src="<?php echo get_image('index_eco_3_img', 'https://icogroup.vn/vnt_upload/service/mmimg3.jpg'); ?>" alt="ICOCollege">
+            </div>
+            <div class="eco-card-logo">
+                <img src="<?php echo get_image('index_eco_3_logo', 'https://icogroup.vn/vnt_upload/service/mmicon3.jpg'); ?>" alt="Logo">
+            </div>
+            <div class="eco-card-content">
+                <h3><?php echo get_text('index_eco_3_name', 'ICOCollege'); ?></h3>
+                <p class="eco-slogan">Go Global! - Hãy bước ra thế giới</p>
+                <p><?php echo get_text('index_eco_3_desc', 'Cao đẳng nghề chất lượng cao với cam kết việc làm sau tốt nghiệp và đào tạo theo đơn đặt hàng.'); ?></p>
+                <a href="icocollege.php" class="eco-btn">Xem thêm</a>
+            </div>
+        </div>
+        
+        <div class="ecosystem-card">
+            <div class="eco-card-image">
+                <img src="<?php echo get_image('index_eco_4_img', 'https://icogroup.vn/vnt_upload/service/mmimg4.jpg'); ?>" alt="ICOCareer">
+            </div>
+            <div class="eco-card-logo">
+                <img src="https://icogroup.vn/vnt_upload/service/mmicon3.jpg" alt="Logo">
+            </div>
+            <div class="eco-card-content">
+                <h3><?php echo get_text('index_eco_4_name', 'ICOCareer'); ?></h3>
+                <p class="eco-slogan">Định hướng tương lai</p>
+                <p><?php echo get_text('index_eco_4_desc', 'Hướng nghiệp, tư vấn nghề nghiệp và kết nối việc làm trong nước và quốc tế cho học viên.'); ?></p>
+                <a href="icocareer.php" class="eco-btn">Xem thêm</a>
+            </div>
+        </div>
+    </div>
     </div>
 </section>
 
@@ -193,26 +194,30 @@ include 'includes/header.php';
 <section class="stats-section">
     <div class="stats-grid">
         <div class="stat-item">
-            <span class="stat-number" data-target="17000">0</span>
-            <span class="stat-label">Du học sinh</span>
+            <span class="stat-number" data-target="<?php echo get_text('stat_duhoc', '17000'); ?>">0</span>
+            <span class="stat-label"><?php echo get_text('stat_duhoc_label', 'Du học sinh'); ?></span>
         </div>
         <div class="stat-item">
-            <span class="stat-number" data-target="38000">0</span>
-            <span class="stat-label">Lao động quốc tế</span>
+            <span class="stat-number" data-target="<?php echo get_text('stat_laodong', '38000'); ?>">0</span>
+            <span class="stat-label"><?php echo get_text('stat_laodong_label', 'Lao động quốc tế'); ?></span>
         </div>
         <div class="stat-item">
-            <span class="stat-number" data-target="600">0</span>
-            <span class="stat-label">Đối tác doanh nghiệp</span>
+            <span class="stat-number" data-target="<?php echo get_text('stat_doitac', '600'); ?>">0</span>
+            <span class="stat-label"><?php echo get_text('stat_doitac_label', 'Đối tác doanh nghiệp'); ?></span>
         </div>
         <div class="stat-item">
-            <span class="stat-number" data-target="300">0</span>
-            <span class="stat-label">Trường liên kết</span>
+            <span class="stat-number" data-target="<?php echo get_text('stat_truong', '300'); ?>">0</span>
+            <span class="stat-label"><?php echo get_text('stat_truong_label', 'Trường liên kết'); ?></span>
         </div>
     </div>
 </section>
 
 <!-- PROGRAMS SECTION - Dark Theme -->
-<section class="section programs-section" style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); padding: 100px 0;">
+<?php
+$programs_bg_url = get_image('index_programs_bg', '');
+$programs_style = $programs_bg_url ? "background: url('$programs_bg_url') no-repeat center center/cover;" : "background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);";
+?>
+<section class="section programs-section" style="<?php echo $programs_style; ?> padding: 100px 0;">
     <div class="container">
         <div class="section-header">
             <h2 style="color: white;">Chương Trình Nổi Bật</h2>
@@ -222,12 +227,12 @@ include 'includes/header.php';
         <div class="programs-grid">
             <div class="program-card" onclick="window.location='nhat.php'" style="cursor:pointer">
                 <div class="program-image">
-                    <img src="https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png" alt="Du học Nhật Bản">
+                    <img src="<?php echo get_image('index_program_1_img', 'https://cdn-images.vtv.vn/562122370168008704/2023/7/26/untitled-1690344019340844974097.png'); ?>" alt="Du học Nhật Bản">
                 </div>
                 <div class="program-content">
                     <span class="program-tag">Du học</span>
-                    <h3>Du Học Nhật Bản</h3>
-                    <p>Chương trình du học Nhật Bản với 100+ trường đối tác. Học bổng hấp dẫn, visa cao.</p>
+                    <h3><?php echo get_text('index_program_1_title', 'Du Học Nhật Bản'); ?></h3>
+                    <p><?php echo get_text('index_program_1_desc', 'Chương trình du học Nhật Bản với 100+ trường đối tác. Học bổng hấp dẫn, visa cao.'); ?></p>
                     <a href="nhat.php" class="program-link">
                         Tìm hiểu thêm 
                         <span class="material-symbols-outlined">arrow_forward</span>
@@ -237,12 +242,12 @@ include 'includes/header.php';
             
             <div class="program-card" onclick="window.location='duc.php'" style="cursor:pointer">
                 <div class="program-image">
-                    <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Du học Đức">
+                    <img src="<?php echo get_image('index_program_2_img', 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg'); ?>" alt="Du học Đức">
                 </div>
                 <div class="program-content">
                     <span class="program-tag">Du học</span>
-                    <h3>Du Học Đức</h3>
-                    <p>Du học kép (Ausbildung): Học miễn phí, có lương, việc làm ngay sau tốt nghiệp.</p>
+                    <h3><?php echo get_text('index_program_2_title', 'Du Học Đức'); ?></h3>
+                    <p><?php echo get_text('index_program_2_desc', 'Du học kép (Ausbildung): Học miễn phí, có lương, việc làm ngay sau tốt nghiệp.'); ?></p>
                     <a href="duc.php" class="program-link">
                         Tìm hiểu thêm 
                         <span class="material-symbols-outlined">arrow_forward</span>
@@ -252,12 +257,12 @@ include 'includes/header.php';
             
             <div class="program-card" onclick="window.location='xkldjp.php'" style="cursor:pointer">
                 <div class="program-image">
-                    <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="Xuất khẩu lao động">
+                    <img src="<?php echo get_image('index_program_3_img', 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg'); ?>" alt="Xuất khẩu lao động">
                 </div>
                 <div class="program-content">
                     <span class="program-tag">XKLĐ</span>
-                    <h3>Xuất Khẩu Lao Động Nhật Bản</h3>
-                    <p>Chương trình thực tập sinh kỹ năng với thu nhập từ 30-40 triệu/tháng.</p>
+                    <h3><?php echo get_text('index_program_3_title', 'Xuất Khẩu Lao Động Nhật Bản'); ?></h3>
+                    <p><?php echo get_text('index_program_3_desc', 'Chương trình thực tập sinh kỹ năng với thu nhập từ 30-40 triệu/tháng.'); ?></p>
                     <a href="xkldjp.php" class="program-link">
                         Tìm hiểu thêm 
                         <span class="material-symbols-outlined">arrow_forward</span>
@@ -269,7 +274,11 @@ include 'includes/header.php';
 </section>
 
 <!-- NEWS SECTION - Light Theme with Top Divider -->
-<section class="section news-section" style="background: linear-gradient(180deg, #FAFAFA 0%, #FFFFFF 100%); padding: 100px 0; border-top: 4px solid #6366F1;">
+<?php
+$news_bg_url = get_image('index_news_bg', '');
+$news_style = $news_bg_url ? "background: url('$news_bg_url') no-repeat center center/cover;" : "background: linear-gradient(180deg, #FAFAFA 0%, #FFFFFF 100%);";
+?>
+<section class="section news-section" style="<?php echo $news_style; ?> padding: 100px 0; border-top: 4px solid #6366F1;">
     <div class="container">
         <div class="section-header">
             <h2>Tin Tức & Hoạt Động</h2>

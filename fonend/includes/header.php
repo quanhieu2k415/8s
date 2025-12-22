@@ -1,5 +1,6 @@
 <?php
 // Header component - ICOGroup Website
+include_once __DIR__ . '/content_helper.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -12,8 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="animations.css">
-    <!-- Load script.js in head for immediate feature initialization -->
-    <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -21,13 +20,13 @@
 <div class="top-bar">
     <div class="top-bar-container">
         <div class="top-bar-left">
-            <a href="tel:0822314555" class="top-bar-item">
+            <a href="tel:<?php echo get_text('header_phone', '0822314555'); ?>" class="top-bar-item">
                 <span class="material-symbols-outlined">call</span>
-                <span>0822.314.555</span>
+                <span><?php echo get_text('header_phone_display', '0822.314.555'); ?></span>
             </a>
-            <a href="mailto:info@icogroup.vn" class="top-bar-item">
+            <a href="mailto:<?php echo get_text('header_email', 'info@icogroup.vn'); ?>" class="top-bar-item">
                 <span class="material-symbols-outlined">mail</span>
-                <span>info@icogroup.vn</span>
+                <span><?php echo get_text('header_email', 'info@icogroup.vn'); ?></span>
             </a>
         </div>
         <div class="top-bar-right">
@@ -62,27 +61,28 @@
         </li>
 
         <li class="has-submenu">
-            <a href="#">Du học <span class="material-symbols-outlined arrow-icon">expand_more</span></a>
+            <a href="#"><?php echo get_text('menu_duhoc', 'Du học'); ?> <span class="material-symbols-outlined arrow-icon">expand_more</span></a>
             <ul class="submenu">
-                <li><a href="duc.php"><span class="flag">🇩🇪</span> Du học Đức</a></li>
-                <li><a href="nhat.php"><span class="flag">🇯🇵</span> Du học Nhật</a></li>
-                <li><a href="han.php"><span class="flag">🇰🇷</span> Du học Hàn Quốc</a></li>
+                <li><a href="duc.php"><span class="flag">🇩🇪</span> <?php echo get_text('menu_duhoc_germany', 'Du học Đức'); ?></a></li>
+                <li><a href="nhat.php"><span class="flag">🇯🇵</span> <?php echo get_text('menu_duhoc_japan', 'Du học Nhật'); ?></a></li>
+                <li><a href="han.php"><span class="flag">🇰🇷</span> <?php echo get_text('menu_duhoc_korea', 'Du học Hàn Quốc'); ?></a></li>
             </ul>
         </li>
 
         <li class="has-submenu">
-            <a href="#">Xuất khẩu lao động <span class="material-symbols-outlined arrow-icon">expand_more</span></a>
+            <a href="#"><?php echo get_text('menu_xkld', 'Xuất khẩu lao động'); ?> <span class="material-symbols-outlined arrow-icon">expand_more</span></a>
             <ul class="submenu">
-                <li><a href="xkldjp.php"><span class="flag">🇯🇵</span> Nhật Bản</a></li>
-                <li><a href="xkldhan.php"><span class="flag">🇰🇷</span> Hàn Quốc</a></li>
-                <li><a href="xklddailoan.php"><span class="flag">🇹🇼</span> Đài Loan</a></li>
-                <li><a href="xkldchauau.php"><span class="flag">🇪🇺</span> Châu Âu</a></li>
+                <li><a href="xkldjp.php"><span class="flag">🇯🇵</span> <?php echo get_text('menu_xkld_japan', 'Nhật Bản'); ?></a></li>
+                <li><a href="xkldhan.php"><span class="flag">🇰🇷</span> <?php echo get_text('menu_xkld_korea', 'Hàn Quốc'); ?></a></li>
+                <li><a href="xklddailoan.php"><span class="flag">🇹🇼</span> <?php echo get_text('menu_xkld_taiwan', 'Đài Loan'); ?></a></li>
+                <li><a href="xkldchauau.php"><span class="flag">🇪🇺</span> <?php echo get_text('menu_xkld_eu', 'Châu Âu'); ?></a></li>
             </ul>
         </li>
 
         <li><a href="huong-nghiep.php">Hướng nghiệp</a></li>
         <li><a href="hoatdong.php">Hoạt động</a></li>
         <li><a href="lienhe.php">Liên hệ</a></li>
+        <li><a href="search.php" title="Tìm kiếm"><span class="material-symbols-outlined">search</span></a></li>
         <li><a href="index.php#dangky" class="btn-register">Đăng ký</a></li>
     </ul>
 
@@ -116,6 +116,7 @@
         <li><a href="huong-nghiep.php">🎯 Hướng nghiệp</a></li>
         <li><a href="hoatdong.php">📰 Hoạt động</a></li>
         <li><a href="lienhe.php">📞 Liên hệ</a></li>
+        <li><a href="search.php">🔍 Tìm kiếm</a></li>
     </ul>
     <div class="mobile-menu-footer">
         <a href="index.php#dangky" class="mobile-register-btn">

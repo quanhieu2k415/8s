@@ -1,3 +1,35 @@
+# Dependencies
+node_modules/
+vendor/
+bun.lockb
+
+# Environment
+.env
+
+# Storage (logs, uploads, cache)
+storage/logs/*
+storage/cache/*
+storage/uploads/*
+!storage/.htaccess
+!storage/README.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Exports
+backend_api/exports/*
+
+# Install script (delete after running)
+# install.php
 node_modules/
 bun.lockb
+bun.lockb
 node_modules/
+bun.lockb

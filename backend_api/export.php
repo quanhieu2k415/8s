@@ -19,14 +19,58 @@ if ($conn->connect_error) {
     die(json_encode(array("message" => "Lỗi kết nối Database.", "status" => false)));
 }
 
-// Thực thi truy vấn SELECT
-$sql = "SELECT id, ngay_nhan, ho_ten, sdt, nam_sinh, dia_chi, chuong_trinh, quoc_gia, ghi_chu FROM $table_name ORDER BY id ASC";
-$result = $conn->query($sql);
+// Get date range parameters
+$dateFrom = isset($_GET['from']) ? $_GET['from'] : null;
+$dateTo = isset($_GET['to']) ? $_GET['to'] : null;
+
+// Build SQL query with optional date filter
+$sql = "SELECT id, ngay_nhan, ho_ten, sdt, nam_sinh, dia_chi, chuong_trinh, quoc_gia, ghi_chu FROM $table_name";
+
+$whereConditions = [];
+$params = [];
+$types = '';
+
+if ($dateFrom) {
+    $whereConditions[] = "DATE(ngay_nhan) >= ?";
+    $params[] = $dateFrom;
+    $types .= 's';
+}
+
+if ($dateTo) {
+    $whereConditions[] = "DATE(ngay_nhan) <= ?";
+    $params[] = $dateTo;
+    $types .= 's';
+}
+
+if (count($whereConditions) > 0) {
+    $sql .= " WHERE " . implode(" AND ", $whereConditions);
+}
+
+$sql .= " ORDER BY id ASC";
+
+// Prepare and execute query
+$stmt = $conn->prepare($sql);
+
+if (count($params) > 0) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result && $result->num_rows > 0) {
     
-    // Tạo tên file
-    $file_name = 'danh_sach_dang_ky_' . date('Ymd_His') . '.csv';
+    // Tạo tên file với date range nếu có
+    $dateRangeSuffix = '';
+    if ($dateFrom && $dateTo) {
+        $dateRangeSuffix = '_' . $dateFrom . '_den_' . $dateTo;
+    } elseif ($dateFrom) {
+        $dateRangeSuffix = '_tu_' . $dateFrom;
+    } elseif ($dateTo) {
+        $dateRangeSuffix = '_den_' . $dateTo;
+    }
+    
+    $file_name = 'danh_sach_dang_ky' . $dateRangeSuffix . '_' . date('Ymd_His') . '.csv';
     
     // Headers để download file
     header('Content-Type: text/csv; charset=utf-8');
@@ -63,8 +107,13 @@ if ($result && $result->num_rows > 0) {
 } else {
     header('Content-Type: application/json');
     http_response_code(200);
-    echo json_encode(array("message" => "Không có dữ liệu để xuất.", "status" => true));
+    $message = "Không có dữ liệu để xuất.";
+    if ($dateFrom || $dateTo) {
+        $message = "Không có dữ liệu trong khoảng thời gian đã chọn.";
+    }
+    echo json_encode(array("message" => $message, "status" => true));
 }
 
+$stmt->close();
 $conn->close();
 ?>

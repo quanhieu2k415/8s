@@ -1,28 +1,33 @@
 <?php
+include_once 'includes/content_helper.php';
 $pageTitle = "XKLĐ Đài Loan";
 $pageDescription = "Xuất khẩu lao động Đài Loan - Chi phí thấp, thu nhập ổn định.";
 include 'includes/header.php';
 ?>
 
-<section class="page-banner" style="background: linear-gradient(135deg, #FE0000, #fff);">
-    <h1>Xuất Khẩu Lao Động Đài Loan</h1>
-    <p>Chi phí thấp - Thu nhập ổn định - Cơ hội phát triển</p>
+<?php
+$header_bg = get_image('xklddailoan_header_bg', '');
+$header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #FE0000, #fff);";
+?>
+<section class="page-banner" style="<?php echo $header_style; ?>">
+    <h1><?php echo get_text('xklddailoan_title', 'Xuất Khẩu Lao Động Đài Loan'); ?></h1>
+    <p><?php echo get_text('xklddailoan_subtitle', 'Chi phí thấp - Thu nhập ổn định - Cơ hội phát triển'); ?></p>
 </section>
 
 <section class="section about-section">
     <div class="container">
         <div class="about-grid">
             <div class="about-content">
-                <h3>Lao Động Đài Loan</h3>
-                <p>Đài Loan là thị trường lao động hấp dẫn với chi phí xuất cảnh thấp, ngôn ngữ dễ học và văn hóa gần gũi với Việt Nam.</p>
+                <h3><?php echo get_text('xklddailoan_program_title', 'Lao Động Đài Loan'); ?></h3>
+                <p><?php echo get_text('xklddailoan_program_desc', 'Đài Loan là thị trường lao động hấp dẫn với chi phí xuất cảnh thấp, ngôn ngữ dễ học và văn hóa gần gũi với Việt Nam.'); ?></p>
                 <div class="about-values">
-                    <div class="value-item"><span>💰</span><span>Thu nhập 20-30 triệu/tháng</span></div>
-                    <div class="value-item"><span>💵</span><span>Chi phí xuất cảnh thấp</span></div>
-                    <div class="value-item"><span>🗣️</span><span>Ngôn ngữ dễ học</span></div>
+                    <div class="value-item"><span>💰</span><span><?php echo get_text('xklddailoan_benefit_1', 'Thu nhập 20-30 triệu/tháng'); ?></span></div>
+                    <div class="value-item"><span>💵</span><span><?php echo get_text('xklddailoan_benefit_2', 'Chi phí xuất cảnh thấp'); ?></span></div>
+                    <div class="value-item"><span>🗣️</span><span><?php echo get_text('xklddailoan_benefit_3', 'Ngôn ngữ dễ học'); ?></span></div>
                 </div>
             </div>
             <div class="about-image">
-                <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="XKLĐ Đài Loan">
+                <img src="<?php echo get_image('xklddailoan_main_img', 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg'); ?>" alt="XKLĐ Đài Loan">
             </div>
         </div>
     </div>
@@ -30,8 +35,8 @@ include 'includes/header.php';
 
 <section class="form-section">
     <div class="form-container" style="text-align: center;">
-        <h3>Đăng Ký XKLĐ Đài Loan</h3>
-        <p style="margin-bottom: 30px; color: #666;">Hotline: <strong>0822.314.555</strong></p>
+        <h3><?php echo get_text('xklddailoan_cta_title', 'Đăng Ký XKLĐ Đài Loan'); ?></h3>
+        <p style="margin-bottom: 30px; color: #666;">Hotline: <strong><?php echo get_text('header_phone_display', '0822.314.555'); ?></strong></p>
         <a href="index.php#dangky" class="hero-btn">Đăng ký ngay</a>
     </div>
 </section>

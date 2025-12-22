@@ -1,11 +1,16 @@
 <?php
+include_once 'includes/content_helper.php';
 $pageTitle = "Hoạt động";
 $pageDescription = "Tin tức và hoạt động nổi bật của ICOGroup - Cập nhật các sự kiện, hội thảo, chương trình hướng nghiệp.";
 include 'includes/header.php';
 ?>
 
 <!-- PAGE BANNER -->
-<section class="page-banner">
+<?php
+$header_bg = get_image('hoatdong_header_bg', '');
+$header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "";
+?>
+<section class="page-banner" style="<?php echo $header_style; ?>">
     <h1>Tin Tức & Hoạt Động</h1>
     <p>Cập nhật những thông tin mới nhất từ ICOGroup</p>
     <div class="breadcrumb">

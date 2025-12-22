@@ -1,11 +1,17 @@
 <?php
+include_once 'includes/content_helper.php';
 $pageTitle = "Về ICOGroup";
 $pageDescription = "Tìm hiểu về ICOGroup - Tổ chức Giáo dục và Nhân lực Quốc tế. Lịch sử hình thành, sứ mệnh, tầm nhìn và giá trị cốt lõi.";
 include 'includes/header.php';
 ?>
 
 <!-- PAGE BANNER -->
-<section class="page-banner">
+<!-- PAGE BANNER -->
+<?php
+$header_bg = get_image('about_header_bg', '');
+$header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "";
+?>
+<section class="page-banner" style="<?php echo $header_style; ?>">
     <h1>Về ICOGroup</h1>
     <p>Tổ chức Giáo dục và Nhân lực Quốc tế ICO</p>
     <div class="breadcrumb">
