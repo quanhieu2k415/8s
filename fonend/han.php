@@ -20,7 +20,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     </div>
 </section>
 
-<!-- INTRO -->
+<!-- INTRO - Section 1 -->
+<?php if (is_section_visible('han', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="section-header">
@@ -47,8 +48,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- PROGRAMS -->
+<!-- PROGRAMS - Section 2 -->
+<?php if (is_section_visible('han', 2)): ?>
 <section class="section programs-section" style="background: #f4f7fb;">
     <div class="container">
         <div class="section-header">
@@ -85,6 +88,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- CTA -->
 <section class="form-section">

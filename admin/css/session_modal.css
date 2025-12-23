@@ -1,0 +1,244 @@
+/**
+ * Session Modal Styles
+ * Styles for session timeout warnings and notifications
+ */
+
+.session-warning-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    line-height: 1;
+}
+
+.modal-icon.warning {
+    animation: pulse 2s ease infinite;
+}
+
+.modal-icon.error {
+    opacity: 0.9;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.modal-content h3 {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.modal-content p {
+    margin: 0 0 8px;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.modal-content p strong {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.modal-hint {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 24px !important;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.modal-actions button {
+    padding: 14px 28px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.modal-actions button .material-icons-outlined {
+    font-size: 20px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* Toast Notifications */
+.session-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.session-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.session-toast.success {
+    border-left: 4px solid #10b981;
+}
+
+.session-toast.success .material-icons-outlined {
+    color: #10b981;
+}
+
+.session-toast.info {
+    border-left: 4px solid #3b82f6;
+}
+
+.session-toast.info .material-icons-outlined {
+    color: #3b82f6;
+}
+
+.session-toast .material-icons-outlined {
+    font-size: 24px;
+}
+
+.session-toast span:last-child {
+    color: #1e293b;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .modal-content {
+        padding: 32px 24px;
+        max-width: 90%;
+    }
+
+    .modal-icon {
+        font-size: 48px;
+    }
+
+    .modal-content h3 {
+        font-size: 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .modal-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .session-toast {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+    }
+}

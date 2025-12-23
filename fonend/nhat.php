@@ -22,7 +22,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     </div>
 </section>
 
-<!-- INTRO -->
+<!-- INTRO - Section 1 -->
+<?php if (is_section_visible('nhat', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="section-header">
@@ -52,8 +53,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- PARTNERS -->
+<!-- PARTNERS - Section 2 -->
+<?php if (is_section_visible('nhat', 2)): ?>
 <section class="section ecosystem-section">
     <div class="container">
         <div class="section-header">
@@ -76,8 +79,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- PROGRAMS -->
+<!-- PROGRAMS - Section 3 -->
+<?php if (is_section_visible('nhat', 3)): ?>
 <section class="section programs-section">
     <div class="container">
         <div class="section-header">
@@ -123,8 +128,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- PROCESS -->
+<!-- PROCESS - Section 4 -->
+<?php if (is_section_visible('nhat', 4)): ?>
 <section class="section about-section" style="background: #f4f7fb;">
     <div class="container">
         <div class="section-header">
@@ -160,8 +167,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- STATISTICS -->
+<!-- STATISTICS - Section 5 -->
+<?php if (is_section_visible('nhat', 5)): ?>
 <section class="stats-section">
     <div class="stats-grid">
         <div class="stat-item">
@@ -182,6 +191,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- DYNAMIC CONTENT BLOCKS -->
 <?php

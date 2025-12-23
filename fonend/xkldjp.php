@@ -21,7 +21,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     </div>
 </section>
 
-<!-- INTRO -->
+<!-- INTRO - Section 1 -->
+<?php if (is_section_visible('xkldjp', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="about-grid">
@@ -43,8 +44,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- JOBS -->
+<!-- JOBS - Section 2 -->
+<?php if (is_section_visible('xkldjp', 2)): ?>
 <section class="section ecosystem-section">
     <div class="container">
         <div class="section-header">
@@ -58,6 +61,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- CTA -->
 <section class="form-section">

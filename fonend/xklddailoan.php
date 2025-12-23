@@ -14,6 +14,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     <p><?php echo get_text('xklddailoan_subtitle', 'Chi phí thấp - Thu nhập ổn định - Cơ hội phát triển'); ?></p>
 </section>
 
+<!-- INTRO - Section 1 -->
+<?php if (is_section_visible('xklddailoan', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="about-grid">
@@ -32,6 +34,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <section class="form-section">
     <div class="form-container" style="text-align: center;">

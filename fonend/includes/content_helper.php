@@ -240,5 +240,35 @@ function echo_content_blocks($page_key, $block_type = null) {
         echo '</div>';
     }
 }
+
+/**
+ * Check if a section should be visible on frontend
+ * Used for CMS section visibility toggle feature
+ * 
+ * @param string $page The page key (e.g., 'duc', 'nhat', 'xkldjp')
+ * @param int $section_index The section index (0-based)
+ * @return bool True if section should be visible
+ */
+function is_section_visible($page, $section_index) {
+    $key = $page . '_section_' . $section_index . '_visible';
+    $value = get_content($key, '1'); // Default to visible if not set
+    return $value !== '0' && $value !== 'false';
+}
+
+/**
+ * Start a conditional section that can be hidden from CMS
+ * Usage: <?php if (section_start('duc', 0)): ?>...<?php section_end(); endif; ?>
+ * 
+ * @param string $page The page key
+ * @param int $section_index The section index
+ * @return bool True if section should be rendered
+ */
+function section_start($page, $section_index) {
+    return is_section_visible($page, $section_index);
+}
+
+function section_end() {
+    // Placeholder for potential future cleanup
+}
 ?>
 

@@ -22,7 +22,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     </div>
 </section>
 
-<!-- INTRO -->
+<!-- INTRO - Section 1 -->
+<?php if (is_section_visible('duc', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="section-header">
@@ -50,8 +51,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- PROGRAMS -->
+<!-- PROGRAMS - Section 2 -->
+<?php if (is_section_visible('duc', 2)): ?>
 <section class="section ecosystem-section">
     <div class="container">
         <div class="section-header">
@@ -79,8 +82,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- AUSBILDUNG DETAIL -->
+<!-- AUSBILDUNG DETAIL - Section 3 -->
+<?php if (is_section_visible('duc', 3)): ?>
 <section class="section programs-section">
     <div class="container">
         <div class="section-header">
@@ -127,8 +132,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- REQUIREMENTS -->
+<!-- REQUIREMENTS - Section 4 -->
+<?php if (is_section_visible('duc', 4)): ?>
 <section class="section about-section" style="background: #f4f7fb;">
     <div class="container">
         <div class="section-header">
@@ -180,6 +187,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- DYNAMIC CONTENT BLOCKS -->
 <?php

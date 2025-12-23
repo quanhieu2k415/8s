@@ -21,7 +21,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     </div>
 </section>
 
-<!-- HISTORY SECTION -->
+<!-- HISTORY SECTION - Section 1 -->
+<?php if (is_section_visible('veicogroup', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="section-header">
@@ -47,8 +48,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- VALUES SECTION -->
+<!-- VALUES SECTION - Section 2 -->
+<?php if (is_section_visible('veicogroup', 2)): ?>
 <section class="section ecosystem-section">
     <div class="container">
         <div class="section-header">
@@ -83,8 +86,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- STATISTICS -->
+<!-- STATISTICS - Section 3 -->
+<?php if (is_section_visible('veicogroup', 3)): ?>
 <section class="stats-section">
     <div class="stats-grid">
         <div class="stat-item">
@@ -105,8 +110,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- PARTNERS SECTION -->
+<!-- PARTNERS SECTION - Section 4 -->
+<?php if (is_section_visible('veicogroup', 4)): ?>
 <section class="section programs-section">
     <div class="container">
         <div class="section-header">
@@ -132,8 +139,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
-<!-- ECOSYSTEM SECTION -->
+<!-- ECOSYSTEM SECTION - Section 5 -->
+<?php if (is_section_visible('veicogroup', 5)): ?>
 <section class="section about-section" style="background: #f4f7fb;">
     <div class="container">
         <div class="section-header">
@@ -167,6 +176,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- CTA SECTION -->
 <section class="form-section">

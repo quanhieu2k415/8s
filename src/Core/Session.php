@@ -109,15 +109,16 @@ class Session
     }
 
     /**
-     * Generate session fingerprint based on user agent and IP
+     * Generate session fingerprint based on user agent only
+     * Note: IP removed to prevent logout on VPN/network changes
      */
     private function generateFingerprint(): string
     {
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
         $secret = $this->config->getAppSecret();
         
-        return hash('sha256', $userAgent . $ip . $secret);
+        // Only use User-Agent, not IP (IP can change with VPN, mobile networks)
+        return hash('sha256', $userAgent . $secret);
     }
 
     /**

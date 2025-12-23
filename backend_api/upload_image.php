@@ -17,10 +17,20 @@ if (!isset($_FILES['image'])) {
 }
 
 $file = $_FILES['image'];
-$targetDir = "uploads/images/";
+$targetDir = __DIR__ . "/uploads/images/";
 $fileName = time() . '_' . basename($file['name']);
 $targetFilePath = $targetDir . $fileName;
 $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+
+// Create directory if it doesn't exist
+if (!file_exists($targetDir)) {
+    if (!mkdir($targetDir, 0755, true)) {
+        error_log("Failed to create directory: " . $targetDir);
+        http_response_code(500);
+        echo json_encode(['status' => false, 'message' => 'Không thể tạo thư mục upload']);
+        exit;
+    }
+}
 
 // Allow certain file formats
 $allowTypes = array('jpg', 'png', 'jpeg', 'gif', 'webp');
@@ -32,17 +42,18 @@ if (in_array($fileType, $allowTypes)) {
     }
 
     if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
-        // Return relative path or full URL depending on need
-        // Assuming backend_api is in root/backend_api/
-        $publicUrl = '/web8s/backend_api/' . $targetFilePath;
+        // Return relative path from web root
+        $publicUrl = '/web8s/backend_api/uploads/images/' . $fileName;
         echo json_encode([
             'status' => true, 
             'message' => 'Upload thành công', 
             'url' => $publicUrl
         ]);
     } else {
+        error_log("Failed to move uploaded file. Temp: {$file['tmp_name']}, Target: {$targetFilePath}");
+        error_log("Upload error code: " . $file['error']);
         http_response_code(500);
-        echo json_encode(['status' => false, 'message' => 'Lỗi khi lưu file']);
+        echo json_encode(['status' => false, 'message' => 'Lỗi khi lưu file. Error: ' . $file['error']]);
     }
 } else {
     http_response_code(400);

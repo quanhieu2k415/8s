@@ -111,6 +111,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle image upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    
+    header('Content-Type: application/json');
+    
+    try {
+        $file = $_FILES['image'];
+        
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Upload error code: ' . $file['error']);
+        }
+        
+        $uploadDir = __DIR__ . '/../uploads/images/';
+        
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0777, true)) {
+                throw new Exception('Cannot create upload directory');
+            }
+        }
+        
+        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($file['name']));
+        $targetPath = $uploadDir . $fileName;
+        $fileType = strtolower(pathinfo($targetPath, PATHINFO_EXTENSION));
+        
+        $allowTypes = array('jpg', 'png', 'jpeg', 'gif', 'webp', 'svg');
+        if (!in_array($fileType, $allowTypes)) {
+            throw new Exception('File type not allowed');
+        }
+        
+        if ($file['size'] > 5000000) {
+            throw new Exception('File too large (max 5MB)');
+        }
+        
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            throw new Exception('Failed to save file');
+        }
+        
+        $publicUrl = '/web8s/uploads/images/' . $fileName;
+        
+        echo json_encode([
+            'status' => true,
+            'message' => 'Upload successful',
+            'url' => $publicUrl
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+    exit;
+}
+
 // Load permissions matrix for admin
 $permissionsData = [];
 if ($userRole === 'admin') {
@@ -416,6 +471,11 @@ if ($userRole === 'admin') {
         .cms-section-card.collapsed .toggle-icon { transform: rotate(-90deg); }
         .cms-section-card.collapsed .cms-section-body { display: none; }
         
+        /* Hidden section styles - for sections hidden on frontend */
+        .cms-section-card.section-hidden { border-color: var(--danger); opacity: 0.7; background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 10px, rgba(239, 68, 68, 0.05) 10px, rgba(239, 68, 68, 0.05) 20px); }
+        .cms-section-card.section-hidden .cms-section-header { background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), var(--surface)); }
+        .cms-section-card.section-hidden:hover { opacity: 1; }
+        
         .cms-section-body { padding: 20px; }
         .cms-field-group { margin-bottom: 20px; }
         .cms-field-group:last-child { margin-bottom: 0; }
@@ -488,7 +548,7 @@ if ($userRole === 'admin') {
                 <span>Dashboard</span>
             </a>
             <?php if ($canManageUsers): ?>
-            <a href="users.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : ''; ?>">
+            <a href="#users" data-section="users">
                 <span class="material-icons-outlined">group</span>
                 <span>Quản lý Tài khoản</span>
             </a>
@@ -677,6 +737,19 @@ if ($userRole === 'admin') {
                 </div>
             </div>
         </section>
+
+        <?php 
+        // Include Users Management Section - must be inside main-content
+        if ($permission->canManageUsers($userRole)) {
+            // Define required variables for users_section.php
+            $isAdmin = ($userRole === 'admin');
+            $canCreateUser = $permission->canCreateUsers($userRole);
+            $canCreateManager = $permission->canCreateUsers($userRole);
+            $canCreateAdmin = $permission->canCreateUsers($userRole);
+            
+            include __DIR__ . '/includes/users_section.php';
+        }
+        ?>
 
         <!-- Registrations Section -->
         <section id="registrations" class="section-panel">
@@ -924,12 +997,12 @@ if ($userRole === 'admin') {
                             <div class="cms-section-body">
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Link Facebook Page</label>
-                                    <input type="url" class="cms-field-input" id="contact_global_facebook_url" placeholder="https://facebook.com/icogroup">
+                                    <input type="url" class="cms-field-input" id="global_facebook_url" placeholder="https://facebook.com/icogroup">
                                 </div>
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Icon Facebook (URL hoặc Upload)</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="url" class="cms-field-input" id="contact_global_facebook_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('facebook', this.value)">
+                                        <input type="url" class="cms-field-input" id="global_facebook_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('facebook', this.value)">
                                         <label style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
                                             <input type="file" accept="image/*" style="display: none;" onchange="uploadSocialIcon('facebook', this)">
                                             📤 Upload
@@ -956,12 +1029,12 @@ if ($userRole === 'admin') {
                             <div class="cms-section-body">
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Link YouTube Channel</label>
-                                    <input type="url" class="cms-field-input" id="contact_global_youtube_url" placeholder="https://youtube.com/icogroup">
+                                    <input type="url" class="cms-field-input" id="global_youtube_url" placeholder="https://youtube.com/icogroup">
                                 </div>
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Icon YouTube (URL hoặc Upload)</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="url" class="cms-field-input" id="contact_global_youtube_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('youtube', this.value)">
+                                        <input type="url" class="cms-field-input" id="global_youtube_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('youtube', this.value)">
                                         <label style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
                                             <input type="file" accept="image/*" style="display: none;" onchange="uploadSocialIcon('youtube', this)">
                                             📤 Upload
@@ -988,12 +1061,12 @@ if ($userRole === 'admin') {
                             <div class="cms-section-body">
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Link Zalo</label>
-                                    <input type="url" class="cms-field-input" id="contact_global_zalo_url" placeholder="https://zalo.me/0822314555">
+                                    <input type="url" class="cms-field-input" id="global_zalo_url" placeholder="https://zalo.me/0822314555">
                                 </div>
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Icon Zalo (URL hoặc Upload)</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="url" class="cms-field-input" id="contact_global_zalo_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('zalo', this.value)">
+                                        <input type="url" class="cms-field-input" id="global_zalo_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('zalo', this.value)">
                                         <label style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
                                             <input type="file" accept="image/*" style="display: none;" onchange="uploadSocialIcon('zalo', this)">
                                             📤 Upload
@@ -1706,6 +1779,9 @@ if ($userRole === 'admin') {
             </div>
         </div>
     </div>
+
+
+
 
     <!-- News Modal -->
     <div id="newsModal" class="modal">
@@ -3925,11 +4001,27 @@ if ($userRole === 'admin') {
             let html = '';
             
             config.sections.forEach((section, sIdx) => {
+                // Generate visibility key for this section
+                const visibilityKey = `${page}_section_${sIdx}_visible`;
+                const isVisible = visualCmsData[visibilityKey] !== '0' && visualCmsData[visibilityKey] !== 'false';
+                
                 html += `
-                    <div class="cms-section-card" id="section-${sIdx}">
-                        <div class="cms-section-header" onclick="toggleSection(${sIdx})">
-                            <h3><span class="icon">${section.title.split(' ')[0]}</span> ${section.title.substring(section.title.indexOf(' ') + 1)}</h3>
-                            <span class="material-icons-outlined toggle-icon">expand_more</span>
+                    <div class="cms-section-card ${!isVisible ? 'section-hidden' : ''}" id="section-${sIdx}">
+                        <div class="cms-section-header">
+                            <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="toggleSection(${sIdx})">
+                                <h3><span class="icon">${section.title.split(' ')[0]}</span> ${section.title.substring(section.title.indexOf(' ') + 1)}</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div class="visibility-toggle" style="display: flex; align-items: center; gap: 8px;" title="Ẩn/Hiện section này trên trang web">
+                                    <span style="font-size: 12px; color: var(--text-secondary);">${isVisible ? 'Đang hiện' : 'Đang ẩn'}</span>
+                                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                                        <input type="checkbox" data-visibility-key="${visibilityKey}" ${isVisible ? 'checked' : ''} 
+                                            onchange="toggleSectionVisibility('${page}', ${sIdx}, this)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <span class="material-icons-outlined toggle-icon" style="cursor: pointer;" onclick="toggleSection(${sIdx})">expand_more</span>
+                            </div>
                         </div>
                         <div class="cms-section-body">`;
                 
@@ -3998,6 +4090,59 @@ if ($userRole === 'admin') {
         function toggleSection(idx) {
             const card = document.getElementById(`section-${idx}`);
             card.classList.toggle('collapsed');
+        }
+        
+        // Toggle section visibility on frontend
+        async function toggleSectionVisibility(page, sectionIdx, checkbox) {
+            const visibilityKey = `${page}_section_${sectionIdx}_visible`;
+            const isVisible = checkbox.checked;
+            const card = checkbox.closest('.cms-section-card');
+            const statusLabel = card.querySelector('.visibility-toggle span');
+            
+            // Update UI
+            if (isVisible) {
+                card.classList.remove('section-hidden');
+                statusLabel.textContent = 'Đang hiện';
+            } else {
+                card.classList.add('section-hidden');
+                statusLabel.textContent = 'Đang ẩn';
+            }
+            
+            // Save to database
+            try {
+                const response = await fetch(`${API_BASE}/save_content.php`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        section_key: visibilityKey,
+                        content_value: isVisible ? '1' : '0'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status) {
+                    showToast(`Đã ${isVisible ? 'hiện' : 'ẩn'} section thành công!`, 'success');
+                    // Update local data
+                    visualCmsData[visibilityKey] = isVisible ? '1' : '0';
+                } else {
+                    throw new Error(result.message || 'Lỗi lưu trạng thái');
+                }
+            } catch (error) {
+                console.error('Error saving visibility:', error);
+                showToast('Lỗi lưu trạng thái: ' + error.message, 'error');
+                // Revert checkbox
+                checkbox.checked = !isVisible;
+                if (isVisible) {
+                    card.classList.add('section-hidden');
+                    statusLabel.textContent = 'Đang ẩn';
+                } else {
+                    card.classList.remove('section-hidden');
+                    statusLabel.textContent = 'Đang hiện';
+                }
+            }
         }
 
         function markModified(input) {
@@ -4104,6 +4249,154 @@ if ($userRole === 'admin') {
 
             if (errorCount === 0) {
                 showToast(`Đã lưu ${successCount} thay đổi thành công!`, 'success');
+            } else {
+                showToast(`Lưu ${successCount} thành công, ${errorCount} thất bại`, 'error');
+            }
+        }
+
+        // ============================================
+        // CONTACT SETTINGS FUNCTIONS
+        // ============================================
+        
+        // Upload social icon
+        async function uploadSocialIcon(platform, input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const formData = new FormData();
+            formData.append('image', input.files[0]);
+            
+            try {
+                const response = await fetch('dashboard.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.status && result.url) {
+                    const urlInput = document.getElementById(`global_${platform}_icon`);
+                    urlInput.value = result.url;
+                    previewSocialIcon(platform, result.url);
+                    showToast('Upload icon thành công!', 'success');
+                } else {
+                    throw new Error(result.message || 'Upload thất bại');
+                }
+            } catch (error) {
+                showToast('Lỗi upload: ' + error.message, 'error');
+            }
+        }
+        
+        // Preview social icon
+        function previewSocialIcon(platform, url) {
+            const preview = document.getElementById(`preview_${platform}_icon`);
+            if (!preview) return;
+            
+            if (url && url.trim()) {
+                preview.innerHTML = `<img src="${url}" alt="${platform}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                const defaultIcons = {
+                    facebook: '👥',
+                    youtube: '▶️',
+                    zalo: '💬'
+                };
+                preview.innerHTML = `<span style="color: #999; font-size: 20px;">${defaultIcons[platform] || '📷'}</span>`;
+            }
+        }
+        
+        // Load contact settings
+        async function loadContactSettings() {
+            try {
+                const response = await fetch(`../backend_api/get_content.php`);
+                const result = await response.json();
+                const dataArray = Array.isArray(result) ? result : (result.data || []);
+                
+                // Map data to input fields
+                // Map data to input fields
+                dataArray.forEach(item => {
+                    // Try with contact_ prefix first (legacy), then exact match
+                    let field = document.getElementById(`contact_${item.section_key}`);
+                    if (!field) {
+                        field = document.getElementById(item.section_key);
+                    }
+                    if (field) {
+                        field.value = item.content_value || '';
+                        
+                        // Load toggle switches
+                        if (fieldId.startsWith('contact_toggle_')) {
+                            field.checked = item.content_value === '1';
+                        }
+                    }
+                });
+                
+                // Load icon previews
+                ['facebook', 'youtube', 'zalo'].forEach(platform => {
+                    const iconInput = document.getElementById(`global_${platform}_icon`);
+                    if (iconInput && iconInput.value) {
+                        previewSocialIcon(platform, iconInput.value);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading contact settings:', error);
+                showToast('Lỗi tải cài đặt liên hệ', 'error');
+            }
+        }
+        
+        // Save contact settings
+        async function saveContactSettings() {
+            const saveBtn = document.getElementById('saveContactBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:2px;"></span> Đang lưu...';
+            
+            // Get all contact fields and global fields
+            const fields = document.querySelectorAll('[id^="contact_"], [id^="global_"]');
+            const updates = [];
+            
+            fields.forEach(field => {
+                let section_key = field.id;
+                if (section_key.startsWith('contact_')) {
+                    section_key = section_key.replace('contact_', '');
+                }
+                let content_value = '';
+                
+                if (field.type === 'checkbox') {
+                    content_value = field.checked ? '1' : '0';
+                } else {
+                    content_value = field.value || '';
+                }
+                
+                updates.push({ section_key, content_value });
+            });
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const update of updates) {
+                try {
+                    const response = await fetch(`../backend_api/save_content.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': CSRF_TOKEN
+                        },
+                        body: JSON.stringify(update)
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    errorCount++;
+                }
+            }
+            
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<span class="material-icons-outlined">save</span> Lưu thay đổi';
+            
+            if (errorCount === 0) {
+                showToast(`Đã lưu ${successCount} cài đặt thành công!`, 'success');
             } else {
                 showToast(`Lưu ${successCount} thành công, ${errorCount} thất bại`, 'error');
             }
@@ -4782,6 +5075,21 @@ if ($userRole === 'admin') {
             });
         });
     </script>
+    
+    <!-- Users Management JavaScript -->
+    <?php if ($permission->canManageUsers($userRole)): ?>
+    <script>
+        // Pass PHP variables to JavaScript for users_management.js
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const currentUser = <?php echo json_encode(['id' => $currentUser['id'], 'username' => $currentUser['username'], 'role' => $currentUser['role']]); ?>;
+        const canDelete = <?php echo ($isAdmin || $permission->has($userRole, 'users.delete')) ? 'true' : 'false'; ?>;
+    </script>
+    <script src="users_management.js"></script>
+    <?php endif; ?>
+    
+    <!-- Session Monitor -->
+    <link rel="stylesheet" href="css/session_modal.css">
+    <script src="js/session_monitor.js"></script>
 </body>
 
 </html>

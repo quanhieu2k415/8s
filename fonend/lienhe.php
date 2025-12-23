@@ -21,7 +21,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     </div>
 </section>
 
-<!-- CONTACT INFO -->
+<!-- CONTACT INFO - Section 1 -->
+<?php if (is_section_visible('lienhe', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="about-grid">
@@ -72,6 +73,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- CONTACT FORM -->
 <section class="form-section" id="dangky">

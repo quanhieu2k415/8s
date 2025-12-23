@@ -14,6 +14,8 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     <p><?php echo get_text('xkldchauau_subtitle', 'Cơ hội làm việc tại các nước phát triển Châu Âu'); ?></p>
 </section>
 
+<!-- INTRO - Section 1 -->
+<?php if (is_section_visible('xkldchauau', 1)): ?>
 <section class="section about-section">
     <div class="container">
         <div class="about-grid">
@@ -32,7 +34,10 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
+<!-- COUNTRIES - Section 2 -->
+<?php if (is_section_visible('xkldchauau', 2)): ?>
 <section class="section ecosystem-section">
     <div class="container">
         <div class="section-header"><h2><?php echo get_text('xkldchauau_countries_title', 'Các Quốc Gia Tuyển Dụng'); ?></h2></div>
@@ -55,6 +60,7 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <section class="form-section">
     <div class="form-container" style="text-align: center;">

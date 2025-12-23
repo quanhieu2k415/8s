@@ -199,7 +199,7 @@ $kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
         .form-group { margin-bottom: 24px; }
         .form-group label { display: block; font-weight: 600; font-size: 14px; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.01em; }
         .input-wrapper { position: relative; }
-        .input-wrapper .material-icons-outlined { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; transition: color var(--transition-fast); }
+        .input-wrapper .material-icons-outlined { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; transition: color var(--transition-fast); pointer-events: none; z-index: 1; }
 
         .form-group input {
             width: 100%;
@@ -210,7 +210,31 @@ $kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
             font-family: inherit;
             transition: all var(--transition-fast);
             outline: none;
-            background: var(--surface);
+            background: var(--surface) !important;
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Disable browser autofill styling */
+        .form-group input:-webkit-autofill,
+        .form-group input:-webkit-autofill:hover,
+        .form-group input:-webkit-autofill:focus,
+        .form-group input:-webkit-autofill:active {
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: #1e293b;
+            transition: background-color 5000s ease-in-out 0s;
+            box-shadow: inset 0 0 20px 20px var(--surface) !important;
+        }
+        
+        .form-group input::placeholder {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         .form-group input:hover { border-color: #CBD5E1; }
@@ -232,6 +256,7 @@ $kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
             align-items: center;
             justify-content: center;
             transition: color var(--transition-fast);
+            z-index: 3;
         }
 
         .password-toggle:hover { color: var(--text-secondary); }
@@ -378,7 +403,7 @@ $kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
             <div class="form-group">
                 <label for="password">Mật khẩu</label>
                 <div class="input-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                    <input type="password" id="password" name="password" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                     <span class="material-icons-outlined">lock_outline</span>
                     <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Hiện/ẩn mật khẩu">
                         <span class="material-icons-outlined" id="passwordIcon">visibility_off</span>
@@ -406,6 +431,51 @@ $kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
     </div>
 
     <script>
+        // ===== Remember Credentials Feature =====
+        const STORAGE_KEY = 'admin_credentials';
+        
+        // Load saved credentials on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedCredentials();
+        });
+        
+        function loadSavedCredentials() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const decoded = JSON.parse(atob(saved));
+                    if (decoded.username) {
+                        document.getElementById('username').value = decoded.username;
+                    }
+                    if (decoded.password) {
+                        document.getElementById('password').value = decoded.password;
+                    }
+                    document.getElementById('remember').checked = true;
+                }
+            } catch (e) {
+                // Invalid data, clear it
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+        
+        function saveCredentials() {
+            const remember = document.getElementById('remember').checked;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (remember && username && password) {
+                const data = btoa(JSON.stringify({ username, password }));
+                localStorage.setItem(STORAGE_KEY, data);
+            } else if (!remember) {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+        
+        function clearSavedCredentials() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+        
+        // Toggle password visibility
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const passwordIcon = document.getElementById('passwordIcon');
@@ -419,10 +489,21 @@ $kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
             }
         }
 
+        // Handle form submission
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const loginBtn = document.getElementById('loginBtn');
             loginBtn.classList.add('loading');
             loginBtn.disabled = true;
+            
+            // Save credentials before submitting
+            saveCredentials();
+        });
+        
+        // Clear saved credentials when remember checkbox is unchecked
+        document.getElementById('remember').addEventListener('change', function() {
+            if (!this.checked) {
+                clearSavedCredentials();
+            }
         });
 
         document.getElementById('username').addEventListener('input', hideError);
