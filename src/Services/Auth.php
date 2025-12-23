@@ -91,6 +91,9 @@ class Auth
                 'remaining_attempts' => $remainingAttempts
             ]);
             
+            // Log failed login to activity_logs
+            ActivityLogger::getInstance()->logLogin($user['id'], $user['username'], $user['role'], false);
+            
             $message = 'Tên đăng nhập hoặc mật khẩu không đúng';
             if ($remainingAttempts > 0 && $remainingAttempts < 3) {
                 $message .= ". Còn {$remainingAttempts} lần thử";
@@ -128,6 +131,9 @@ class Auth
 
         $this->logger->info("Login successful", ['user_id' => $user['id'], 'username' => $username]);
         $this->logger->audit('login', $user['id'], 'admin_user', $user['id']);
+        
+        // Log to activity_logs table
+        ActivityLogger::getInstance()->logLogin($user['id'], $user['username'], $user['role'], true);
 
         return [
             'success' => true,
@@ -228,10 +234,14 @@ class Auth
     public function logout(): void
     {
         $userId = $this->session->getUserId();
+        $user = $this->session->getUser();
         
-        if ($userId) {
+        if ($userId && $user) {
             $this->userRepo->deleteRememberToken($userId);
             $this->logger->audit('logout', $userId, 'admin_user', $userId);
+            
+            // Log to activity_logs table
+            ActivityLogger::getInstance()->logLogout($userId, $user['username'] ?? '', $user['role'] ?? '');
         }
         
         $this->clearRememberCookie();

@@ -1,63 +1,61 @@
 <?php
 /**
- * Debug script to test permissions
+ * Debug permission check
  */
 
-require_once __DIR__ . '/backend_api/bootstrap.php';
-
-use App\Core\Database;
+require_once __DIR__ . '/admin/includes/auth_check.php';
 
 header('Content-Type: text/html; charset=utf-8');
 
-echo "<h2>Debug Permissions</h2>";
+echo "<h2>Debug Permission Check</h2>";
+echo "<p>Current User: <strong>" . htmlspecialchars($currentUser['username']) . "</strong></p>";
+echo "<p>Role: <strong>" . htmlspecialchars($userRole) . "</strong></p>";
 
-try {
-    $db = Database::getInstance();
-    
-    // Test if permissions table exists
-    echo "<h3>1. Kiểm tra bảng permissions:</h3>";
-    try {
-        $result = $db->fetchAll("SHOW TABLES LIKE 'permissions'");
-        if (empty($result)) {
-            echo "<p style='color:red'>❌ Bảng 'permissions' CHƯA TỒN TẠI</p>";
-            echo "<p>→ Bạn cần import file: <code>backend_api/database/permission_migration.sql</code></p>";
-        } else {
-            echo "<p style='color:green'>✓ Bảng 'permissions' tồn tại</p>";
-            
-            // Count permissions
-            $count = $db->fetchAll("SELECT COUNT(*) as cnt FROM permissions");
-            echo "<p>→ Số lượng permissions: " . ($count[0]['cnt'] ?? 0) . "</p>";
-        }
-    } catch (Exception $e) {
-        echo "<p style='color:red'>❌ Lỗi: " . $e->getMessage() . "</p>";
-    }
-    
-    // Test if role_permissions table exists
-    echo "<h3>2. Kiểm tra bảng role_permissions:</h3>";
-    try {
-        $result = $db->fetchAll("SHOW TABLES LIKE 'role_permissions'");
-        if (empty($result)) {
-            echo "<p style='color:red'>❌ Bảng 'role_permissions' CHƯA TỒN TẠI</p>";
-        } else {
-            echo "<p style='color:green'>✓ Bảng 'role_permissions' tồn tại</p>";
-            
-            // Count role permissions
-            $count = $db->fetchAll("SELECT COUNT(*) as cnt FROM role_permissions");
-            echo "<p>→ Số lượng role_permissions: " . ($count[0]['cnt'] ?? 0) . "</p>";
-        }
-    } catch (Exception $e) {
-        echo "<p style='color:red'>❌ Lỗi: " . $e->getMessage() . "</p>";
-    }
-    
-    echo "<h3>3. Hướng dẫn sửa lỗi:</h3>";
-    echo "<ol>";
-    echo "<li>Mở <a href='http://localhost/phpmyadmin' target='_blank'>phpMyAdmin</a></li>";
-    echo "<li>Chọn database <strong>icogroup_db</strong></li>";
-    echo "<li>Click tab <strong>Import</strong></li>";
-    echo "<li>Chọn file: <code>c:\\xampp\\htdocs\\web8s\\backend_api\\database\\permission_migration.sql</code></li>";
-    echo "<li>Click <strong>Import</strong></li>";
-    echo "</ol>";
-    
-} catch (Exception $e) {
-    echo "<p style='color:red'>Lỗi kết nối database: " . $e->getMessage() . "</p>";
+echo "<h3>1. Permission Variables (from auth_check.php):</h3>";
+echo "<ul>";
+echo "<li>\$canManageCMS: " . ($canManageCMS ? 'TRUE ✅' : 'FALSE ❌') . "</li>";
+echo "<li>\$canManageUsers: " . ($canManageUsers ? 'TRUE ✅' : 'FALSE ❌') . "</li>";
+echo "<li>\$canAccessSettings: " . ($canAccessSettings ? 'TRUE ✅' : 'FALSE ❌') . "</li>";
+echo "<li>\$canViewAllLogs: " . ($canViewAllLogs ? 'TRUE ✅' : 'FALSE ❌') . "</li>";
+echo "<li>\$canViewAllReports: " . ($canViewAllReports ? 'TRUE ✅' : 'FALSE ❌') . "</li>";
+echo "<li>\$canExportData: " . ($canExportData ? 'TRUE ✅' : 'FALSE ❌') . "</li>";
+echo "</ul>";
+
+echo "<h3>2. Direct Permission Check (Permission::check):</h3>";
+$permissionsToCheck = [
+    'cms.manage' => 'Quản lý CMS',
+    'content.manage_all' => 'Quản lý tất cả nội dung',
+    'news.create' => 'Tạo tin tức',
+    'settings.view' => 'Xem cấu hình',
+    'logs.view_all' => 'Xem tất cả logs',
+    'users.view_all' => 'Xem tất cả users',
+    'registrations.view_all' => 'Xem tất cả đăng ký'
+];
+
+echo "<table border='1' cellpadding='8'>";
+echo "<tr><th>Permission Key</th><th>Tên</th><th>Có quyền?</th></tr>";
+foreach ($permissionsToCheck as $key => $name) {
+    $hasPermission = $permission->check($userRole, $key);
+    echo "<tr>";
+    echo "<td><code>$key</code></td>";
+    echo "<td>$name</td>";
+    echo "<td>" . ($hasPermission ? '✅ CÓ' : '❌ KHÔNG') . "</td>";
+    echo "</tr>";
 }
+echo "</table>";
+
+echo "<h3>3. Role Permissions in Database:</h3>";
+$rolePerms = $permission->getRolePermissions($userRole);
+if (empty($rolePerms)) {
+    echo "<p style='color:red'>Không có quyền nào được gán cho role '$userRole'</p>";
+} else {
+    echo "<p>Role '$userRole' có " . count($rolePerms) . " quyền:</p>";
+    echo "<ul>";
+    foreach ($rolePerms as $perm) {
+        echo "<li><code>$perm</code></li>";
+    }
+    echo "</ul>";
+}
+
+echo "<h3>4. Gợi ý:</h3>";
+echo "<p>Nếu admin đã cấp quyền nhưng đây vẫn hiện KHÔNG, hãy <strong>đăng xuất và đăng nhập lại</strong>.</p>";

@@ -47,10 +47,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         $db->execute($sql, [':role' => $role, ':pkey' => $permissionKey]);
         
+        // Log permission change
+        \App\Services\ActivityLogger::getInstance()->logPermissionChange(
+            $currentUser['id'],
+            $currentUser['username'],
+            $role,
+            $permissionKey,
+            $granted
+        );
+        
         echo json_encode([
             'success' => true, 
             'message' => $granted ? 'Đã cấp quyền thành công' : 'Đã thu hồi quyền thành công'
         ]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+// Handle password change via POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_password') {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    
+    header('Content-Type: application/json');
+    
+    try {
+        // Verify CSRF
+        if (!isset($csrf) || !$csrf->validateToken($_POST['csrf_token'] ?? '')) {
+            echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+            exit;
+        }
+        
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        
+        if (empty($currentPassword) || empty($newPassword)) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng điền đầy đủ thông tin']);
+            exit;
+        }
+        
+        if (strlen($newPassword) < 6) {
+            echo json_encode(['success' => false, 'message' => 'Mật khẩu mới phải có ít nhất 6 ký tự']);
+            exit;
+        }
+        
+        $result = $auth->changePassword($currentUser['id'], $currentPassword, $newPassword);
+        
+        if ($result['success']) {
+            // Log password change
+            \App\Services\ActivityLogger::getInstance()->logPasswordChange(
+                $currentUser['id'],
+                $currentUser['username'],
+                $userRole
+            );
+        }
+        
+        echo json_encode($result);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
     }
@@ -475,6 +529,9 @@ if ($userRole === 'admin') {
                 <p><?php echo htmlspecialchars($currentUser['username']); ?></p>
                 <span><?php echo htmlspecialchars(ucfirst($currentUser['role'])); ?></span>
             </div>
+            <button class="btn-icon" onclick="openPasswordModal()" title="Đổi mật khẩu" style="margin-left: auto; background: rgba(255,255,255,0.1); border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
+                <span class="material-icons-outlined" style="color: white; font-size: 20px;">lock</span>
+            </button>
         </div>
     </aside>
 
@@ -485,7 +542,7 @@ if ($userRole === 'admin') {
             <div class="header">
                 <h1>Dashboard</h1>
                 <div class="header-actions">
-                    <button class="btn btn-outline" onclick="loadStats()">
+                    <button class="btn btn-outline" onclick="refreshDashboard()">
                         <span class="material-icons-outlined">refresh</span>
                         Làm mới
                     </button>
@@ -1536,6 +1593,41 @@ if ($userRole === 'admin') {
         <span id="toastMessage"></span>
     </div>
 
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2><span class="material-icons-outlined">lock</span> Đổi mật khẩu</h2>
+                <button class="btn-close" onclick="closePasswordModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm" onsubmit="changePassword(event)">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-primary);">Mật khẩu hiện tại</label>
+                        <input type="password" id="currentPassword" required 
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-primary);">Mật khẩu mới</label>
+                        <input type="password" id="newPassword" required minlength="6"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-primary);">Xác nhận mật khẩu mới</label>
+                        <input type="password" id="confirmPassword" required minlength="6"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <span class="material-icons-outlined">save</span>
+                        Đổi mật khẩu
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables
         const API_BASE = '../backend_api';
@@ -1569,6 +1661,7 @@ if ($userRole === 'admin') {
         
         // Show a specific section (called by hash navigation)
         function showSection(sectionId) {
+            console.log('showSection called with:', sectionId);
             const sectionElement = document.getElementById(sectionId);
             if (!sectionElement) return;
             
@@ -1586,7 +1679,10 @@ if ($userRole === 'admin') {
             if (sectionId === 'news') loadNews();
             if (sectionId === 'cms') loadCMS();
             if (sectionId === 'dashboard') { loadStats(); loadRecentRegistrations(); }
-            if (sectionId === 'logs') loadActivityLogs();
+            if (sectionId === 'logs') {
+                console.log('Calling loadActivityLogs...');
+                loadActivityLogs();
+            }
             if (sectionId === 'settings') loadSettings();
         }
 
@@ -1596,16 +1692,7 @@ if ($userRole === 'admin') {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     const section = this.dataset.section;
-                    
-                    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
-                    document.getElementById(section).classList.add('active');
-                    
-                    if (section === 'registrations') loadRegistrations();
-                    if (section === 'news') loadNews();
-                    if (section === 'dashboard') { loadStats(); loadRecentRegistrations(); }
+                    showSection(section);
                 });
             });
         }
@@ -1623,6 +1710,16 @@ if ($userRole === 'admin') {
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
+        }
+
+        // Refresh all dashboard data
+        function refreshDashboard() {
+            loadStats();
+            loadRecentRegistrations();
+            if (typeof loadAnalyticsCharts === 'function') {
+                loadAnalyticsCharts();
+            }
+            showToast('Đã làm mới Dashboard', 'success');
         }
 
         // Recent Registrations
@@ -3936,93 +4033,6 @@ if ($userRole === 'admin') {
             }
         });
 
-        // ===== Activity Logs Functions =====
-        let allLogs = [];
-
-        async function loadActivityLogs() {
-            const tbody = document.getElementById('logsList');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div>Đang tải...</td></tr>';
-
-            try {
-                // For now, show demo data since API might not exist yet
-                const demoLogs = [
-                    { id: 1, timestamp: new Date().toISOString(), username: 'admin', action: 'login', details: 'Đăng nhập thành công', ip: '127.0.0.1' },
-                    { id: 2, timestamp: new Date(Date.now() - 3600000).toISOString(), username: 'admin', action: 'update', details: 'Cập nhật nội dung CMS', ip: '127.0.0.1' },
-                    { id: 3, timestamp: new Date(Date.now() - 7200000).toISOString(), username: 'manager', action: 'create', details: 'Tạo tin tức mới', ip: '192.168.1.100' }
-                ];
-
-                allLogs = demoLogs;
-                renderLogs(demoLogs);
-            } catch (error) {
-                console.error('Error loading logs:', error);
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
-                    <span class="material-icons-outlined">error_outline</span>
-                    <h3>Lỗi tải dữ liệu</h3>
-                    <p>${error.message}</p>
-                </td></tr>`;
-            }
-        }
-
-        function renderLogs(logs) {
-            const tbody = document.getElementById('logsList');
-            if (!tbody) return;
-
-            if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
-                    <span class="material-icons-outlined">history</span>
-                    <h3>Chưa có hoạt động nào</h3>
-                    <p>Lịch sử hoạt động sẽ hiển thị ở đây</p>
-                </td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = logs.map(log => {
-                const actionBadge = getActionBadge(log.action);
-                return `<tr>
-                    <td>${log.id}</td>
-                    <td>${formatDateTime(log.timestamp)}</td>
-                    <td><strong>${escapeHtml(log.username)}</strong></td>
-                    <td>${actionBadge}</td>
-                    <td>${escapeHtml(log.details)}</td>
-                    <td><code>${log.ip}</code></td>
-                </tr>`;
-            }).join('');
-        }
-
-        function getActionBadge(action) {
-            const badges = {
-                'login': '<span class="badge badge-success">Đăng nhập</span>',
-                'logout': '<span class="badge badge-warning">Đăng xuất</span>',
-                'create': '<span class="badge badge-info">Tạo mới</span>',
-                'update': '<span class="badge" style="background: #DBEAFE; color: #1E40AF;">Cập nhật</span>',
-                'delete': '<span class="badge" style="background: #FEE2E2; color: #991B1B;">Xóa</span>'
-            };
-            return badges[action] || `<span class="badge">${action}</span>`;
-        }
-
-        function filterLogs() {
-            const search = document.getElementById('logsSearchInput')?.value.toLowerCase() || '';
-            const actionFilter = document.getElementById('logsActionFilter')?.value || '';
-
-            const filtered = allLogs.filter(log => {
-                const matchSearch = !search || 
-                    log.username.toLowerCase().includes(search) ||
-                    log.details.toLowerCase().includes(search) ||
-                    log.ip.includes(search);
-                const matchAction = !actionFilter || log.action === actionFilter;
-                return matchSearch && matchAction;
-            });
-
-            renderLogs(filtered);
-        }
-
-        function formatDateTime(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        }
-
         // ===== Settings Functions =====
         async function loadSettings() {
             try {
@@ -4223,6 +4233,172 @@ if ($userRole === 'admin') {
                 showToast('Lỗi: ' + error.message, 'error');
             }
         }
+
+        // ===== Activity Logs Functions =====
+        let allLogs = [];
+
+        async function loadActivityLogs() {
+            const tbody = document.getElementById('logsList');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div><p>Đang tải logs...</p></td></tr>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/activity_logs_api.php?action=list&limit=100`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'Không thể tải logs');
+                }
+                
+                allLogs = result.data;
+                renderLogs(allLogs);
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+                    <span class="material-icons-outlined">error_outline</span>
+                    <h3>Lỗi tải logs</h3>
+                    <p>${error.message}</p>
+                </td></tr>`;
+            }
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById('logsList');
+            if (!tbody) return;
+            
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+                    <span class="material-icons-outlined">history</span>
+                    <h3>Chưa có dữ liệu logs</h3>
+                    <p>Các hoạt động sẽ được ghi lại tại đây</p>
+                </td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${log.id}</td>
+                    <td>${formatDateTime(log.created_at)}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-icons-outlined" style="font-size: 18px; color: var(--text-muted);">person</span>
+                            <div>
+                                <div style="font-weight: 600;">${log.username || 'Unknown'}</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">${log.role || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${getActionBadge(log.action)}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(log.details || '').replace(/"/g, '&quot;')}">${log.details || '-'}</td>
+                    <td><code style="font-size: 12px; background: var(--bg-primary); padding: 2px 6px; border-radius: 4px;">${log.ip_address || '-'}</code></td>
+                </tr>
+            `).join('');
+        }
+
+        function getActionBadge(action) {
+            const badges = {
+                'login': { icon: 'login', color: 'var(--success)', bg: 'var(--success-light)', text: 'Đăng nhập' },
+                'logout': { icon: 'logout', color: 'var(--info)', bg: 'var(--info-light)', text: 'Đăng xuất' },
+                'login_failed': { icon: 'error', color: 'var(--danger)', bg: 'var(--danger-light)', text: 'Đăng nhập thất bại' },
+                'create': { icon: 'add_circle', color: 'var(--success)', bg: 'var(--success-light)', text: 'Tạo mới' },
+                'update': { icon: 'edit', color: 'var(--warning)', bg: 'var(--warning-light)', text: 'Cập nhật' },
+                'delete': { icon: 'delete', color: 'var(--danger)', bg: 'var(--danger-light)', text: 'Xóa' },
+                'permission_grant': { icon: 'check_circle', color: 'var(--success)', bg: 'var(--success-light)', text: 'Cấp quyền' },
+                'permission_revoke': { icon: 'remove_circle', color: 'var(--warning)', bg: 'var(--warning-light)', text: 'Thu hồi quyền' },
+                'password_change': { icon: 'lock', color: 'var(--info)', bg: 'var(--info-light)', text: 'Đổi mật khẩu' }
+            };
+            
+            const badge = badges[action] || { icon: 'info', color: 'var(--text-muted)', bg: 'var(--bg-primary)', text: action };
+            
+            return `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: ${badge.bg}; color: ${badge.color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span class="material-icons-outlined" style="font-size: 14px;">${badge.icon}</span>
+                ${badge.text}
+            </span>`;
+        }
+
+        function filterLogs() {
+            const search = (document.getElementById('logsSearchInput')?.value || '').toLowerCase();
+            const actionFilter = document.getElementById('logsActionFilter')?.value || '';
+            
+            const filtered = allLogs.filter(log => {
+                const matchSearch = !search || 
+                    (log.username || '').toLowerCase().includes(search) ||
+                    (log.details || '').toLowerCase().includes(search) ||
+                    (log.ip_address || '').includes(search) ||
+                    (log.action || '').toLowerCase().includes(search);
+                const matchAction = !actionFilter || log.action === actionFilter;
+                return matchSearch && matchAction;
+            });
+            
+            renderLogs(filtered);
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ===== Password Change Functions =====
+        function openPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('passwordForm').reset();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Mật khẩu mới không khớp', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'change_password');
+                formData.append('csrf_token', CSRF_TOKEN);
+                formData.append('current_password', currentPassword);
+                formData.append('new_password', newPassword);
+                
+                const response = await fetch('dashboard.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closePasswordModal();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showToast('Lỗi: ' + error.message, 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePasswordModal();
+            }
+        });
     </script>
 </body>
 

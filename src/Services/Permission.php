@@ -201,7 +201,7 @@ class Permission
 
     public function canManageCMS(string $role): bool
     {
-        return $this->check($role, 'cms.manage');
+        return $this->check($role, 'cms.manage') || $this->check($role, 'content.manage_all');
     }
 
     public function canManageNews(string $role): bool
