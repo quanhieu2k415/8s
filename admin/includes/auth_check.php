@@ -35,6 +35,14 @@ $_SESSION['last_activity'] = time();
 // Check authentication
 $auth->requireAuth('index.php');
 
+// Verify session token (single session login)
+if (!$auth->verifySessionToken()) {
+    // Session token invalid - user logged in from another device
+    $auth->logout();
+    header('Location: index.php?kicked=1');
+    exit;
+}
+
 // Get current user
 $currentUser = $auth->user();
 $csrfToken = $csrf->getToken();
@@ -43,6 +51,7 @@ $userRole = $currentUser['role'] ?? 'user';
 // Permission helper variables for views
 $canManageUsers = $permission->canManageUsers($userRole);
 $canManageCMS = $permission->canManageCMS($userRole);
+$canManageContentBlocks = $permission->canManageContentBlocks($userRole);
 $canAccessSettings = $permission->canAccessSettings($userRole);
 $canViewAllReports = $permission->canViewAllReports($userRole);
 $canViewAllLogs = $permission->canViewAllLogs($userRole);

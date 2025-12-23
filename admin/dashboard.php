@@ -127,6 +127,7 @@ if ($userRole === 'admin') {
             'news' => 'Tin tức',
             'registrations' => 'Đăng ký Tư vấn',
             'cms' => 'CMS',
+            'content_blocks' => 'Content Blocks',
             'profile' => 'Hồ sơ Cá nhân',
             'database' => 'Database',
             'general' => 'Chung'
@@ -140,6 +141,7 @@ if ($userRole === 'admin') {
             'news' => 'article',
             'registrations' => 'people',
             'cms' => 'dashboard_customize',
+            'content_blocks' => 'view_quilt',
             'profile' => 'person',
             'database' => 'storage',
             'general' => 'extension'
@@ -182,7 +184,9 @@ if ($userRole === 'admin') {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="icon" type="image/x-icon" href="../logo.ico">
+    <link rel="stylesheet" href="content_blocks.css">
     <style>
+
         /* ===== CSS Variables ===== */
         :root {
             --primary: #2563EB;
@@ -232,6 +236,10 @@ if ($userRole === 'admin') {
         .toggle-switch input:checked + .toggle-slider:before { transform: translateX(22px); }
         .toggle-switch input:focus + .toggle-slider { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
 
+        /* ===== Section Panel ===== */
+        .section-panel { display: none; animation: fadeIn 0.3s ease; }
+        .section-panel.active { display: block; }
+        
         /* ===== Sidebar ===== */
         .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); color: var(--text-white); z-index: 100; display: flex; flex-direction: column; transition: transform var(--transition-normal); }
         .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
@@ -474,39 +482,45 @@ if ($userRole === 'admin') {
             <p>Quản lý hệ thống</p>
         </div>
         <nav class="sidebar-menu">
-            <a href="#" class="active" data-section="dashboard">
+            <a href="dashboard.php" class="<?php echo !isset($_SERVER['QUERY_STRING']) && empty(trim($_SERVER['REQUEST_URI'], '/')) ? 'active' : ''; ?>" data-section="dashboard">
                 <span class="material-icons-outlined">dashboard</span>
                 <span>Dashboard</span>
             </a>
             <?php if ($canManageUsers): ?>
-            <a href="users.php">
+            <a href="users.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : ''; ?>">
                 <span class="material-icons-outlined">group</span>
                 <span>Quản lý Tài khoản</span>
             </a>
             <?php endif; ?>
-            <a href="#" data-section="registrations">
+            <a href="#registrations" data-section="registrations">
                 <span class="material-icons-outlined">people</span>
                 <span>Đăng ký tư vấn</span>
             </a>
-            <a href="#" data-section="news">
+            <a href="#news" data-section="news">
                 <span class="material-icons-outlined">article</span>
                 <span>Tin tức</span>
             </a>
             <?php if ($canManageCMS): ?>
-            <a href="#" data-section="cms">
+            <a href="#cms" data-section="cms">
                 <span class="material-icons-outlined">edit_note</span>
                 <span>Quản lý nội dung</span>
             </a>
             <?php endif; ?>
+            <?php if ($canManageContentBlocks): ?>
+            <a href="#contentBlocks" data-section="contentBlocks">
+                <span class="material-icons-outlined">view_quilt</span>
+                <span>Content Blocks</span>
+            </a>
+            <?php endif; ?>
             <?php if ($canViewAllLogs): ?>
-            <a href="#" data-section="logs">
+            <a href="#logs" data-section="logs">
                 <span class="material-icons-outlined">history</span>
                 <span>Activity Logs</span>
             </a>
             <?php endif; ?>
             <?php if ($canAccessSettings): ?>
             <div class="sidebar-divider"></div>
-            <a href="#" data-section="settings">
+            <a href="#settings" data-section="settings">
                 <span class="material-icons-outlined">settings</span>
                 <span>Cài đặt hệ thống</span>
             </a>
@@ -538,7 +552,7 @@ if ($userRole === 'admin') {
     <!-- Main Content -->
     <main class="main-content">
         <!-- Dashboard Section -->
-        <section id="dashboard" class="section-panel active">
+        <section id="dashboard" class="section-panel">
             <div class="header">
                 <h1>Dashboard</h1>
                 <div class="header-actions">
@@ -911,6 +925,20 @@ if ($userRole === 'admin') {
                                     <label class="cms-field-label">Link Facebook Page</label>
                                     <input type="url" class="cms-field-input" id="contact_global_facebook_url" placeholder="https://facebook.com/icogroup">
                                 </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Icon Facebook (URL hoặc Upload)</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="url" class="cms-field-input" id="contact_global_facebook_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('facebook', this.value)">
+                                        <label style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                            <input type="file" accept="image/*" style="display: none;" onchange="uploadSocialIcon('facebook', this)">
+                                            📤 Upload
+                                        </label>
+                                    </div>
+                                    <div id="preview_facebook_icon" style="margin-top: 8px; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #999; font-size: 20px;">📘</span>
+                                    </div>
+                                    <small style="color: var(--text-muted);">Để trống để dùng icon mặc định</small>
+                                </div>
                             </div>
                         </div>
                         
@@ -929,6 +957,20 @@ if ($userRole === 'admin') {
                                     <label class="cms-field-label">Link YouTube Channel</label>
                                     <input type="url" class="cms-field-input" id="contact_global_youtube_url" placeholder="https://youtube.com/icogroup">
                                 </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Icon YouTube (URL hoặc Upload)</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="url" class="cms-field-input" id="contact_global_youtube_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('youtube', this.value)">
+                                        <label style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                            <input type="file" accept="image/*" style="display: none;" onchange="uploadSocialIcon('youtube', this)">
+                                            📤 Upload
+                                        </label>
+                                    </div>
+                                    <div id="preview_youtube_icon" style="margin-top: 8px; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #999; font-size: 20px;">📺</span>
+                                    </div>
+                                    <small style="color: var(--text-muted);">Để trống để dùng icon mặc định</small>
+                                </div>
                             </div>
                         </div>
                         
@@ -946,6 +988,20 @@ if ($userRole === 'admin') {
                                 <div class="cms-field-group">
                                     <label class="cms-field-label">Link Zalo</label>
                                     <input type="url" class="cms-field-input" id="contact_global_zalo_url" placeholder="https://zalo.me/0822314555">
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Icon Zalo (URL hoặc Upload)</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="url" class="cms-field-input" id="contact_global_zalo_icon" placeholder="URL ảnh icon" style="flex: 1;" oninput="previewSocialIcon('zalo', this.value)">
+                                        <label style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                            <input type="file" accept="image/*" style="display: none;" onchange="uploadSocialIcon('zalo', this)">
+                                            📤 Upload
+                                        </label>
+                                    </div>
+                                    <div id="preview_zalo_icon" style="margin-top: 8px; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #999; font-size: 20px;">💬</span>
+                                    </div>
+                                    <small style="color: var(--text-muted);">Để trống để dùng icon mặc định</small>
                                 </div>
                             </div>
                         </div>
@@ -1131,6 +1187,229 @@ if ($userRole === 'admin') {
                 </div>
             </div>
         </section>
+
+        <!-- Content Blocks Section -->
+        <section id="contentBlocks" class="section-panel">
+            <div class="header">
+                <h1>📦 Content Blocks</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openAddBlockModal()">
+                        <span class="material-icons-outlined">add</span>
+                        Thêm Block
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container" style="padding: 24px;">
+                <div class="blocks-header">
+                    <div class="blocks-header-left">
+                        <h2 style="margin: 0;">Quản lý Content Blocks</h2>
+                        <select id="blockPageSelect" class="page-select" onchange="loadContentBlocks(this.value)">
+                            <option value="">-- Chọn trang để quản lý --</option>
+                            <option value="duc">🇩🇪 Du học Đức</option>
+                            <option value="nhat">🇯🇵 Du học Nhật Bản</option>
+                            <option value="han">🇰🇷 Du học Hàn Quốc</option>
+                            <option value="xkldjp">💼 XKLĐ Nhật Bản</option>
+                            <option value="xkldhan">💼 XKLĐ Hàn Quốc</option>
+                            <option value="xklddailoan">💼 XKLĐ Đài Loan</option>
+                            <option value="xkldchauau">💼 XKLĐ Châu Âu</option>
+                            <option value="huongnghiep">🎯 Hướng nghiệp</option>
+                            <option value="about">🏢 Về ICOGroup</option>
+                            <option value="contact">📞 Liên hệ</option>
+                            <option value="hoatdong">📸 Hoạt động</option>
+                            <option value="index">🏠 Trang chủ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="blocksContainer" class="blocks-grid">
+                    <div class="blocks-empty">
+                        <span class="material-icons-outlined icon">widgets</span>
+                        <h3>Chọn một trang để bắt đầu</h3>
+                        <p>Sử dụng dropdown ở trên để chọn trang và quản lý content blocks</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Block Modal -->
+        <div id="blockModal" class="modal">
+            <div class="modal-content block-modal-content">
+                <div class="modal-header">
+                    <h2 id="blockModalTitle">Thêm Content Block</h2>
+                    <button class="modal-close" onclick="closeModal('blockModal')">
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="blockId">
+                    
+                    <div class="block-form-row">
+                        <div>
+                            <label>Trang *</label>
+                            <select id="blockPageKey" class="page-select" style="width: 100%;">
+                                <option value="">-- Chọn trang --</option>
+                                <option value="duc">Du học Đức</option>
+                                <option value="nhat">Du học Nhật Bản</option>
+                                <option value="han">Du học Hàn Quốc</option>
+                                <option value="xkldjp">XKLĐ Nhật Bản</option>
+                                <option value="xkldhan">XKLĐ Hàn Quốc</option>
+                                <option value="xklddailoan">XKLĐ Đài Loan</option>
+                                <option value="xkldchauau">XKLĐ Châu Âu</option>
+                                <option value="huongnghiep">Hướng nghiệp</option>
+                                <option value="about">Về ICOGroup</option>
+                                <option value="contact">Liên hệ</option>
+                                <option value="hoatdong">Hoạt động</option>
+                                <option value="index">Trang chủ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Loại Block</label>
+                            <select id="blockType" style="width: 100%;">
+                                <option value="section">Section</option>
+                                <option value="card">Card</option>
+                                <option value="info">Info Box</option>
+                                <option value="banner">Banner</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="block-form-row">
+                        <div>
+                            <label>Thứ tự hiển thị</label>
+                            <input type="number" id="blockOrder" value="1" min="0">
+                        </div>
+                    </div>
+
+                    <label>Tiêu đề</label>
+                    <div class="editor-wrapper">
+                        <div class="editor-toolbar">
+                            <div class="toolbar-group">
+                                <button type="button" onclick="formatBlockText('bold')" title="In đậm">
+                                    <span class="material-icons-outlined">format_bold</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('italic')" title="In nghiêng">
+                                    <span class="material-icons-outlined">format_italic</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('underline')" title="Gạch chân">
+                                    <span class="material-icons-outlined">format_underlined</span>
+                                </button>
+                            </div>
+                            <div class="toolbar-divider"></div>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="titleColorPicker" value="#000000" onchange="applyBlockTextColor(this.value)">
+                                <div class="color-picker-preview" onclick="document.getElementById('titleColorPicker').click()">
+                                    <span class="material-icons-outlined">format_color_text</span>
+                                </div>
+                            </div>
+                            <select class="font-select" onchange="applyBlockFont(this.value)" style="max-width: 120px;">
+                                <option value="">Font</option>
+                            </select>
+                        </div>
+                        <div id="blockTitleEditor" contenteditable="true" class="rich-editor rich-editor-mini" data-placeholder="Nhập tiêu đề..."></div>
+                    </div>
+
+                    <label>Hình ảnh</label>
+                    <div class="image-upload-area">
+                        <div class="image-preview-box" id="blockImagePreview">
+                            <span class="placeholder">
+                                <span class="material-icons-outlined">image</span>
+                                Preview
+                            </span>
+                        </div>
+                        <div class="image-input-group">
+                            <input type="text" id="blockImageUrl" placeholder="URL hình ảnh..." onchange="previewBlockImageUrl()">
+                            <label class="upload-btn">
+                                <input type="file" accept="image/*" style="display: none;" onchange="uploadBlockImage(this)">
+                                <span class="material-icons-outlined">cloud_upload</span> Upload ảnh
+                            </label>
+                        </div>
+                    </div>
+
+                    <label style="margin-top: 16px;">Nội dung</label>
+                    <div class="editor-wrapper">
+                        <div class="editor-toolbar">
+                            <div class="toolbar-group">
+                                <button type="button" onclick="formatBlockText('bold')" title="In đậm (Ctrl+B)">
+                                    <span class="material-icons-outlined">format_bold</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('italic')" title="In nghiêng (Ctrl+I)">
+                                    <span class="material-icons-outlined">format_italic</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('underline')" title="Gạch chân (Ctrl+U)">
+                                    <span class="material-icons-outlined">format_underlined</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('strikeThrough')" title="Gạch ngang">
+                                    <span class="material-icons-outlined">strikethrough_s</span>
+                                </button>
+                            </div>
+                            
+                            <div class="toolbar-divider"></div>
+                            
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="contentColorPicker" value="#000000" onchange="applyBlockTextColor(this.value)">
+                                <div class="color-picker-preview" onclick="document.getElementById('contentColorPicker').click()">
+                                    <span class="material-icons-outlined">format_color_text</span>
+                                </div>
+                            </div>
+                            
+                            <select class="font-select" onchange="applyBlockFont(this.value)">
+                                <option value="">-- Font --</option>
+                            </select>
+                            
+                            <select class="font-size-select" onchange="applyBlockFontSize(this.value)">
+                                <option value="">Cỡ</option>
+                                <option value="1">Rất nhỏ</option>
+                                <option value="2">Nhỏ</option>
+                                <option value="3">Vừa</option>
+                                <option value="4">TB</option>
+                                <option value="5">Lớn</option>
+                                <option value="6">Rất lớn</option>
+                                <option value="7">Cực lớn</option>
+                            </select>
+                            
+                            <div class="toolbar-divider"></div>
+                            
+                            <div class="toolbar-group">
+                                <button type="button" onclick="formatBlockText('justifyLeft')" title="Căn trái">
+                                    <span class="material-icons-outlined">format_align_left</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('justifyCenter')" title="Căn giữa">
+                                    <span class="material-icons-outlined">format_align_center</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('justifyRight')" title="Căn phải">
+                                    <span class="material-icons-outlined">format_align_right</span>
+                                </button>
+                            </div>
+                            
+                            <div class="toolbar-divider"></div>
+                            
+                            <button type="button" onclick="insertBlockLink()" title="Chèn liên kết">
+                                <span class="material-icons-outlined">link</span>
+                            </button>
+                            <button type="button" onclick="formatBlockText('insertUnorderedList')" title="Danh sách">
+                                <span class="material-icons-outlined">format_list_bulleted</span>
+                            </button>
+                        </div>
+                        <div id="blockContentEditor" contenteditable="true" class="rich-editor" data-placeholder="Nhập nội dung với định dạng..."></div>
+                    </div>
+
+                    <!-- Tracking info -->
+                    <div id="blockTrackingInfo" class="tracking-info" style="display: none;">
+                        <span class="material-icons-outlined">history</span>
+                        Cập nhật bởi: <strong id="blockUpdatedBy"></strong> 
+                        lúc <strong id="blockUpdatedAt"></strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeModal('blockModal')">Hủy</button>
+                    <button class="btn btn-primary" onclick="saveBlock()">
+                        <span class="material-icons-outlined">save</span>
+                        Lưu Block
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Activity Logs Section -->
         <section id="logs" class="section-panel">
@@ -1641,11 +1920,26 @@ if ($userRole === 'admin') {
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initNavigation();
-            loadStats();
-            loadRecentRegistrations();
             
-            // Check URL hash and switch to appropriate section
-            handleHashNavigation();
+            // Priority 1: URL Hash
+            const hash = window.location.hash.substring(1);
+            if (hash && document.getElementById(hash)) {
+                console.log("Restoring from Hash:", hash);
+                showSection(hash);
+            } 
+            // Priority 2: LocalStorage
+            else {
+                const savedSection = localStorage.getItem('adminCurrentSection');
+                if (savedSection && document.getElementById(savedSection)) {
+                    console.log("Restoring from LocalStorage:", savedSection);
+                    showSection(savedSection);
+                    history.replaceState(null, null, '#' + savedSection);
+                } else {
+                    // Priority 3: Default to Dashboard
+                    console.log("Defaulting to Dashboard");
+                    showSection('dashboard');
+                }
+            }
             
             // Listen for hash changes
             window.addEventListener('hashchange', handleHashNavigation);
@@ -1653,17 +1947,19 @@ if ($userRole === 'admin') {
         
         // Handle hash navigation from URL
         function handleHashNavigation() {
-            const hash = window.location.hash.substring(1); // Remove the # symbol
+            const hash = window.location.hash.substring(1);
             if (hash && document.getElementById(hash)) {
                 showSection(hash);
             }
         }
         
-        // Show a specific section (called by hash navigation)
+        // Show a specific section
         function showSection(sectionId) {
-            console.log('showSection called with:', sectionId);
             const sectionElement = document.getElementById(sectionId);
             if (!sectionElement) return;
+            
+            // Save to localStorage
+            localStorage.setItem('adminCurrentSection', sectionId);
             
             // Update sidebar active state
             document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
@@ -1678,11 +1974,9 @@ if ($userRole === 'admin') {
             if (sectionId === 'registrations') loadRegistrations();
             if (sectionId === 'news') loadNews();
             if (sectionId === 'cms') loadCMS();
-            if (sectionId === 'dashboard') { loadStats(); loadRecentRegistrations(); }
-            if (sectionId === 'logs') {
-                console.log('Calling loadActivityLogs...');
-                loadActivityLogs();
-            }
+            if (sectionId === 'contentBlocks') loadContentBlocks(document.getElementById('blockPageSelect')?.value || '');
+            if (sectionId === 'dashboard') { loadStats(); loadRecentRegistrations(); if (typeof loadAnalyticsCharts === 'function') setTimeout(loadAnalyticsCharts, 100); }
+            if (sectionId === 'logs') loadActivityLogs();
             if (sectionId === 'settings') loadSettings();
         }
 
@@ -1693,9 +1987,11 @@ if ($userRole === 'admin') {
                     e.preventDefault();
                     const section = this.dataset.section;
                     showSection(section);
+                    history.pushState(null, null, '#' + section);
                 });
             });
         }
+
 
         // Stats
         async function loadStats() {
@@ -2533,30 +2829,7 @@ if ($userRole === 'admin') {
             }
         }
 
-        // Update navigation to load CMS
-        const originalInitNav = initNavigation;
-        initNavigation = function() {
-            document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    
-                    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
-                    document.getElementById(section).classList.add('active');
-                    
-                    if (section === 'registrations') loadRegistrations();
-                    if (section === 'news') loadNews();
-                    if (section === 'cms') loadCMS();
-                    if (section === 'dashboard') { loadStats(); loadRecentRegistrations(); }
-                });
-            });
-        };
-        
-        // Re-init navigation
-        initNavigation();
+
     </script>
 
     <!-- CMS Modal -->
@@ -4014,24 +4287,7 @@ if ($userRole === 'admin') {
             }
         }
 
-        // Load charts when switching to dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            // Override showSection if it exists
-            if (typeof showSection === 'function') {
-                const originalShowSection = showSection;
-                window.showSection = function(sectionId) {
-                    originalShowSection(sectionId);
-                    if (sectionId === 'dashboard') {
-                        setTimeout(loadAnalyticsCharts, 100);
-                    }
-                };
-            }
-            
-            // Load charts on initial page load if dashboard is active
-            if (document.querySelector('#dashboard.active')) {
-                setTimeout(loadAnalyticsCharts, 500);
-            }
-        });
+        // Charts are now loaded directly in showSection function
 
         // ===== Settings Functions =====
         async function loadSettings() {
@@ -4398,6 +4654,74 @@ if ($userRole === 'admin') {
             if (e.target === this) {
                 closePasswordModal();
             }
+        });
+
+        // ===== Social Icon Upload Functions =====
+        function previewSocialIcon(type, url) {
+            const preview = document.getElementById(`preview_${type}_icon`);
+            if (url && url.trim()) {
+                preview.innerHTML = `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.innerHTML='<span style=\\'color: red; font-size: 12px;\\'>❌</span>'">`;
+            } else {
+                const icons = { facebook: '📘', youtube: '📺', zalo: '💬' };
+                preview.innerHTML = `<span style="color: #999; font-size: 20px;">${icons[type] || '📷'}</span>`;
+            }
+        }
+
+        async function uploadSocialIcon(type, input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            if (!file.type.startsWith('image/')) {
+                showToast('Vui lòng chọn file ảnh', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch(API_BASE + 'upload_api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.status && result.url) {
+                    document.getElementById(`contact_global_${type}_icon`).value = result.url;
+                    previewSocialIcon(type, result.url);
+                    showToast('Upload thành công!', 'success');
+                } else {
+                    showToast(result.message || 'Lỗi upload', 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('Lỗi upload: ' + error.message, 'error');
+            }
+        }
+
+        // Load social icon previews when contact section loads
+        function loadSocialIconPreviews() {
+            ['facebook', 'youtube', 'zalo'].forEach(type => {
+                const input = document.getElementById(`contact_global_${type}_icon`);
+                if (input && input.value) {
+                    previewSocialIcon(type, input.value);
+                }
+            });
+        }
+    </script>
+    
+    <!-- Content Blocks JavaScript -->
+    <script src="content_blocks.js"></script>
+    <script>
+        // Update navigation to load Content Blocks
+        document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const section = this.dataset.section;
+                if (section === 'contentBlocks') {
+                    // Load fonts when switching to Content Blocks
+                    loadFonts();
+                }
+            });
         });
     </script>
 </body>

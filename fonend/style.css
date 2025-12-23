@@ -3342,3 +3342,134 @@ nav a[href="index.php"] img {
     mix-blend-mode: multiply;
     border-radius: 8px;
 }
+
+/* ===== DYNAMIC CONTENT BLOCKS ===== */
+.content-blocks-section {
+    padding: 60px 0;
+    background: var(--bg-light);
+}
+
+.dynamic-content-block {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    transition: var(--transition-normal);
+}
+
+.dynamic-content-block:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.dynamic-content-block:last-child {
+    margin-bottom: 0;
+}
+
+/* Block Title */
+.block-title-display {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+.block-title-display h1,
+.block-title-display h2,
+.block-title-display h3 {
+    margin: 0;
+}
+
+/* Block Image */
+.block-image-display {
+    margin-bottom: 20px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.block-image-display img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    display: block;
+}
+
+/* Block Content */
+.block-content-display {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.block-content-display p {
+    margin-bottom: 16px;
+}
+
+.block-content-display p:last-child {
+    margin-bottom: 0;
+}
+
+.block-content-display ul,
+.block-content-display ol {
+    margin: 16px 0;
+    padding-left: 24px;
+}
+
+.block-content-display li {
+    margin-bottom: 8px;
+}
+
+.block-content-display a {
+    color: var(--primary-blue);
+    text-decoration: underline;
+}
+
+.block-content-display a:hover {
+    color: var(--primary-dark);
+}
+
+/* Block Type Variants */
+.block-type-card {
+    text-align: center;
+}
+
+.block-type-card .block-image-display img {
+    max-height: 300px;
+}
+
+.block-type-banner {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+    color: white;
+    text-align: center;
+}
+
+.block-type-banner .block-title-display,
+.block-type-banner .block-content-display {
+    color: white;
+}
+
+.block-type-info {
+    background: var(--primary-50);
+    border-left: 4px solid var(--primary-500);
+    padding: 30px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dynamic-content-block {
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+
+    .block-title-display {
+        font-size: 22px;
+    }
+
+    .content-blocks-section {
+        padding: 40px 0;
+    }
+}

@@ -15,14 +15,19 @@
                 <p><strong>✉️ Email:</strong> <a href="mailto:<?php echo get_text('header_email', 'info@icogroup.vn'); ?>" style="color: #a5b4fc; text-decoration: none;"><?php echo get_text('header_email', 'info@icogroup.vn'); ?></a></p>
                 
                 <div class="social-links">
+                    <?php 
+                    $fb_icon = get_image('global_facebook_icon', 'https://cdn-icons-png.flaticon.com/512/733/733547.png');
+                    $zalo_icon = get_image('global_zalo_icon', 'https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg');
+                    $yt_icon = get_image('global_youtube_icon', 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png');
+                    ?>
                     <a href="<?php echo get_text('global_facebook_url', 'https://facebook.com/icogroup'); ?>" target="_blank" title="Facebook">
-                        <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
+                        <img src="<?php echo $fb_icon; ?>" alt="Facebook">
                     </a>
                     <a href="<?php echo get_text('global_zalo_url', 'https://zalo.me/0822314555'); ?>" target="_blank" title="Zalo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo">
+                        <img src="<?php echo $zalo_icon; ?>" alt="Zalo">
                     </a>
                     <a href="<?php echo get_text('global_youtube_url', 'https://youtube.com/@icogroup'); ?>" target="_blank" title="YouTube">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
+                        <img src="<?php echo $yt_icon; ?>" alt="YouTube">
                     </a>
                 </div>
             </div>

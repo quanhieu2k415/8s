@@ -31,14 +31,31 @@ include_once __DIR__ . '/content_helper.php';
             </a>
         </div>
         <div class="top-bar-right">
+            <?php 
+            $fb_icon = get_image('global_facebook_icon', '');
+            $yt_icon = get_image('global_youtube_icon', '');
+            $zalo_icon = get_image('global_zalo_icon', '');
+            ?>
             <a href="<?php echo get_text('global_facebook_url', 'https://facebook.com/icogroup'); ?>" target="_blank" class="social-icon" title="Facebook">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <?php if ($fb_icon): ?>
+                    <img src="<?php echo $fb_icon; ?>" alt="Facebook" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;">
+                <?php else: ?>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <?php endif; ?>
             </a>
             <a href="<?php echo get_text('global_youtube_url', 'https://youtube.com/icogroup'); ?>" target="_blank" class="social-icon" title="YouTube">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <?php if ($yt_icon): ?>
+                    <img src="<?php echo $yt_icon; ?>" alt="YouTube" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;">
+                <?php else: ?>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <?php endif; ?>
             </a>
             <a href="<?php echo get_text('global_zalo_url', 'https://zalo.me/icogroup'); ?>" target="_blank" class="social-icon" title="Zalo">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 5.28c-.096.288-.444.48-.756.48H9.892c-.312 0-.66-.192-.756-.48l-1.97-5.28c-.168-.456.144-.936.636-.936h.924c.312 0 .588.216.684.504l1.356 4.032h2.468l1.356-4.032c.096-.288.372-.504.684-.504h.924c.492 0 .804.48.636.936z"/></svg>
+                <?php if ($zalo_icon): ?>
+                    <img src="<?php echo $zalo_icon; ?>" alt="Zalo" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;">
+                <?php else: ?>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 5.28c-.096.288-.444.48-.756.48H9.892c-.312 0-.66-.192-.756-.48l-1.97-5.28c-.168-.456.144-.936.636-.936h.924c.312 0 .588.216.684.504l1.356 4.032h2.468l1.356-4.032c.096-.288.372-.504.684-.504h.924c.492 0 .804.48.636.936z"/></svg>
+                <?php endif; ?>
             </a>
             <a href="index.php#dangky" class="top-bar-cta">
                 <span class="material-symbols-outlined">app_registration</span>

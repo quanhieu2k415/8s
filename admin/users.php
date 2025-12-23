@@ -258,6 +258,9 @@ $isAdmin = $userRole === 'admin';
                 <p><?php echo htmlspecialchars($currentUser['username']); ?></p>
                 <span><?php echo htmlspecialchars(ucfirst($currentUser['role'])); ?></span>
             </div>
+            <button class="btn-icon" onclick="openPasswordModal()" title="Đổi mật khẩu" style="margin-left: auto; background: rgba(255,255,255,0.1); border: none; padding: 8px; border-radius: 8px; cursor: pointer;">
+                <span class="material-icons-outlined" style="color: white; font-size: 20px;">lock</span>
+            </button>
         </div>
     </aside>
 
@@ -267,6 +270,10 @@ $isAdmin = $userRole === 'admin';
             <h1>👥 Quản lý Tài khoản</h1>
             <div class="header-actions">
                 <?php if ($canCreateUser || $canCreateManager || $canCreateAdmin): ?>
+                <button class="btn btn-outline" onclick="openImportModal()" title="Import từ file TXT">
+                    <span class="material-icons-outlined">upload_file</span>
+                    Import
+                </button>
                 <button class="btn btn-primary" onclick="openCreateModal()">
                     <span class="material-icons-outlined">person_add</span>
                     Thêm tài khoản
@@ -373,7 +380,7 @@ $isAdmin = $userRole === 'admin';
                     <input type="email" name="email" placeholder="Nhập email">
                     
                     <label>Mật khẩu *</label>
-                    <input type="password" name="password" required placeholder="Nhập mật khẩu" minlength="6">
+                    <input type="password" name="password" required placeholder="Nhập mật khẩu" minlength="6" autocomplete="new-password">
                     
                     <label>Role *</label>
                     <select name="role" required>
@@ -451,6 +458,62 @@ $isAdmin = $userRole === 'admin';
                 <button class="btn btn-primary" onclick="updateUser()">
                     <span class="material-icons-outlined">save</span>
                     Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Users Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><span class="material-icons-outlined">upload_file</span> Import tài khoản từ TXT</h2>
+                <button class="modal-close" onclick="closeModal('importModal')">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="background: var(--info-light); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: var(--info); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                        <span class="material-icons-outlined">info</span> Hướng dẫn định dạng
+                    </h4>
+                    <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.6;">
+                        Mỗi dòng là một tài khoản với định dạng:<br>
+                        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 8px;">username/email/password/role</code><br><br>
+                        <strong>Ví dụ:</strong><br>
+                        <code style="background: white; padding: 4px 8px; border-radius: 4px; display: inline-block; font-size: 12px;">
+                            user1/user1@email.com/123456/user<br>
+                            manager1/manager@email.com/pass123/manager
+                        </code>
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Chọn file TXT hoặc dán nội dung:</label>
+                    <input type="file" id="importFile" accept=".txt" onchange="handleFileSelect(event)" 
+                        style="width: 100%; padding: 12px; border: 2px dashed var(--border-medium); border-radius: 8px; background: var(--bg-primary);">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Hoặc dán nội dung trực tiếp:</label>
+                    <textarea id="importContent" rows="8" placeholder="username/email/password/role&#10;user1/user1@email.com/123456/user&#10;user2/user2@email.com/password/manager"
+                        style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; font-family: monospace; font-size: 13px; resize: vertical;"></textarea>
+                </div>
+                
+                <div id="importPreview" style="display: none; background: var(--bg-primary); padding: 16px; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                    <h4 style="margin-bottom: 12px;">Preview:</h4>
+                    <div id="previewContent"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('importModal')">Hủy</button>
+                <button class="btn btn-outline" onclick="previewImport()">
+                    <span class="material-icons-outlined">visibility</span>
+                    Xem trước
+                </button>
+                <button class="btn btn-primary" onclick="importUsers()">
+                    <span class="material-icons-outlined">upload</span>
+                    Import
                 </button>
             </div>
         </div>
@@ -751,6 +814,240 @@ $isAdmin = $userRole === 'admin';
                 event.target.style.display = 'none';
             }
         }
+
+        // ===== Import Users Functions =====
+        function openImportModal() {
+            document.getElementById('importModal').style.display = 'flex';
+            document.getElementById('importContent').value = '';
+            document.getElementById('importFile').value = '';
+            document.getElementById('importPreview').style.display = 'none';
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('importContent').value = e.target.result;
+                previewImport();
+            };
+            reader.readAsText(file);
+        }
+
+        function parseImportData(content) {
+            const lines = content.trim().split('\n').filter(line => line.trim());
+            const users = [];
+            const errors = [];
+            
+            lines.forEach((line, index) => {
+                const parts = line.trim().split('/');
+                if (parts.length < 3) {
+                    errors.push(`Dòng ${index + 1}: Thiếu thông tin (cần ít nhất username/email/password)`);
+                    return;
+                }
+                
+                const [username, email, password, role = 'user'] = parts.map(p => p.trim());
+                
+                if (!username || !email || !password) {
+                    errors.push(`Dòng ${index + 1}: Username, email hoặc password trống`);
+                    return;
+                }
+                
+                if (!['admin', 'manager', 'user'].includes(role.toLowerCase())) {
+                    errors.push(`Dòng ${index + 1}: Role không hợp lệ (chỉ có: admin, manager, user)`);
+                    return;
+                }
+                
+                users.push({
+                    username,
+                    email,
+                    password,
+                    role: role.toLowerCase()
+                });
+            });
+            
+            return { users, errors };
+        }
+
+        function previewImport() {
+            const content = document.getElementById('importContent').value;
+            if (!content.trim()) {
+                showToast('Vui lòng nhập nội dung hoặc chọn file', 'error');
+                return;
+            }
+            
+            const { users, errors } = parseImportData(content);
+            const previewDiv = document.getElementById('importPreview');
+            const previewContent = document.getElementById('previewContent');
+            
+            let html = '';
+            
+            if (errors.length > 0) {
+                html += `<div style="color: var(--danger); margin-bottom: 12px;">
+                    <strong>⚠️ Lỗi:</strong><br>
+                    ${errors.map(e => `• ${e}`).join('<br>')}
+                </div>`;
+            }
+            
+            if (users.length > 0) {
+                html += `<div style="color: var(--success); margin-bottom: 8px;">
+                    <strong>✅ ${users.length} tài khoản hợp lệ:</strong>
+                </div>`;
+                html += '<table style="width: 100%; font-size: 12px; border-collapse: collapse;">';
+                html += '<tr style="background: var(--surface);"><th style="padding: 8px; text-align: left;">Username</th><th style="padding: 8px; text-align: left;">Email</th><th style="padding: 8px; text-align: left;">Role</th></tr>';
+                users.forEach(u => {
+                    html += `<tr style="border-top: 1px solid var(--border-light);">
+                        <td style="padding: 8px;">${escapeHtml(u.username)}</td>
+                        <td style="padding: 8px;">${escapeHtml(u.email)}</td>
+                        <td style="padding: 8px;"><span class="badge badge-${u.role === 'admin' ? 'primary' : u.role === 'manager' ? 'warning' : 'info'}">${u.role}</span></td>
+                    </tr>`;
+                });
+                html += '</table>';
+            }
+            
+            previewContent.innerHTML = html || '<p style="color: var(--text-muted);">Không có dữ liệu hợp lệ</p>';
+            previewDiv.style.display = 'block';
+        }
+
+        async function importUsers() {
+            const content = document.getElementById('importContent').value;
+            if (!content.trim()) {
+                showToast('Vui lòng nhập nội dung hoặc chọn file', 'error');
+                return;
+            }
+            
+            const { users, errors } = parseImportData(content);
+            
+            if (users.length === 0) {
+                showToast('Không có tài khoản hợp lệ để import', 'error');
+                return;
+            }
+            
+            if (errors.length > 0) {
+                if (!confirm(`Có ${errors.length} lỗi. Bạn có muốn import ${users.length} tài khoản hợp lệ không?`)) {
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'import',
+                        users: users,
+                        csrf_token: document.querySelector('meta[name="csrf-token"]').content
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(`Đã import ${result.imported || users.length} tài khoản`, 'success');
+                    closeModal('importModal');
+                    loadUsers();
+                    if (isAdmin) loadStats();
+                } else {
+                    showToast(result.message || 'Lỗi khi import', 'error');
+                    if (result.errors && result.errors.length > 0) {
+                        console.error('Import errors:', result.errors);
+                    }
+                }
+            } catch (error) {
+                console.error('Error importing users:', error);
+                showToast('Lỗi: ' + error.message, 'error');
+            }
+        }
+
+        // ===== Password Change Functions =====
+        function openPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('passwordForm').reset();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Mật khẩu mới không khớp', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'change_password');
+                formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
+                formData.append('current_password', currentPassword);
+                formData.append('new_password', newPassword);
+                
+                const response = await fetch('../backend_api/users_api.php?action=change-password', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closePasswordModal();
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showToast('Lỗi: ' + error.message, 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('passwordModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePasswordModal();
+            }
+        });
     </script>
+    
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2><span class="material-icons-outlined">lock</span> Đổi mật khẩu</h2>
+                <button class="modal-close" onclick="closePasswordModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm" onsubmit="changePassword(event)">
+                    <label>Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" required autocomplete="current-password">
+                    <label>Mật khẩu mới</label>
+                    <input type="password" id="newPassword" required minlength="6" autocomplete="new-password">
+                    <label>Xác nhận mật khẩu mới</label>
+                    <input type="password" id="confirmPassword" required minlength="6" autocomplete="new-password">
+                    <div class="modal-footer" style="padding: 0; border: none; margin-top: 8px;">
+                        <button type="button" class="btn btn-outline" onclick="closePasswordModal()">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-icons-outlined">save</span>
+                            Đổi mật khẩu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

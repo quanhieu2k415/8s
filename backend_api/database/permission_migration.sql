@@ -118,6 +118,10 @@ INSERT INTO permissions (permission_key, permission_name, description, category)
 ('cms.images', 'Quản lý hình ảnh', 'Upload và quản lý hình ảnh', 'cms'),
 ('cms.texts', 'Quản lý văn bản', 'Chỉnh sửa văn bản trên website', 'cms'),
 
+-- Content Blocks
+('content_blocks.view', 'Xem Content Blocks', 'Xem danh sách content blocks', 'content_blocks'),
+('content_blocks.manage', 'Quản lý Content Blocks', 'Tạo, sửa, xóa content blocks', 'content_blocks'),
+
 -- Profile
 ('profile.edit_own', 'Sửa thông tin cá nhân', 'Chỉnh sửa thông tin cá nhân của mình', 'profile'),
 ('profile.change_password', 'Đổi mật khẩu', 'Đổi mật khẩu tài khoản của mình', 'profile'),
@@ -156,6 +160,8 @@ INSERT INTO role_permissions (role, permission_key) VALUES
 ('manager', 'cms.manage'),
 ('manager', 'cms.images'),
 ('manager', 'cms.texts'),
+('manager', 'content_blocks.view'),
+('manager', 'content_blocks.manage'),
 ('manager', 'profile.edit_own'),
 ('manager', 'profile.change_password')
 ON DUPLICATE KEY UPDATE role = role;

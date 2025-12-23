@@ -114,12 +114,17 @@ class Auth
             $this->userRepo->updatePassword($user['id'], $password);
         }
 
+        // Generate unique session token for single-session login
+        $sessionToken = bin2hex(random_bytes(32));
+        $this->userRepo->saveSessionToken($user['id'], $sessionToken);
+
         // Set session
         $sessionUser = [
             'id' => $user['id'],
             'username' => $user['username'],
             'email' => $user['email'],
-            'role' => $user['role']
+            'role' => $user['role'],
+            'session_token' => $sessionToken
         ];
         
         $this->session->setUser($sessionUser);
@@ -276,6 +281,20 @@ class Auth
     public function id(): ?int
     {
         return $this->session->getUserId();
+    }
+
+    /**
+     * Verify session token is still valid (for single session login)
+     * Returns false if user logged in from another device/browser
+     */
+    public function verifySessionToken(): bool
+    {
+        $user = $this->session->getUser();
+        if (!$user || !isset($user['id']) || !isset($user['session_token'])) {
+            return true; // No session or old sessions without token
+        }
+
+        return $this->userRepo->verifySessionToken($user['id'], $user['session_token']);
     }
 
     /**

@@ -11,7 +11,7 @@ $header_bg = get_image('nhat_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #BC002D, #FFFFFF);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1><?php echo get_text('nhat_title', 'Du Học Nhật Bản 🇯🇵'); ?></h1>
+    <h1>🇯🇵 <?php echo get_text('nhat_title', 'Du Học Nhật Bản'); ?> <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">JP</span></h1>
     <p><?php echo get_text('nhat_subtitle', 'Hành trình chinh phục xứ sở hoa anh đào'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
@@ -182,6 +182,38 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+
+<!-- DYNAMIC CONTENT BLOCKS -->
+<?php
+$blocks = get_content_blocks('nhat');
+if (!empty($blocks)):
+?>
+<section class="section content-blocks-section">
+    <div class="container">
+        <?php foreach ($blocks as $block): ?>
+        <div class="dynamic-content-block block-type-<?php echo htmlspecialchars($block['block_type']); ?>">
+            <?php if (!empty($block['title'])): ?>
+            <div class="block-title-display">
+                <?php echo render_html($block['title']); ?>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['image_url'])): ?>
+            <div class="block-image-display">
+                <img src="<?php echo htmlspecialchars($block['image_url']); ?>" alt="">
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['content'])): ?>
+            <div class="block-content-display">
+                <?php echo render_html($block['content']); ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
 
 <!-- CTA -->
 <section class="form-section">

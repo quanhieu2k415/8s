@@ -2,6 +2,7 @@
 /**
  * Analytics API - ICOGroup
  * Returns detailed statistics with chart data
+ * Requires authentication and canViewAllReports permission
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -12,6 +13,28 @@ header('Access-Control-Allow-Headers: Content-Type');
 require_once __DIR__ . '/../autoloader.php';
 
 use App\Core\Database;
+use App\Services\Auth;
+use App\Services\Permission;
+
+// Check authentication
+$auth = Auth::getInstance();
+$permission = Permission::getInstance();
+
+if (!$auth->check()) {
+    http_response_code(401);
+    echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
+$currentUser = $auth->user();
+$userRole = $currentUser['role'] ?? 'user';
+
+// Check permission - need canViewAllReports for analytics
+if (!$permission->canViewAllReports($userRole)) {
+    http_response_code(403);
+    echo json_encode(['status' => false, 'message' => 'Không có quyền xem thống kê']);
+    exit;
+}
 
 $db = Database::getInstance();
 $type = $_GET['type'] ?? 'overview';

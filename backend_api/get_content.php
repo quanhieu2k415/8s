@@ -8,7 +8,8 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: GET');
 
-$sql = "SELECT section_key, content_value FROM $content_table";
+// Lấy thêm thông tin tracking
+$sql = "SELECT section_key, content_value, updated_by, updated_at FROM $content_table";
 $result = $conn->query($sql);
 
 $content = [];

@@ -226,6 +226,16 @@ class Permission
         return $this->check($role, 'database.backup');
     }
 
+    public function canManageContentBlocks(string $role): bool
+    {
+        return $this->check($role, 'content_blocks.manage') || $this->check($role, 'cms.manage');
+    }
+
+    public function canViewContentBlocks(string $role): bool
+    {
+        return $this->check($role, 'content_blocks.view') || $this->canManageContentBlocks($role);
+    }
+
     // =============================================
     // Permission management (for admin)
     // =============================================

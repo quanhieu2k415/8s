@@ -12,7 +12,7 @@ $header_bg = get_image('xkldjp_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #BC002D, #fff);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1>Xuất Khẩu Lao Động Nhật Bản 🇯🇵</h1>
+    <h1>🇯🇵 Xuất Khẩu Lao Động Nhật Bản <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">JP</span></h1>
     <p>Chương trình thực tập sinh kỹ năng - Thu nhập cao, môi trường làm việc tốt</p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>

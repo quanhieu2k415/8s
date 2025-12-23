@@ -68,8 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $csrfToken = $csrf->getToken();
 
-// Check if session expired
+// Check if session expired or kicked by another login
 $sessionExpired = isset($_GET['expired']) && $_GET['expired'] == '1';
+$kickedByOther = isset($_GET['kicked']) && $_GET['kicked'] == '1';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -351,6 +352,13 @@ $sessionExpired = isset($_GET['expired']) && $_GET['expired'] == '1';
             <div class="error-message show" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #92400E; border-color: #FCD34D;">
                 <span class="material-icons-outlined">schedule</span>
                 <span>Phiên làm việc đã hết hạn (1 giờ). Vui lòng đăng nhập lại.</span>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($kickedByOther): ?>
+            <div class="error-message show" style="background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%); color: #5B21B6; border-color: #A78BFA;">
+                <span class="material-icons-outlined">devices</span>
+                <span>Tài khoản đã đăng nhập từ thiết bị khác. Vui lòng đăng nhập lại!</span>
             </div>
             <?php endif; ?>
             

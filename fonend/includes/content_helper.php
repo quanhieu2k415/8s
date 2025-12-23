@@ -155,4 +155,90 @@ function get_content_by_prefix($prefix) {
     
     return $results;
 }
+
+/**
+ * Get all content blocks for a page
+ * 
+ * @param string $page_key The page key (e.g., 'duc', 'nhat', 'xkldjp')
+ * @return array List of content blocks
+ */
+function get_content_blocks($page_key) {
+    global $conn;
+    
+    if (!$conn) return [];
+    
+    $sql = "SELECT * FROM content_blocks WHERE page_key = ? AND is_active = 1 ORDER BY block_order ASC";
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) return [];
+    
+    $stmt->bind_param("s", $page_key);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $blocks = [];
+    while ($row = $result->fetch_assoc()) {
+        $blocks[] = $row;
+    }
+    
+    return $blocks;
+}
+
+/**
+ * Render HTML content safely (allowing formatting tags)
+ * 
+ * @param string $content The HTML content
+ * @param string $default Default value if empty
+ * @return string Sanitized HTML content
+ */
+function render_html($content, $default = '') {
+    if (empty($content)) return $default;
+    
+    // Cho phép các tag định dạng cơ bản và inline styles
+    $allowed_tags = '<b><i><u><s><strong><em><span><br><p><h1><h2><h3><h4><h5><h6><font><div><ul><ol><li><a>';
+    return strip_tags($content, $allowed_tags);
+}
+
+/**
+ * Get text content and render as HTML (allowing safe formatting)
+ * 
+ * @param string $key The text key
+ * @param string $default_text Default text if not found
+ * @return string The HTML content (sanitized)
+ */
+function get_html_text($key, $default_text = '') {
+    $content = get_content($key, $default_text);
+    return render_html($content, $default_text);
+}
+
+/**
+ * Echo HTML content block
+ * 
+ * @param string $page_key The page key
+ * @param string $block_type Filter by block type (optional)
+ */
+function echo_content_blocks($page_key, $block_type = null) {
+    $blocks = get_content_blocks($page_key);
+    
+    foreach ($blocks as $block) {
+        if ($block_type && $block['block_type'] !== $block_type) continue;
+        
+        echo '<div class="content-block content-block-' . htmlspecialchars($block['block_type']) . '">';
+        
+        if (!empty($block['title'])) {
+            echo '<h3 class="block-title">' . render_html($block['title']) . '</h3>';
+        }
+        
+        if (!empty($block['image_url'])) {
+            echo '<div class="block-image"><img src="' . htmlspecialchars($block['image_url']) . '" alt=""></div>';
+        }
+        
+        if (!empty($block['content'])) {
+            echo '<div class="block-content">' . render_html($block['content']) . '</div>';
+        }
+        
+        echo '</div>';
+    }
+}
 ?>
+

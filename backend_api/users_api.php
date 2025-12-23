@@ -234,6 +234,74 @@ function handlePost($action, $auth, $permission, $userRepo, $currentUser, $curre
             }
             break;
 
+        case 'import':
+            // Bulk import users
+            if ($currentRole !== 'admin') {
+                Response::json(['success' => false, 'message' => 'Chỉ Admin mới có quyền import'], 403);
+            }
+
+            $users = $input['users'] ?? [];
+            if (empty($users) || !is_array($users)) {
+                Response::json(['success' => false, 'message' => 'Không có dữ liệu import'], 400);
+            }
+
+            $imported = 0;
+            $errors = [];
+
+            foreach ($users as $index => $userData) {
+                $username = trim($userData['username'] ?? '');
+                $email = trim($userData['email'] ?? '');
+                $password = $userData['password'] ?? '';
+                $role = strtolower($userData['role'] ?? 'user');
+
+                // Validate
+                if (!$username || !$password) {
+                    $errors[] = "User $index: Username hoặc password trống";
+                    continue;
+                }
+
+                if (!in_array($role, ['admin', 'manager', 'user'])) {
+                    $role = 'user';
+                }
+
+                // Check if username exists
+                if ($userRepo->usernameExists($username)) {
+                    $errors[] = "$username: Đã tồn tại";
+                    continue;
+                }
+
+                try {
+                    $userId = $userRepo->createUser($username, $password, $email, $role);
+                    $imported++;
+
+                    // Log activity
+                    \App\Services\ActivityLogger::getInstance()->logCreate(
+                        $currentUser['id'],
+                        $currentUser['username'],
+                        $currentRole,
+                        'user',
+                        $userId,
+                        "Import user: $username ($role)"
+                    );
+                } catch (Exception $e) {
+                    $errors[] = "$username: " . $e->getMessage();
+                }
+            }
+
+            $logger->audit('users_import', $currentUser['id'], 'admin_users', null, [
+                'imported' => $imported,
+                'total' => count($users),
+                'errors_count' => count($errors)
+            ]);
+
+            Response::json([
+                'success' => true,
+                'message' => "Đã import $imported/" . count($users) . " tài khoản",
+                'imported' => $imported,
+                'errors' => $errors
+            ]);
+            break;
+
         default:
             Response::json(['success' => false, 'message' => 'Action không hợp lệ'], 400);
     }

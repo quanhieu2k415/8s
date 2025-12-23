@@ -2,6 +2,7 @@
 /**
  * Statistics API - ICOGroup
  * Returns registration statistics and custom statistics
+ * Requires authentication and appropriate permissions
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -13,8 +14,37 @@ require_once __DIR__ . '/../autoloader.php';
 
 use App\Repositories\RegistrationRepository;
 use App\Core\Database;
+use App\Services\Auth;
+use App\Services\Permission;
+
+// Check authentication
+$auth = Auth::getInstance();
+$permission = Permission::getInstance();
+
+if (!$auth->check()) {
+    http_response_code(401);
+    echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
+$currentUser = $auth->user();
+$userRole = $currentUser['role'] ?? 'user';
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Check permission based on method
+if ($method === 'PUT' && !$permission->canModifySettings($userRole)) {
+    http_response_code(403);
+    echo json_encode(['status' => false, 'message' => 'Không có quyền chỉnh sửa']);
+    exit;
+}
+
+// GET requires canViewAllReports
+if ($method === 'GET' && !$permission->canViewAllReports($userRole)) {
+    http_response_code(403);
+    echo json_encode(['status' => false, 'message' => 'Không có quyền xem thống kê']);
+    exit;
+}
 
 switch ($method) {
     case 'GET':

@@ -106,6 +106,18 @@ try {
     ");
     echo "✓ Created audit_logs table\n";
     
+    // Add session_token column for single session login (auto-migration)
+    try {
+        $result = $pdo->query("SHOW COLUMNS FROM admin_users LIKE 'session_token'");
+        if ($result->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE admin_users ADD COLUMN session_token VARCHAR(64) NULL");
+            $pdo->exec("CREATE INDEX idx_session_token ON admin_users(session_token)");
+            echo "✓ Added session_token column for single session login\n";
+        }
+    } catch (Exception $e) {
+        echo "! session_token migration skipped: " . $e->getMessage() . "\n";
+    }
+    
     // Add indexes to user table (registrations)
     try {
         // Check if deleted_at column exists
@@ -132,6 +144,43 @@ try {
         echo "✓ Added indexes to news table\n";
     } catch (Exception $e) {
         echo "! News table modifications skipped (may not exist yet)\n";
+    }
+    
+    // Create content_blocks table
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS content_blocks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                page_key VARCHAR(100) NOT NULL,
+                block_order INT DEFAULT 0,
+                block_type ENUM('section', 'card', 'info', 'banner') DEFAULT 'section',
+                title TEXT DEFAULT NULL,
+                image_url TEXT DEFAULT NULL,
+                content LONGTEXT DEFAULT NULL,
+                updated_by VARCHAR(100) DEFAULT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                is_active TINYINT(1) DEFAULT 1,
+                INDEX idx_page_key (page_key),
+                INDEX idx_block_order (block_order),
+                INDEX idx_is_active (is_active)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+        echo "✓ Created content_blocks table\n";
+    } catch (Exception $e) {
+        echo "! content_blocks table may already exist\n";
+    }
+    
+    // Add tracking columns to content_pages
+    try {
+        $result = $pdo->query("SHOW COLUMNS FROM content_pages LIKE 'updated_by'");
+        if ($result->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE content_pages ADD COLUMN updated_by VARCHAR(100) DEFAULT NULL");
+            $pdo->exec("ALTER TABLE content_pages ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+            echo "✓ Added tracking columns to content_pages\n";
+        }
+    } catch (Exception $e) {
+        echo "! content_pages tracking columns skipped: " . $e->getMessage() . "\n";
     }
     
     // Create default admin user

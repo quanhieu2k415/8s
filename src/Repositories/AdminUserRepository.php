@@ -383,5 +383,39 @@ class AdminUserRepository extends BaseRepository
                 WHERE u.id = :id";
         return $this->db->fetch($sql, [':id' => $userId]);
     }
+
+    /**
+     * Save session token for single session login
+     */
+    public function saveSessionToken(int $userId, string $token): bool
+    {
+        return $this->update($userId, ['session_token' => $token]);
+    }
+
+    /**
+     * Get session token
+     */
+    public function getSessionToken(int $userId): ?string
+    {
+        $user = $this->find($userId);
+        return $user['session_token'] ?? null;
+    }
+
+    /**
+     * Clear session token
+     */
+    public function clearSessionToken(int $userId): bool
+    {
+        return $this->update($userId, ['session_token' => null]);
+    }
+
+    /**
+     * Verify session token matches
+     */
+    public function verifySessionToken(int $userId, string $token): bool
+    {
+        $currentToken = $this->getSessionToken($userId);
+        return $currentToken !== null && $currentToken === $token;
+    }
 }
 

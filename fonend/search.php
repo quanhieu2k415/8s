@@ -367,6 +367,67 @@ include 'includes/header.php';
             gap: 10px;
         }
     }
+
+    /* Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+        .search-form {
+            background: #1E293B;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-input-wrapper {
+            background: #0F172A;
+            border-color: #334155;
+        }
+
+        .search-input-wrapper input {
+            color: #F8FAFC;
+        }
+
+        .search-input-wrapper input::placeholder {
+            color: #94A3B8;
+        }
+
+        .filter-option {
+            color: #CBD5E1;
+        }
+
+        .search-placeholder h3,
+        .results-header h2,
+        .result-item h3,
+        .no-results h3 {
+            color: #F8FAFC;
+        }
+
+        .search-placeholder,
+        .results-loading,
+        .no-results {
+            color: #94A3B8;
+        }
+
+        .result-item {
+            background: #1E293B;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-item p {
+            color: #94A3B8;
+        }
+
+        .results-header {
+            border-bottom-color: #334155;
+        }
+
+        .suggestion-tag {
+            background: #334155;
+            color: #60A5FA;
+        }
+
+        .suggestion-tag:hover {
+            background: #2563EB;
+            color: white;
+        }
+    }
 </style>
 
 <script>
