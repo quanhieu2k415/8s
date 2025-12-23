@@ -10,18 +10,18 @@
             <div class="footer-col company-info">
                 <img src="https://www.icogroup.vn/vnt_upload/company/Logo_icogroup4x.png" alt="ICOGroup" class="footer-logo">
                 <h3>CÔNG TY CỔ PHẦN QUỐC TẾ ICO</h3>
-                <p><strong>📌 Địa chỉ:</strong> Số 360, đường Phan Đình Phùng, tỉnh Thái Nguyên</p>
-                <p><strong>📞 Hotline:</strong> 0822.314.555</p>
-                <p><strong>✉️ Email:</strong> info@icogroup.vn</p>
+                <p><strong>📌 Địa chỉ:</strong> <?php echo get_text('global_footer_address', 'Số 360, đường Phan Đình Phùng, tỉnh Thái Nguyên'); ?></p>
+                <p><strong>📞 Hotline:</strong> <a href="tel:<?php echo get_text('header_phone', '0822314555'); ?>" style="color: #f472b6; text-decoration: none;"><?php echo get_text('header_phone_display', '0822.314.555'); ?></a></p>
+                <p><strong>✉️ Email:</strong> <a href="mailto:<?php echo get_text('header_email', 'info@icogroup.vn'); ?>" style="color: #a5b4fc; text-decoration: none;"><?php echo get_text('header_email', 'info@icogroup.vn'); ?></a></p>
                 
                 <div class="social-links">
-                    <a href="https://facebook.com/icogroup.vn" target="_blank" title="Facebook">
+                    <a href="<?php echo get_text('global_facebook_url', 'https://facebook.com/icogroup'); ?>" target="_blank" title="Facebook">
                         <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
                     </a>
-                    <a href="https://zalo.me/0822314555" target="_blank" title="Zalo">
+                    <a href="<?php echo get_text('global_zalo_url', 'https://zalo.me/0822314555'); ?>" target="_blank" title="Zalo">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo">
                     </a>
-                    <a href="https://youtube.com/@icogroup" target="_blank" title="YouTube">
+                    <a href="<?php echo get_text('global_youtube_url', 'https://youtube.com/@icogroup'); ?>" target="_blank" title="YouTube">
                         <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
                     </a>
                 </div>

@@ -81,6 +81,7 @@ $sessionExpired = isset($_GET['expired']) && $_GET['expired'] == '1';
     <meta name="csrf-token" content="<?php echo htmlspecialchars($csrfToken); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../logo.ico">
     <style>
         /* ===== CSS Variables ===== */
         :root {
@@ -336,7 +337,9 @@ $sessionExpired = isset($_GET['expired']) && $_GET['expired'] == '1';
 <body>
     <div class="login-container">
         <div class="login-header">
-            <img src="https://icogroup.vn/vnt_template/ico_vn/images/logo.svg" alt="ICOGroup">
+            <a href="../fonend/index.php" title="Về trang chủ">
+                <img src="../hi.jpg" alt="Logo" style="filter: none; height: 80px; border-radius: 8px;">
+            </a>
             <h1>Admin Panel</h1>
             <p>Đăng nhập để quản lý hệ thống</p>
         </div>

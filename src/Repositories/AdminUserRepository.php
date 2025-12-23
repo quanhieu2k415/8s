@@ -266,4 +266,122 @@ class AdminUserRepository extends BaseRepository
         $sql = "DELETE FROM remember_tokens WHERE expires_at < NOW()";
         return $this->db->execute($sql);
     }
+
+    /**
+     * Get all users (for admin) - overrides parent to order by role
+     */
+    public function all(string $orderBy = 'id', string $order = 'DESC'): array
+    {
+        $sql = "SELECT * FROM {$this->table} ORDER BY role ASC, username ASC";
+        return $this->db->fetchAll($sql);
+    }
+
+    /**
+     * Get subordinates (users managed by a manager)
+     */
+    public function getSubordinates(int $managerId): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE manager_id = :manager_id ORDER BY username ASC";
+        return $this->db->fetchAll($sql, [':manager_id' => $managerId]);
+    }
+
+    /**
+     * Assign a manager to a user
+     */
+    public function assignManager(int $userId, ?int $managerId): bool
+    {
+        return $this->update($userId, ['manager_id' => $managerId]);
+    }
+
+    /**
+     * Get users by department
+     */
+    public function getByDepartment(string $department): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE department = :department ORDER BY role ASC, username ASC";
+        return $this->db->fetchAll($sql, [':department' => $department]);
+    }
+
+    /**
+     * Update user's department
+     */
+    public function updateDepartment(int $userId, ?string $department): bool
+    {
+        return $this->update($userId, ['department' => $department]);
+    }
+
+    /**
+     * Get all managers
+     */
+    public function getManagers(): array
+    {
+        return $this->getByRole('manager');
+    }
+
+    /**
+     * Get users without a manager
+     */
+    public function getUsersWithoutManager(): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE manager_id IS NULL AND role = 'user' ORDER BY username ASC";
+        return $this->db->fetchAll($sql);
+    }
+
+    /**
+     * Count users by role
+     */
+    public function countByRole(): array
+    {
+        $sql = "SELECT role, COUNT(*) as count FROM {$this->table} GROUP BY role";
+        $results = $this->db->fetchAll($sql);
+        
+        $counts = ['admin' => 0, 'manager' => 0, 'user' => 0];
+        foreach ($results as $row) {
+            $counts[$row['role']] = (int) $row['count'];
+        }
+        
+        return $counts;
+    }
+
+    /**
+     * Search users by username or email
+     */
+    public function searchUsers(string $query, ?string $role = null): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE (username LIKE :query OR email LIKE :query)";
+        $params = [':query' => "%{$query}%"];
+        
+        if ($role !== null) {
+            $sql .= " AND role = :role";
+            $params[':role'] = $role;
+        }
+        
+        $sql .= " ORDER BY username ASC LIMIT 50";
+        
+        return $this->db->fetchAll($sql, $params);
+    }
+
+    /**
+     * Update user role
+     */
+    public function updateRole(int $userId, string $role): bool
+    {
+        if (!in_array($role, ['admin', 'manager', 'user'], true)) {
+            return false;
+        }
+        return $this->update($userId, ['role' => $role]);
+    }
+
+    /**
+     * Get user with manager info
+     */
+    public function findWithManager(int $userId): ?array
+    {
+        $sql = "SELECT u.*, m.username as manager_username, m.email as manager_email 
+                FROM {$this->table} u 
+                LEFT JOIN {$this->table} m ON u.manager_id = m.id 
+                WHERE u.id = :id";
+        return $this->db->fetch($sql, [':id' => $userId]);
+    }
 }
+

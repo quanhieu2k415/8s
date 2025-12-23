@@ -34,6 +34,8 @@ $all_content = [
         ['header_phone_display', '0822.314.555', 'Số điện thoại header (có dấu chấm)'],
         ['header_email', 'info@icogroup.vn', 'Email header'],
         // Navigation Menu
+        ['menu_trangchu', 'Trang chủ', 'Menu Trang chủ'],
+        ['menu_veicogroup', 'Về ICOGroup', 'Menu Về ICOGroup'],
         ['menu_duhoc', 'Du học', 'Menu Du học'],
         ['menu_duhoc_germany', 'Du học Đức', 'Menu Du học Đức'],
         ['menu_duhoc_japan', 'Du học Nhật', 'Menu Du học Nhật'],
@@ -43,6 +45,18 @@ $all_content = [
         ['menu_xkld_korea', 'Hàn Quốc', 'Menu XKLĐ Hàn Quốc'],
         ['menu_xkld_taiwan', 'Đài Loan', 'Menu XKLĐ Đài Loan'],
         ['menu_xkld_eu', 'Châu Âu', 'Menu XKLĐ Châu Âu'],
+        ['menu_huongnghiep', 'Hướng nghiệp', 'Menu Hướng nghiệp'],
+        ['menu_hoatdong', 'Hoạt động', 'Menu Hoạt động'],
+        ['menu_lienhe', 'Liên hệ', 'Menu Liên hệ'],
+        ['menu_dangky', 'Đăng ký', 'Menu Đăng ký'],
+        // Menu Visibility (1 = hiện, 0 = ẩn)
+        ['menu_duhoc_germany_visible', '1', 'Hiển thị Du học Đức'],
+        ['menu_duhoc_japan_visible', '1', 'Hiển thị Du học Nhật'],
+        ['menu_duhoc_korea_visible', '1', 'Hiển thị Du học Hàn'],
+        ['menu_xkld_japan_visible', '1', 'Hiển thị XKLĐ Nhật'],
+        ['menu_xkld_korea_visible', '1', 'Hiển thị XKLĐ Hàn'],
+        ['menu_xkld_taiwan_visible', '1', 'Hiển thị XKLĐ Đài Loan'],
+        ['menu_xkld_eu_visible', '1', 'Hiển thị XKLĐ Châu Âu'],
     ],
     
     // ============ TRANG CHỦ (index) ============

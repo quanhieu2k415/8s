@@ -49,17 +49,21 @@ try {
             username VARCHAR(50) NOT NULL UNIQUE,
             email VARCHAR(255) DEFAULT NULL,
             password_hash VARCHAR(255) NOT NULL,
-            role ENUM('admin', 'editor') NOT NULL DEFAULT 'editor',
+            role ENUM('admin', 'manager', 'user') NOT NULL DEFAULT 'user',
+            department VARCHAR(100) DEFAULT NULL,
+            manager_id INT DEFAULT NULL,
             is_active TINYINT(1) NOT NULL DEFAULT 1,
             last_login TIMESTAMP NULL DEFAULT NULL,
             login_attempts INT NOT NULL DEFAULT 0,
             locked_until TIMESTAMP NULL DEFAULT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            profile_updated_at TIMESTAMP NULL DEFAULT NULL,
             INDEX idx_username (username),
             INDEX idx_email (email),
             INDEX idx_role (role),
-            INDEX idx_is_active (is_active)
+            INDEX idx_is_active (is_active),
+            INDEX idx_manager_id (manager_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "✓ Created admin_users table\n";

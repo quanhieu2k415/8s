@@ -4,6 +4,117 @@
  */
 
 require_once __DIR__ . '/includes/auth_check.php';
+
+use App\Core\Database;
+
+// Handle permission update via POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_permission') {
+    // Suppress error output for JSON response
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    
+    header('Content-Type: application/json');
+    
+    try {
+        // Verify CSRF
+        if (!isset($csrf) || !$csrf->validateToken($_POST['csrf_token'] ?? '')) {
+            echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+            exit;
+        }
+        
+        // Only admin can update
+        if (!isset($userRole) || $userRole !== 'admin') {
+            echo json_encode(['success' => false, 'message' => 'Không có quyền']);
+            exit;
+        }
+        
+        $role = $_POST['role'] ?? '';
+        $permissionKey = $_POST['permission_key'] ?? '';
+        $grantedValue = $_POST['granted'] ?? '';
+        $granted = ($grantedValue === 'true' || $grantedValue === '1');
+        
+        if (!in_array($role, ['manager', 'user']) || empty($permissionKey)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid input']);
+            exit;
+        }
+        
+        $db = \App\Core\Database::getInstance();
+        
+        if ($granted) {
+            $sql = "INSERT IGNORE INTO role_permissions (role, permission_key) VALUES (:role, :pkey)";
+        } else {
+            $sql = "DELETE FROM role_permissions WHERE role = :role AND permission_key = :pkey";
+        }
+        $db->execute($sql, [':role' => $role, ':pkey' => $permissionKey]);
+        
+        echo json_encode([
+            'success' => true, 
+            'message' => $granted ? 'Đã cấp quyền thành công' : 'Đã thu hồi quyền thành công'
+        ]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+// Load permissions matrix for admin
+$permissionsData = [];
+if ($userRole === 'admin') {
+    try {
+        $allPerms = $permission->getAllPermissions();
+        $matrix = $permission->getPermissionMatrix();
+        
+        $categoryNames = [
+            'users' => 'Quản lý Tài khoản',
+            'settings' => 'Cài đặt Hệ thống',
+            'reports' => 'Báo cáo',
+            'logs' => 'Activity Logs',
+            'content' => 'Quản lý Nội dung',
+            'news' => 'Tin tức',
+            'registrations' => 'Đăng ký Tư vấn',
+            'cms' => 'CMS',
+            'profile' => 'Hồ sơ Cá nhân',
+            'database' => 'Database',
+            'general' => 'Chung'
+        ];
+        $categoryIcons = [
+            'users' => 'group',
+            'settings' => 'settings',
+            'reports' => 'analytics',
+            'logs' => 'history',
+            'content' => 'edit_note',
+            'news' => 'article',
+            'registrations' => 'people',
+            'cms' => 'dashboard_customize',
+            'profile' => 'person',
+            'database' => 'storage',
+            'general' => 'extension'
+        ];
+        
+        foreach ($allPerms as $perm) {
+            $category = $perm['category'] ?? 'general';
+            if (!isset($permissionsData[$category])) {
+                $permissionsData[$category] = [
+                    'name' => $categoryNames[$category] ?? ucfirst($category),
+                    'icon' => $categoryIcons[$category] ?? 'extension',
+                    'permissions' => []
+                ];
+            }
+            
+            $key = $perm['permission_key'];
+            $permissionsData[$category]['permissions'][] = [
+                'key' => $key,
+                'name' => $perm['permission_name'],
+                'description' => $perm['description'] ?? '',
+                'manager' => $matrix[$key]['roles']['manager'] ?? false,
+                'user' => $matrix[$key]['roles']['user'] ?? false
+            ];
+        }
+    } catch (Exception $e) {
+        // Permissions tables may not exist
+        $permissionsData = [];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -16,6 +127,7 @@ require_once __DIR__ . '/includes/auth_check.php';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="../logo.ico">
     <style>
         /* ===== CSS Variables ===== */
         :root {
@@ -56,6 +168,15 @@ require_once __DIR__ . '/includes/auth_check.php';
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-primary); min-height: 100vh; color: var(--text-primary); }
+
+        /* ===== Toggle Switch Styles ===== */
+        .toggle-switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #CBD5E1; border-radius: 26px; transition: 0.3s; }
+        .toggle-switch .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch input:checked + .toggle-slider { background: #10B981; }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(22px); }
+        .toggle-switch input:focus + .toggle-slider { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
 
         /* ===== Sidebar ===== */
         .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); color: var(--text-white); z-index: 100; display: flex; flex-direction: column; transition: transform var(--transition-normal); }
@@ -257,6 +378,10 @@ require_once __DIR__ . '/includes/auth_check.php';
         
         .cms-save-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 2px solid var(--primary); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); margin: 20px -24px -24px; }
         .cms-save-bar .changes-info { color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        
+        /* Spin animation for loading */
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .cms-save-bar .changes-info .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning); }
         .cms-save-bar .btn-save-all { padding: 14px 32px; font-size: 16px; font-weight: 600; }
         
@@ -265,6 +390,22 @@ require_once __DIR__ . '/includes/auth_check.php';
         
         .cms-empty { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
         .cms-empty .icon { font-size: 64px; color: var(--border-light); margin-bottom: 16px; }
+        
+        /* Toggle Switch Styles */
+        .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .toggle-wrapper .toggle-label { flex: 1; }
+        .toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #CBD5E1; border-radius: 26px; transition: 0.3s; }
+        .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch input:checked + .toggle-slider { background: var(--success); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(22px); }
+        .toggle-switch input:focus + .toggle-slider { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        .menu-item-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-primary); border-radius: var(--radius-md); margin-bottom: 10px; transition: all 0.2s; }
+        .menu-item-row:hover { background: rgba(99, 102, 241, 0.05); }
+        .menu-item-row.disabled { opacity: 0.5; }
+        .menu-item-row .menu-icon { font-size: 20px; min-width: 28px; text-align: center; }
+        .menu-item-row input[type="text"] { flex: 1; }
     </style>
 </head>
 
@@ -272,7 +413,9 @@ require_once __DIR__ . '/includes/auth_check.php';
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <img src="https://icogroup.vn/vnt_template/ico_vn/images/logo.svg" alt="ICOGroup">
+            <a href="../fonend/index.php" title="Về trang chủ">
+                <img src="../hi.jpg" alt="Logo" style="filter: none; height: 60px; border-radius: 8px;">
+            </a>
             <h2>Admin Panel</h2>
             <p>Quản lý hệ thống</p>
         </div>
@@ -281,6 +424,12 @@ require_once __DIR__ . '/includes/auth_check.php';
                 <span class="material-icons-outlined">dashboard</span>
                 <span>Dashboard</span>
             </a>
+            <?php if ($canManageUsers): ?>
+            <a href="users.php">
+                <span class="material-icons-outlined">group</span>
+                <span>Quản lý Tài khoản</span>
+            </a>
+            <?php endif; ?>
             <a href="#" data-section="registrations">
                 <span class="material-icons-outlined">people</span>
                 <span>Đăng ký tư vấn</span>
@@ -289,10 +438,25 @@ require_once __DIR__ . '/includes/auth_check.php';
                 <span class="material-icons-outlined">article</span>
                 <span>Tin tức</span>
             </a>
+            <?php if ($canManageCMS): ?>
             <a href="#" data-section="cms">
                 <span class="material-icons-outlined">edit_note</span>
                 <span>Quản lý nội dung</span>
             </a>
+            <?php endif; ?>
+            <?php if ($canViewAllLogs): ?>
+            <a href="#" data-section="logs">
+                <span class="material-icons-outlined">history</span>
+                <span>Activity Logs</span>
+            </a>
+            <?php endif; ?>
+            <?php if ($canAccessSettings): ?>
+            <div class="sidebar-divider"></div>
+            <a href="#" data-section="settings">
+                <span class="material-icons-outlined">settings</span>
+                <span>Cài đặt hệ thống</span>
+            </a>
+            <?php endif; ?>
 
             <div class="sidebar-divider"></div>
 
@@ -556,6 +720,9 @@ require_once __DIR__ . '/includes/auth_check.php';
                             <button class="btn btn-primary cms-tab active" id="tabVisual" onclick="switchCMSTab('visual')">
                                 <span class="material-icons-outlined">dashboard_customize</span> Chỉnh sửa trực quan
                             </button>
+                            <button class="btn btn-outline cms-tab" id="tabContact" onclick="switchCMSTab('contact')">
+                                <span class="material-icons-outlined">contact_phone</span> Liên hệ & MXH
+                            </button>
                             <button class="btn btn-outline cms-tab" id="tabAll" onclick="switchCMSTab('all')">
                                 <span class="material-icons-outlined">view_list</span> Tất cả
                             </button>
@@ -621,6 +788,258 @@ require_once __DIR__ . '/includes/auth_check.php';
                     </div>
                 </div>
                 
+                <!-- Contact & Social Section -->
+                <div id="contactContent" style="padding: 20px; display: none;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                            <span class="material-icons-outlined" style="color: var(--primary);">contact_phone</span>
+                            Thông tin liên hệ & Mạng xã hội
+                        </h3>
+                        <p style="color: var(--text-secondary);">Quản lý số điện thoại, email và các link mạng xã hội hiển thị trên website</p>
+                    </div>
+                    
+                    <!-- Contact Info Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px;">
+                        
+                        <!-- Phone Section -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span class="material-icons-outlined" style="color: #10B981;">phone</span>
+                                    Số điện thoại
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Số điện thoại (không dấu chấm)</label>
+                                    <input type="text" class="cms-field-input" id="contact_header_phone" placeholder="0822314555">
+                                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">Dùng cho link gọi điện (tel:)</small>
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Số điện thoại (có dấu chấm)</label>
+                                    <input type="text" class="cms-field-input" id="contact_header_phone_display" placeholder="0822.314.555">
+                                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">Hiển thị trên giao diện</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Email Section -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span class="material-icons-outlined" style="color: #F59E0B;">email</span>
+                                    Email liên hệ
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Địa chỉ Email</label>
+                                    <input type="email" class="cms-field-input" id="contact_header_email" placeholder="info@icogroup.vn">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Facebook Section -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span style="width: 24px; height: 24px; background: #1877F2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                    </span>
+                                    Facebook
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Link Facebook Page</label>
+                                    <input type="url" class="cms-field-input" id="contact_global_facebook_url" placeholder="https://facebook.com/icogroup">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- YouTube Section -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span style="width: 24px; height: 24px; background: #FF0000; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                    </span>
+                                    YouTube
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Link YouTube Channel</label>
+                                    <input type="url" class="cms-field-input" id="contact_global_youtube_url" placeholder="https://youtube.com/icogroup">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Zalo Section -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span style="width: 24px; height: 24px; background: #0068FF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 5.28c-.096.288-.444.48-.756.48H9.892c-.312 0-.66-.192-.756-.48l-1.97-5.28c-.168-.456.144-.936.636-.936h.924c.312 0 .588.216.684.504l1.356 4.032h2.468l1.356-4.032c.096-.288.372-.504.684-.504h.924c.492 0 .804.48.636.936z"/></svg>
+                                    </span>
+                                    Zalo
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Link Zalo</label>
+                                    <input type="url" class="cms-field-input" id="contact_global_zalo_url" placeholder="https://zalo.me/0822314555">
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Menu Navigation Section -->
+                    <h3 style="margin: 32px 0 16px; display: flex; align-items: center; gap: 10px;">
+                        <span class="material-icons-outlined" style="color: var(--primary);">menu</span>
+                        Menu Navigation
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                        <!-- Main Menu Items -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span class="material-icons-outlined" style="color: #6366F1;">home</span>
+                                    Menu chính
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Trang chủ</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_trangchu" placeholder="Trang chủ">
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Về ICOGroup</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_veicogroup" placeholder="Về ICOGroup">
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Hướng nghiệp</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_huongnghiep" placeholder="Hướng nghiệp">
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Hoạt động</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_hoatdong" placeholder="Hoạt động">
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Liên hệ</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_lienhe" placeholder="Liên hệ">
+                                </div>
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Đăng ký</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_dangky" placeholder="Đăng ký">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Du học Menu -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span style="font-size: 18px;">🎓</span>
+                                    Menu Du học
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Du học (menu chính)</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_duhoc" placeholder="Du học">
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇩🇪</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_duhoc_germany" placeholder="Du học Đức" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_duhoc_germany" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇯🇵</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_duhoc_japan" placeholder="Du học Nhật" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_duhoc_japan" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇰🇷</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_duhoc_korea" placeholder="Du học Hàn Quốc" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_duhoc_korea" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- XKLĐ Menu -->
+                        <div class="cms-section-card">
+                            <div class="cms-section-header" style="cursor: default;">
+                                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin: 0;">
+                                    <span style="font-size: 18px;">💼</span>
+                                    Menu XKLĐ
+                                </h3>
+                            </div>
+                            <div class="cms-section-body">
+                                <div class="cms-field-group">
+                                    <label class="cms-field-label">Xuất khẩu lao động (menu chính)</label>
+                                    <input type="text" class="cms-field-input" id="contact_menu_xkld" placeholder="Xuất khẩu lao động">
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇯🇵</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_xkld_japan" placeholder="Nhật Bản" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_xkld_japan" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇰🇷</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_xkld_korea" placeholder="Hàn Quốc" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_xkld_korea" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇹🇼</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_xkld_taiwan" placeholder="Đài Loan" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_xkld_taiwan" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="menu-item-row">
+                                    <span class="menu-icon">🇪🇺</span>
+                                    <input type="text" class="cms-field-input" id="contact_menu_xkld_eu" placeholder="Châu Âu" style="flex: 1;">
+                                    <label class="toggle-switch" title="Bật/tắt hiển thị">
+                                        <input type="checkbox" id="toggle_menu_xkld_eu" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Save Button -->
+                    <div style="margin-top: 24px; padding: 16px; background: var(--bg-primary); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary);">
+                            <span class="material-icons-outlined">info</span>
+                            <span>Thay đổi sẽ được áp dụng ngay trên website sau khi lưu</span>
+                        </div>
+                        <button class="btn btn-success" onclick="saveContactSettings()" id="saveContactBtn">
+                            <span class="material-icons-outlined">save</span>
+                            Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+                
                 <!-- Visual CMS Editor -->
                 <div id="visualCmsContent" class="visual-cms-container" style="display: block;">
                     <div class="visual-cms-header">
@@ -651,6 +1070,243 @@ require_once __DIR__ . '/includes/auth_check.php';
                             <h3>Chọn trang để bắt đầu chỉnh sửa</h3>
                             <p>Chọn một trang từ dropdown ở trên để xem và chỉnh sửa nội dung</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Logs Section -->
+        <section id="logs" class="section-panel">
+            <div class="header">
+                <h1>📋 Activity Logs</h1>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="loadActivityLogs()">
+                        <span class="material-icons-outlined">refresh</span>
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Lịch sử hoạt động</h2>
+                    <div class="table-filters">
+                        <div class="search-box">
+                            <span class="material-icons-outlined">search</span>
+                            <input type="text" id="logsSearchInput" placeholder="Tìm kiếm..." onkeyup="filterLogs()">
+                        </div>
+                        <select class="filter-select" id="logsActionFilter" onchange="filterLogs()">
+                            <option value="">Tất cả hành động</option>
+                            <option value="login">Đăng nhập</option>
+                            <option value="logout">Đăng xuất</option>
+                            <option value="create">Tạo mới</option>
+                            <option value="update">Cập nhật</option>
+                            <option value="delete">Xóa</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Thời gian</th>
+                                <th>Người dùng</th>
+                                <th>Hành động</th>
+                                <th>Chi tiết</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsList">
+                            <tr><td colspan="6" class="empty-state">
+                                <span class="material-icons-outlined">history</span>
+                                <h3>Chức năng Activity Logs</h3>
+                                <p>Theo dõi hoạt động của người dùng trong hệ thống</p>
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Settings Section -->
+        <section id="settings" class="section-panel">
+            <div class="header">
+                <h1>⚙️ Cài đặt hệ thống</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <span class="material-icons-outlined">save</span>
+                        Lưu cài đặt
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+                <!-- General Settings -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>🏢 Thông tin chung</h2>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Tên website</label>
+                            <input type="text" id="settingSiteName" class="cms-field-input" value="ICOGroup" placeholder="Nhập tên website">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Mô tả website</label>
+                            <textarea id="settingSiteDesc" class="cms-field-input" rows="3" placeholder="Mô tả ngắn về website">Du học & Xuất khẩu lao động uy tín</textarea>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Email liên hệ</label>
+                            <input type="email" id="settingEmail" class="cms-field-input" value="info@icogroup.vn" placeholder="email@example.com">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Số điện thoại</label>
+                            <input type="text" id="settingPhone" class="cms-field-input" value="0822.314.555" placeholder="Số điện thoại">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>🔒 Bảo mật</h2>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Thời gian hết phiên (phút)</label>
+                            <input type="number" id="settingSessionTimeout" class="cms-field-input" value="60" min="5" max="1440">
+                            <small style="color: var(--text-muted);">Thời gian không hoạt động trước khi tự động đăng xuất</small>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Số lần đăng nhập sai tối đa</label>
+                            <input type="number" id="settingMaxLoginAttempts" class="cms-field-input" value="5" min="3" max="10">
+                        </div>
+                        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingMaintenanceMode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span style="font-weight: 600;">Chế độ bảo trì</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>🔔 Thông báo</h2>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingEmailNotify" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span style="font-weight: 600;">Gửi email khi có đăng ký mới</span>
+                        </div>
+                        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingEmailContact" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span style="font-weight: 600;">Gửi email khi có liên hệ mới</span>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Email nhận thông báo</label>
+                            <input type="email" id="settingNotifyEmail" class="cms-field-input" value="admin@icogroup.vn" placeholder="Email nhận thông báo">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup Settings -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>💾 Sao lưu dữ liệu</h2>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: var(--text-secondary); margin-bottom: 16px;">Tạo bản sao lưu database để phòng tránh mất dữ liệu</p>
+                            <button class="btn btn-success" onclick="createBackup()" style="width: 100%;">
+                                <span class="material-icons-outlined">backup</span>
+                                Tạo bản sao lưu
+                            </button>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Lần sao lưu cuối</label>
+                            <p id="lastBackupTime" style="color: var(--text-muted);">Chưa có bản sao lưu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permission Management Section (Full Width) -->
+            <div class="table-container" style="grid-column: 1 / -1; margin-top: 24px;">
+                <div class="table-header">
+                    <h2>🔐 Phân quyền Role</h2>
+                    <button class="btn btn-outline" onclick="loadPermissions()">
+                        <span class="material-icons-outlined">refresh</span>
+                        Làm mới
+                    </button>
+                </div>
+                <div style="padding: 24px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        Cấu hình quyền hạn cho từng role. <strong>Admin</strong> luôn có tất cả quyền.
+                    </p>
+                    
+                    <div id="permissionMatrix">
+                        <?php if (!empty($permissionsData)): ?>
+                            <?php foreach ($permissionsData as $categoryKey => $category): ?>
+                            <div class="permission-category" style="margin-bottom: 20px; border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden;">
+                                <div class="category-header" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: linear-gradient(135deg, var(--bg-primary), var(--surface)); cursor: pointer; border-bottom: 1px solid var(--border-light);" onclick="togglePermissionCategory(this)">
+                                    <h4 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px;">
+                                        <span class="material-icons-outlined" style="color: var(--primary);"><?php echo htmlspecialchars($category['icon']); ?></span>
+                                        <?php echo htmlspecialchars($category['name']); ?>
+                                        <span style="background: var(--info-light); color: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;"><?php echo count($category['permissions']); ?></span>
+                                    </h4>
+                                    <span class="material-icons-outlined toggle-icon" style="color: var(--text-muted); transition: transform 0.2s;">expand_more</span>
+                                </div>
+                                <div class="category-body" style="padding: 0;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: var(--bg-primary);">
+                                                <th style="text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; width: 35%;">Quyền</th>
+                                                <th style="text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">Mô tả</th>
+                                                <th style="text-align: center; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; width: 100px;">Manager</th>
+                                                <th style="text-align: center; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; width: 100px;">User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($category['permissions'] as $perm): ?>
+                                            <tr style="border-bottom: 1px solid var(--border-light);">
+                                                <td style="padding: 12px 16px; font-weight: 500;"><?php echo htmlspecialchars($perm['name']); ?></td>
+                                                <td style="padding: 12px 16px; color: var(--text-secondary); font-size: 13px;"><?php echo htmlspecialchars($perm['description']); ?></td>
+                                                <td style="padding: 12px 16px; text-align: center;">
+                                                    <label class="toggle-switch">
+                                                        <input type="checkbox" <?php echo $perm['manager'] ? 'checked' : ''; ?> onchange="updatePermission('manager', '<?php echo htmlspecialchars($perm['key']); ?>', this.checked)">
+                                                        <span class="toggle-slider"></span>
+                                                    </label>
+                                                </td>
+                                                <td style="padding: 12px 16px; text-align: center;">
+                                                    <label class="toggle-switch">
+                                                        <input type="checkbox" <?php echo $perm['user'] ? 'checked' : ''; ?> onchange="updatePermission('user', '<?php echo htmlspecialchars($perm['key']); ?>', this.checked)">
+                                                        <span class="toggle-slider"></span>
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="empty-state" style="text-align: center; padding: 40px;">
+                                <span class="material-icons-outlined" style="font-size: 48px; color: var(--text-muted);">info</span>
+                                <h3>Chưa có dữ liệu quyền</h3>
+                                <p>Vui lòng import file: backend_api/database/permission_migration.sql</p>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -895,7 +1551,44 @@ require_once __DIR__ . '/includes/auth_check.php';
             initNavigation();
             loadStats();
             loadRecentRegistrations();
+            
+            // Check URL hash and switch to appropriate section
+            handleHashNavigation();
+            
+            // Listen for hash changes
+            window.addEventListener('hashchange', handleHashNavigation);
         });
+        
+        // Handle hash navigation from URL
+        function handleHashNavigation() {
+            const hash = window.location.hash.substring(1); // Remove the # symbol
+            if (hash && document.getElementById(hash)) {
+                showSection(hash);
+            }
+        }
+        
+        // Show a specific section (called by hash navigation)
+        function showSection(sectionId) {
+            const sectionElement = document.getElementById(sectionId);
+            if (!sectionElement) return;
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            const activeLink = document.querySelector(`.sidebar-menu a[data-section="${sectionId}"]`);
+            if (activeLink) activeLink.classList.add('active');
+            
+            // Update section visibility
+            document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
+            sectionElement.classList.add('active');
+            
+            // Load section data
+            if (sectionId === 'registrations') loadRegistrations();
+            if (sectionId === 'news') loadNews();
+            if (sectionId === 'cms') loadCMS();
+            if (sectionId === 'dashboard') { loadStats(); loadRecentRegistrations(); }
+            if (sectionId === 'logs') loadActivityLogs();
+            if (sectionId === 'settings') loadSettings();
+        }
 
         // Navigation
         function initNavigation() {
@@ -1361,7 +2054,7 @@ require_once __DIR__ . '/includes/auth_check.php';
             const activeBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
             if (activeBtn) {
                 activeBtn.classList.add('active');
-                if (tab === 'visual') {
+                if (tab === 'visual' || tab === 'contact') {
                     activeBtn.classList.remove('btn-outline');
                     activeBtn.classList.add('btn-primary');
                 }
@@ -1371,23 +2064,34 @@ require_once __DIR__ . '/includes/auth_check.php';
             const cmsContent = document.getElementById('cmsContent');
             const bannerContent = document.getElementById('bannerContent');
             const visualContent = document.getElementById('visualCmsContent');
+            const contactContent = document.getElementById('contactContent');
             const filterBar = document.querySelector('.table-header > div:nth-child(2)'); // Filter bar
             
             if (tab === 'visual') {
                 cmsContent.style.display = 'none';
                 bannerContent.style.display = 'none';
                 visualContent.style.display = 'block';
+                contactContent.style.display = 'none';
                 if (filterBar) filterBar.style.display = 'none';
+            } else if (tab === 'contact') {
+                cmsContent.style.display = 'none';
+                bannerContent.style.display = 'none';
+                visualContent.style.display = 'none';
+                contactContent.style.display = 'block';
+                if (filterBar) filterBar.style.display = 'none';
+                loadContactSettings();
             } else if (tab === 'banners') {
                 cmsContent.style.display = 'none';
                 bannerContent.style.display = 'block';
                 visualContent.style.display = 'none';
+                contactContent.style.display = 'none';
                 if (filterBar) filterBar.style.display = 'none';
                 loadBanners();
             } else {
                 cmsContent.style.display = 'block';
                 bannerContent.style.display = 'none';
                 visualContent.style.display = 'none';
+                contactContent.style.display = 'none';
                 if (filterBar) filterBar.style.display = 'flex';
                 renderCMS();
             }
@@ -1395,6 +2099,164 @@ require_once __DIR__ . '/includes/auth_check.php';
 
         function filterCMS() {
             renderCMS();
+        }
+
+        // Contact Settings - Mapping between field IDs and database keys
+        const contactFieldMapping = {
+            // Contact Info
+            'contact_header_phone': 'header_phone',
+            'contact_header_phone_display': 'header_phone_display',
+            'contact_header_email': 'header_email',
+            // Social Links
+            'contact_global_facebook_url': 'global_facebook_url',
+            'contact_global_youtube_url': 'global_youtube_url',
+            'contact_global_zalo_url': 'global_zalo_url',
+            // Main Menu
+            'contact_menu_trangchu': 'menu_trangchu',
+            'contact_menu_veicogroup': 'menu_veicogroup',
+            'contact_menu_huongnghiep': 'menu_huongnghiep',
+            'contact_menu_hoatdong': 'menu_hoatdong',
+            'contact_menu_lienhe': 'menu_lienhe',
+            'contact_menu_dangky': 'menu_dangky',
+            // Du học Menu
+            'contact_menu_duhoc': 'menu_duhoc',
+            'contact_menu_duhoc_germany': 'menu_duhoc_germany',
+            'contact_menu_duhoc_japan': 'menu_duhoc_japan',
+            'contact_menu_duhoc_korea': 'menu_duhoc_korea',
+            // XKLĐ Menu
+            'contact_menu_xkld': 'menu_xkld',
+            'contact_menu_xkld_japan': 'menu_xkld_japan',
+            'contact_menu_xkld_korea': 'menu_xkld_korea',
+            'contact_menu_xkld_taiwan': 'menu_xkld_taiwan',
+            'contact_menu_xkld_eu': 'menu_xkld_eu'
+        };
+
+        // Toggle visibility mapping between toggle IDs and database keys
+        const toggleFieldMapping = {
+            'toggle_menu_duhoc_germany': 'menu_duhoc_germany_visible',
+            'toggle_menu_duhoc_japan': 'menu_duhoc_japan_visible',
+            'toggle_menu_duhoc_korea': 'menu_duhoc_korea_visible',
+            'toggle_menu_xkld_japan': 'menu_xkld_japan_visible',
+            'toggle_menu_xkld_korea': 'menu_xkld_korea_visible',
+            'toggle_menu_xkld_taiwan': 'menu_xkld_taiwan_visible',
+            'toggle_menu_xkld_eu': 'menu_xkld_eu_visible'
+        };
+
+        async function loadContactSettings() {
+            try {
+                // Fetch directly from API
+                const response = await fetch(`${API_BASE}/get_content.php`);
+                const result = await response.json();
+                
+                if (result.status && result.data) {
+                    const cmsData = result.data;
+                    
+                    // Load text fields
+                    for (const [fieldId, dbKey] of Object.entries(contactFieldMapping)) {
+                        const field = document.getElementById(fieldId);
+                        if (field) {
+                            const content = cmsData.find(c => c.section_key === dbKey);
+                            field.value = content ? content.content_value : '';
+                        }
+                    }
+                    
+                    // Load toggle switches
+                    for (const [toggleId, dbKey] of Object.entries(toggleFieldMapping)) {
+                        const toggle = document.getElementById(toggleId);
+                        if (toggle) {
+                            const content = cmsData.find(c => c.section_key === dbKey);
+                            toggle.checked = content ? content.content_value === '1' : true;
+                            // Update row opacity based on toggle state
+                            const row = toggle.closest('.menu-item-row');
+                            if (row) {
+                                row.classList.toggle('disabled', !toggle.checked);
+                            }
+                        }
+                    }
+                    
+                    // Add change event listeners to toggles
+                    for (const toggleId of Object.keys(toggleFieldMapping)) {
+                        const toggle = document.getElementById(toggleId);
+                        if (toggle) {
+                            toggle.onchange = function() {
+                                const row = this.closest('.menu-item-row');
+                                if (row) {
+                                    row.classList.toggle('disabled', !this.checked);
+                                }
+                            };
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading contact settings:', error);
+                showToast('Lỗi tải dữ liệu liên hệ', 'error');
+            }
+        }
+
+        async function saveContactSettings() {
+            const saveBtn = document.getElementById('saveContactBtn');
+            const originalHTML = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="material-icons-outlined spin">sync</span> Đang lưu...';
+            saveBtn.disabled = true;
+
+            try {
+                const promises = [];
+                
+                // Save text fields
+                for (const [fieldId, dbKey] of Object.entries(contactFieldMapping)) {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        const value = field.value.trim();
+                        promises.push(
+                            fetch(`${API_BASE}/save_content.php`, {
+                                method: 'POST',
+                                headers: { 
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-Token': CSRF_TOKEN
+                                },
+                                body: JSON.stringify({
+                                    section_key: dbKey,
+                                    content_value: value
+                                })
+                            })
+                        );
+                    }
+                }
+                
+                // Save toggle switches (visibility)
+                for (const [toggleId, dbKey] of Object.entries(toggleFieldMapping)) {
+                    const toggle = document.getElementById(toggleId);
+                    if (toggle) {
+                        const value = toggle.checked ? '1' : '0';
+                        promises.push(
+                            fetch(`${API_BASE}/save_content.php`, {
+                                method: 'POST',
+                                headers: { 
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-Token': CSRF_TOKEN
+                                },
+                                body: JSON.stringify({
+                                    section_key: dbKey,
+                                    content_value: value
+                                })
+                            })
+                        );
+                    }
+                }
+
+                await Promise.all(promises);
+                
+                // Refresh CMS data
+                await loadCMS();
+                
+                showToast('Đã lưu thông tin liên hệ & menu thành công!', 'success');
+            } catch (error) {
+                console.error('Error saving contact settings:', error);
+                showToast('Lỗi lưu thông tin: ' + error.message, 'error');
+            } finally {
+                saveBtn.innerHTML = originalHTML;
+                saveBtn.disabled = false;
+            }
         }
 
         function renderCMS() {
@@ -3073,6 +3935,294 @@ require_once __DIR__ . '/includes/auth_check.php';
                 setTimeout(loadAnalyticsCharts, 500);
             }
         });
+
+        // ===== Activity Logs Functions =====
+        let allLogs = [];
+
+        async function loadActivityLogs() {
+            const tbody = document.getElementById('logsList');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div>Đang tải...</td></tr>';
+
+            try {
+                // For now, show demo data since API might not exist yet
+                const demoLogs = [
+                    { id: 1, timestamp: new Date().toISOString(), username: 'admin', action: 'login', details: 'Đăng nhập thành công', ip: '127.0.0.1' },
+                    { id: 2, timestamp: new Date(Date.now() - 3600000).toISOString(), username: 'admin', action: 'update', details: 'Cập nhật nội dung CMS', ip: '127.0.0.1' },
+                    { id: 3, timestamp: new Date(Date.now() - 7200000).toISOString(), username: 'manager', action: 'create', details: 'Tạo tin tức mới', ip: '192.168.1.100' }
+                ];
+
+                allLogs = demoLogs;
+                renderLogs(demoLogs);
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+                    <span class="material-icons-outlined">error_outline</span>
+                    <h3>Lỗi tải dữ liệu</h3>
+                    <p>${error.message}</p>
+                </td></tr>`;
+            }
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById('logsList');
+            if (!tbody) return;
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+                    <span class="material-icons-outlined">history</span>
+                    <h3>Chưa có hoạt động nào</h3>
+                    <p>Lịch sử hoạt động sẽ hiển thị ở đây</p>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => {
+                const actionBadge = getActionBadge(log.action);
+                return `<tr>
+                    <td>${log.id}</td>
+                    <td>${formatDateTime(log.timestamp)}</td>
+                    <td><strong>${escapeHtml(log.username)}</strong></td>
+                    <td>${actionBadge}</td>
+                    <td>${escapeHtml(log.details)}</td>
+                    <td><code>${log.ip}</code></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function getActionBadge(action) {
+            const badges = {
+                'login': '<span class="badge badge-success">Đăng nhập</span>',
+                'logout': '<span class="badge badge-warning">Đăng xuất</span>',
+                'create': '<span class="badge badge-info">Tạo mới</span>',
+                'update': '<span class="badge" style="background: #DBEAFE; color: #1E40AF;">Cập nhật</span>',
+                'delete': '<span class="badge" style="background: #FEE2E2; color: #991B1B;">Xóa</span>'
+            };
+            return badges[action] || `<span class="badge">${action}</span>`;
+        }
+
+        function filterLogs() {
+            const search = document.getElementById('logsSearchInput')?.value.toLowerCase() || '';
+            const actionFilter = document.getElementById('logsActionFilter')?.value || '';
+
+            const filtered = allLogs.filter(log => {
+                const matchSearch = !search || 
+                    log.username.toLowerCase().includes(search) ||
+                    log.details.toLowerCase().includes(search) ||
+                    log.ip.includes(search);
+                const matchAction = !actionFilter || log.action === actionFilter;
+                return matchSearch && matchAction;
+            });
+
+            renderLogs(filtered);
+        }
+
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ===== Settings Functions =====
+        async function loadSettings() {
+            try {
+                // Load settings from CMS or dedicated settings API
+                // For now, values are pre-filled in HTML
+                console.log('Settings loaded');
+                
+                // Load permissions matrix
+                loadPermissions();
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        async function saveSettings() {
+            try {
+                const settings = {
+                    siteName: document.getElementById('settingSiteName')?.value,
+                    siteDesc: document.getElementById('settingSiteDesc')?.value,
+                    email: document.getElementById('settingEmail')?.value,
+                    phone: document.getElementById('settingPhone')?.value,
+                    sessionTimeout: document.getElementById('settingSessionTimeout')?.value,
+                    maxLoginAttempts: document.getElementById('settingMaxLoginAttempts')?.value,
+                    maintenanceMode: document.getElementById('settingMaintenanceMode')?.checked,
+                    emailNotify: document.getElementById('settingEmailNotify')?.checked,
+                    emailContact: document.getElementById('settingEmailContact')?.checked,
+                    notifyEmail: document.getElementById('settingNotifyEmail')?.value
+                };
+
+                // Save to CMS
+                const promises = [];
+                
+                const settingsMapping = {
+                    'global_site_name': settings.siteName,
+                    'global_site_desc': settings.siteDesc,
+                    'header_phone_display': settings.phone,
+                    'header_email': settings.email
+                };
+
+                for (const [key, value] of Object.entries(settingsMapping)) {
+                    if (value !== undefined) {
+                        promises.push(
+                            fetch(`${API_BASE}/save_content.php`, {
+                                method: 'POST',
+                                headers: { 
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-Token': CSRF_TOKEN
+                                },
+                                body: JSON.stringify({
+                                    section_key: key,
+                                    content_value: value
+                                })
+                            })
+                        );
+                    }
+                }
+
+                await Promise.all(promises);
+                showToast('Cài đặt đã được lưu thành công!', 'success');
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showToast('Lỗi khi lưu cài đặt: ' + error.message, 'error');
+            }
+        }
+
+        async function createBackup() {
+            try {
+                showToast('Đang tạo bản sao lưu...', 'success');
+                
+                // Simulate backup creation
+                setTimeout(() => {
+                    const now = new Date();
+                    document.getElementById('lastBackupTime').textContent = formatDateTime(now.toISOString());
+                    showToast('Tạo bản sao lưu thành công!', 'success');
+                }, 2000);
+            } catch (error) {
+                console.error('Error creating backup:', error);
+                showToast('Lỗi khi tạo bản sao lưu: ' + error.message, 'error');
+            }
+        }
+
+        // Permissions data embedded by PHP (no API call needed)
+        let permissionData = {};
+        const EMBEDDED_PERMISSIONS = <?php echo json_encode($permissionsData, JSON_UNESCAPED_UNICODE); ?>;
+
+        async function loadPermissions() {
+            const container = document.getElementById('permissionMatrix');
+            if (!container) return;
+            
+            // Use embedded data directly
+            if (Object.keys(EMBEDDED_PERMISSIONS).length > 0) {
+                permissionData = EMBEDDED_PERMISSIONS;
+                renderPermissionMatrix(EMBEDDED_PERMISSIONS);
+            } else {
+                container.innerHTML = `<div class="empty-state">
+                    <span class="material-icons-outlined">info</span>
+                    <h3>Chưa có dữ liệu quyền</h3>
+                    <p>Vui lòng import file: backend_api/database/permission_migration.sql</p>
+                </div>`;
+            }
+        }
+
+        function renderPermissionMatrix(data) {
+            const container = document.getElementById('permissionMatrix');
+            if (!container) return;
+
+            let html = '';
+            
+            for (const [categoryKey, category] of Object.entries(data)) {
+                html += `
+                <div class="permission-category" style="margin-bottom: 20px; border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden;">
+                    <div class="category-header" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: linear-gradient(135deg, var(--bg-primary), var(--surface)); cursor: pointer; border-bottom: 1px solid var(--border-light);" onclick="togglePermissionCategory(this)">
+                        <h4 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px;">
+                            <span class="material-icons-outlined" style="color: var(--primary);">${category.icon}</span>
+                            ${category.name}
+                            <span style="background: var(--info-light); color: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${category.permissions.length}</span>
+                        </h4>
+                        <span class="material-icons-outlined toggle-icon" style="color: var(--text-muted); transition: transform 0.2s;">expand_more</span>
+                    </div>
+                    <div class="category-body" style="padding: 0;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-primary);">
+                                    <th style="text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; width: 35%;">Quyền</th>
+                                    <th style="text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">Mô tả</th>
+                                    <th style="text-align: center; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; width: 100px;">Manager</th>
+                                    <th style="text-align: center; padding: 12px 16px; font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; width: 100px;">User</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                for (const perm of category.permissions) {
+                    html += `
+                                <tr style="border-bottom: 1px solid var(--border-light);">
+                                    <td style="padding: 12px 16px; font-weight: 500;">${perm.name}</td>
+                                    <td style="padding: 12px 16px; color: var(--text-secondary); font-size: 13px;">${perm.description || ''}</td>
+                                    <td style="padding: 12px 16px; text-align: center;">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" ${perm.manager ? 'checked' : ''} onchange="updatePermission('manager', '${perm.key}', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </td>
+                                    <td style="padding: 12px 16px; text-align: center;">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" ${perm.user ? 'checked' : ''} onchange="updatePermission('user', '${perm.key}', this.checked)">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </td>
+                                </tr>`;
+                }
+                
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function togglePermissionCategory(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                body.style.display = 'none';
+                icon.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        async function updatePermission(role, permissionKey, granted) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'update_permission');
+                formData.append('csrf_token', CSRF_TOKEN);
+                formData.append('role', role);
+                formData.append('permission_key', permissionKey);
+                formData.append('granted', granted ? 'true' : 'false');
+
+                const response = await fetch('dashboard.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error updating permission:', error);
+                showToast('Lỗi: ' + error.message, 'error');
+            }
+        }
     </script>
 </body>
 

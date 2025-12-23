@@ -7,12 +7,14 @@
 require_once __DIR__ . '/../../autoloader.php';
 
 use App\Services\Auth;
+use App\Services\Permission;
 use App\Core\CSRF;
 
 // Session timeout configuration (1 hour = 3600 seconds)
 define('SESSION_TIMEOUT', 3600);
 
 $auth = Auth::getInstance();
+$permission = Permission::getInstance();
 $csrf = new CSRF();
 
 // Check session timeout
@@ -36,3 +38,15 @@ $auth->requireAuth('index.php');
 // Get current user
 $currentUser = $auth->user();
 $csrfToken = $csrf->getToken();
+$userRole = $currentUser['role'] ?? 'user';
+
+// Permission helper variables for views
+$canManageUsers = $permission->canManageUsers($userRole);
+$canManageCMS = $permission->canManageCMS($userRole);
+$canAccessSettings = $permission->canAccessSettings($userRole);
+$canViewAllReports = $permission->canViewAllReports($userRole);
+$canViewAllLogs = $permission->canViewAllLogs($userRole);
+$canExportData = $permission->canExportData($userRole);
+$isAdmin = $userRole === 'admin';
+$isManager = $userRole === 'manager';
+

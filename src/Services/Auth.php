@@ -286,11 +286,113 @@ class Auth
     }
 
     /**
-     * Check if user is editor
+     * Check if user is editor (deprecated - use isUser or isManager)
+     * @deprecated Use isManager() or isUser() instead
      */
     public function isEditor(): bool
     {
-        return $this->hasRole('editor');
+        return $this->hasRole('manager') || $this->hasRole('user');
+    }
+
+    /**
+     * Check if user is manager
+     */
+    public function isManager(): bool
+    {
+        return $this->hasRole('manager');
+    }
+
+    /**
+     * Check if user is regular user
+     */
+    public function isUser(): bool
+    {
+        return $this->hasRole('user');
+    }
+
+    /**
+     * Check if current user has a specific permission
+     */
+    public function hasPermission(string $permissionKey): bool
+    {
+        $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+
+        $permission = Permission::getInstance();
+        return $permission->check($user['role'] ?? 'user', $permissionKey);
+    }
+
+    /**
+     * Check if current user can manage another user
+     */
+    public function canManage(int $targetUserId): bool
+    {
+        $currentUser = $this->user();
+        if (!$currentUser) {
+            return false;
+        }
+
+        // Admin can manage everyone
+        if ($currentUser['role'] === 'admin') {
+            return true;
+        }
+
+        // Manager can only manage their assigned users
+        if ($currentUser['role'] === 'manager') {
+            $targetUser = $this->userRepo->find($targetUserId);
+            if ($targetUser && $targetUser['manager_id'] === $currentUser['id']) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get list of users that current user can manage
+     */
+    public function getSubordinates(): array
+    {
+        $currentUser = $this->user();
+        if (!$currentUser) {
+            return [];
+        }
+
+        // Admin sees all users
+        if ($currentUser['role'] === 'admin') {
+            return $this->userRepo->all();
+        }
+
+        // Manager sees their team
+        if ($currentUser['role'] === 'manager') {
+            return $this->userRepo->getSubordinates($currentUser['id']);
+        }
+
+        // Regular user sees no one
+        return [];
+    }
+
+    /**
+     * Get current user's role
+     */
+    public function getRole(): ?string
+    {
+        $user = $this->user();
+        return $user['role'] ?? null;
+    }
+
+    /**
+     * Check if user has one of the specified roles
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+        return in_array($user['role'] ?? '', $roles, true);
     }
 
     /**
@@ -325,6 +427,46 @@ class Auth
     }
 
     /**
+     * Require one of specified roles
+     */
+    public function requireAnyRole(array $roles, string $redirectUrl = 'index.php'): void
+    {
+        $this->requireAuth($redirectUrl);
+        
+        if (!$this->hasAnyRole($roles)) {
+            $this->logger->warning("Unauthorized access attempt", [
+                'user_id' => $this->id(),
+                'required_roles' => implode(', ', $roles),
+                'current_role' => $this->user()['role'] ?? 'none'
+            ]);
+            
+            http_response_code(403);
+            include dirname(__DIR__, 2) . '/admin/403.php';
+            exit;
+        }
+    }
+
+    /**
+     * Require specific permission
+     */
+    public function requirePermission(string $permissionKey, string $redirectUrl = 'index.php'): void
+    {
+        $this->requireAuth($redirectUrl);
+        
+        if (!$this->hasPermission($permissionKey)) {
+            $this->logger->warning("Permission denied", [
+                'user_id' => $this->id(),
+                'required_permission' => $permissionKey,
+                'current_role' => $this->user()['role'] ?? 'none'
+            ]);
+            
+            http_response_code(403);
+            include dirname(__DIR__, 2) . '/admin/403.php';
+            exit;
+        }
+    }
+
+    /**
      * Change password
      */
     public function changePassword(int $userId, string $currentPassword, string $newPassword): array
@@ -345,3 +487,4 @@ class Auth
         return ['success' => true, 'message' => 'Đổi mật khẩu thành công'];
     }
 }
+
