@@ -183,6 +183,7 @@ if ($userRole === 'admin') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link rel="icon" type="image/x-icon" href="../logo.ico">
     <link rel="stylesheet" href="content_blocks.css">
     <style>
@@ -1919,6 +1920,13 @@ if ($userRole === 'admin') {
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Register ChartDataLabels plugin globally
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+                // Disable by default for all charts
+                Chart.defaults.plugins.datalabels.display = false;
+            }
+            
             initNavigation();
             
             // Priority 1: URL Hash
@@ -3738,9 +3746,9 @@ if ($userRole === 'admin') {
                 name: 'XKLĐ Nhật Bản',
                 sections: [
                     { title: '🖼️ Banner Trang', icon: 'image', fields: [
-                        { key: 'xkldjp_hero_img', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xkldjp.jpg' },
-                        { key: 'xkldjp_hero_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Nhật Bản 🇯🇵' },
-                        { key: 'xkldjp_hero_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình thực tập sinh kỹ năng - Thu nhập cao, tương lai ổn định' }
+                        { key: 'xkldjp_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xkldjp.jpg' },
+                        { key: 'xkldjp_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Nhật Bản 🇯🇵' },
+                        { key: 'xkldjp_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình thực tập sinh kỹ năng - Thu nhập cao, tương lai ổn định' }
                     ]},
                     { title: '📋 Chương Trình', icon: 'work', fields: [
                         { key: 'xkldjp_about_title', label: 'Tiêu đề giới thiệu', type: 'text', defaultValue: 'Chương Trình Thực Tập Sinh Kỹ Năng' },
@@ -4217,11 +4225,15 @@ if ($userRole === 'admin') {
                     if (programChart) programChart.destroy();
                     
                     const colors = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-                    
+                    const total = result.data.reduce((sum, item) => sum + parseInt(item.count), 0);
+
                     programChart = new Chart(ctx, {
                         type: 'doughnut',
                         data: {
-                            labels: result.data.map(d => d.program),
+                            labels: result.data.map(d => {
+                                const percent = total > 0 ? ((d.count / total) * 100).toFixed(1) : 0;
+                                return `${d.program} (${percent}%)`;
+                            }),
                             datasets: [{
                                 data: result.data.map(d => d.count),
                                 backgroundColor: colors.slice(0, result.data.length),
@@ -4236,6 +4248,27 @@ if ($userRole === 'admin') {
                                 legend: {
                                     position: 'right',
                                     labels: { usePointStyle: true, padding: 15 }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.raw;
+                                            const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${context.label.split(' (')[0]}: ${value} (${percent}%)`;
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    display: true,
+                                    color: '#fff',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 12
+                                    },
+                                    formatter: (value) => {
+                                        const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return percent > 5 ? percent + '%' : '';
+                                    }
                                 }
                             }
                         }
@@ -4258,11 +4291,15 @@ if ($userRole === 'admin') {
                     if (countryChart) countryChart.destroy();
                     
                     const colors = ['#F59E0B', '#10B981', '#2563EB', '#EF4444', '#8B5CF6', '#EC4899'];
-                    
+                    const total = result.data.reduce((sum, item) => sum + parseInt(item.count), 0);
+
                     countryChart = new Chart(ctx, {
                         type: 'pie',
                         data: {
-                            labels: result.data.map(d => d.country),
+                            labels: result.data.map(d => {
+                                const percent = total > 0 ? ((d.count / total) * 100).toFixed(1) : 0;
+                                return `${d.country} (${percent}%)`;
+                            }),
                             datasets: [{
                                 data: result.data.map(d => d.count),
                                 backgroundColor: colors.slice(0, result.data.length),
@@ -4277,6 +4314,27 @@ if ($userRole === 'admin') {
                                 legend: {
                                     position: 'right',
                                     labels: { usePointStyle: true, padding: 15 }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.raw;
+                                            const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${context.label.split(' (')[0]}: ${value} (${percent}%)`;
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    display: true,
+                                    color: '#fff',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 12
+                                    },
+                                    formatter: (value) => {
+                                        const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return percent > 5 ? percent + '%' : '';
+                                    }
                                 }
                             }
                         }
