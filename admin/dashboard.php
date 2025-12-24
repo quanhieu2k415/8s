@@ -1288,10 +1288,6 @@ if ($userRole === 'admin') {
                             <option value="xklddailoan">💼 XKLĐ Đài Loan</option>
                             <option value="xkldchauau">💼 XKLĐ Châu Âu</option>
                             <option value="huongnghiep">🎯 Hướng nghiệp</option>
-                            <option value="about">🏢 Về ICOGroup</option>
-                            <option value="contact">📞 Liên hệ</option>
-                            <option value="hoatdong">📸 Hoạt động</option>
-                            <option value="index">🏠 Trang chủ</option>
                         </select>
                     </div>
                 </div>
@@ -1320,24 +1316,6 @@ if ($userRole === 'admin') {
                     
                     <div class="block-form-row">
                         <div>
-                            <label>Trang *</label>
-                            <select id="blockPageKey" class="page-select" style="width: 100%;">
-                                <option value="">-- Chọn trang --</option>
-                                <option value="duc">Du học Đức</option>
-                                <option value="nhat">Du học Nhật Bản</option>
-                                <option value="han">Du học Hàn Quốc</option>
-                                <option value="xkldjp">XKLĐ Nhật Bản</option>
-                                <option value="xkldhan">XKLĐ Hàn Quốc</option>
-                                <option value="xklddailoan">XKLĐ Đài Loan</option>
-                                <option value="xkldchauau">XKLĐ Châu Âu</option>
-                                <option value="huongnghiep">Hướng nghiệp</option>
-                                <option value="about">Về ICOGroup</option>
-                                <option value="contact">Liên hệ</option>
-                                <option value="hoatdong">Hoạt động</option>
-                                <option value="index">Trang chủ</option>
-                            </select>
-                        </div>
-                        <div>
                             <label>Loại Block</label>
                             <select id="blockType" style="width: 100%;">
                                 <option value="section">Section</option>
@@ -1359,14 +1337,38 @@ if ($userRole === 'admin') {
                     <div class="editor-wrapper">
                         <div class="editor-toolbar">
                             <div class="toolbar-group">
-                                <button type="button" onclick="formatBlockText('bold')" title="In đậm">
+                                <button type="button" onclick="formatBlockText('bold')" title="Bold (Ctrl+B)">
                                     <span class="material-icons-outlined">format_bold</span>
                                 </button>
-                                <button type="button" onclick="formatBlockText('italic')" title="In nghiêng">
+                                <button type="button" onclick="formatBlockText('italic')" title="Italic (Ctrl+I)">
                                     <span class="material-icons-outlined">format_italic</span>
                                 </button>
-                                <button type="button" onclick="formatBlockText('underline')" title="Gạch chân">
+                                <button type="button" onclick="formatBlockText('underline')" title="Underline (Ctrl+U)">
                                     <span class="material-icons-outlined">format_underlined</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('strikeThrough')" title="Strikethrough">
+                                    <span class="material-icons-outlined">format_strikethrough</span>
+                                </button>
+                            </div>
+                            <div class="toolbar-divider"></div>
+                            <div class="toolbar-group">
+                                <button type="button" onclick="formatBlockText('justifyLeft')" title="Căn trái">
+                                    <span class="material-icons-outlined">format_align_left</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('justifyCenter')" title="Căn giữa">
+                                    <span class="material-icons-outlined">format_align_center</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('justifyRight')" title="Căn phải">
+                                    <span class="material-icons-outlined">format_align_right</span>
+                                </button>
+                            </div>
+                            <div class="toolbar-divider"></div>
+                            <div class="toolbar-group">
+                                <button type="button" onclick="insertLink()" title="Chèn link">
+                                    <span class="material-icons-outlined">link</span>
+                                </button>
+                                <button type="button" onclick="formatBlockText('insertUnorderedList')" title="Danh sách">
+                                    <span class="material-icons-outlined">format_list_bulleted</span>
                                 </button>
                             </div>
                             <div class="toolbar-divider"></div>
@@ -1505,6 +1507,10 @@ if ($userRole === 'admin') {
                             <span class="material-icons-outlined">search</span>
                             <input type="text" id="logsSearchInput" placeholder="Tìm kiếm..." onkeyup="filterLogs()">
                         </div>
+                        <select class="filter-select" id="logsUserFilter" onchange="filterLogs()">
+                            <option value="">Tất cả người dùng</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
                         <select class="filter-select" id="logsActionFilter" onchange="filterLogs()">
                             <option value="">Tất cả hành động</option>
                             <option value="login">Đăng nhập</option>
@@ -2055,6 +2061,7 @@ if ($userRole === 'admin') {
             sectionElement.classList.add('active');
             
             // Load section data
+            if (sectionId === 'users') { if (typeof initUsersSection === 'function') initUsersSection(); }
             if (sectionId === 'registrations') loadRegistrations();
             if (sectionId === 'news') loadNews();
             if (sectionId === 'cms') loadCMS();
@@ -2348,7 +2355,7 @@ if ($userRole === 'admin') {
                 tbody.innerHTML = news.map(n => `
                     <tr>
                         <td>${n.id}</td>
-                        <td><img src="${escapeHtml(n.image_url || 'https://via.placeholder.com/60x40')}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;"></td>
+                        <td><img src="${escapeHtml(n.image_url || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2240%22%3E%3Crect fill=%22%23e2e8f0%22 width=%2260%22 height=%2240%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%2394a3b8%22 font-family=%22Arial%22 font-size=%2210%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E')}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;"></td>
                         <td>${escapeHtml(n.title)}</td>
                         <td><span class="badge badge-info">${escapeHtml(n.category)}</span></td>
                         <td>${formatDate(n.created_at)}</td>
@@ -2811,7 +2818,7 @@ if ($userRole === 'admin') {
                     </div>
                     <div style="padding: 16px; min-height: 80px;">
                         ${isImage && value ? 
-                            `<img src="${escapeHtml(value)}" style="max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/300x150?text=Không+tải+được'">` :
+                            `<img src="${escapeHtml(value)}" style="max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22150%22%3E%3Crect fill=%22%23fee2e2%22 width=%22300%22 height=%22150%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23ef4444%22 font-family=%22Arial%22 font-size=%2214%22 text-anchor=%22middle%22 dy=%22.3em%22%3EKh%C3%B4ng t%E1%BA%A3i %C4%91%C6%B0%E1%BB%A3c%3C/text%3E%3C/svg%3E'">` :
                             `<p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${escapeHtml(truncatedValue) || '<em style="color: var(--text-muted);">Chưa có nội dung</em>'}</p>`
                         }
                     </div>
@@ -4343,7 +4350,7 @@ if ($userRole === 'admin') {
                         field.value = item.content_value || '';
                         
                         // Load toggle switches
-                        if (fieldId.startsWith('contact_toggle_')) {
+                        if (item.section_key.startsWith('contact_toggle_')) {
                             field.checked = item.content_value === '1';
                         }
                     }
@@ -4394,7 +4401,7 @@ if ($userRole === 'admin') {
             
             for (const update of updates) {
                 try {
-                    const response = await fetch(`../backend_api/save_content.php`, {
+                    const response = await fetch(`../backend_api/save_content_debug.php`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -4408,9 +4415,11 @@ if ($userRole === 'admin') {
                         successCount++;
                     } else {
                         errorCount++;
+                        console.error('Failed to save:', update.section_key, 'Error:', result.message);
                     }
                 } catch (error) {
                     errorCount++;
+                    console.error('Exception saving:', update.section_key, 'Error:', error);
                 }
             }
             
@@ -4665,9 +4674,30 @@ if ($userRole === 'admin') {
         // ===== Settings Functions =====
         async function loadSettings() {
             try {
-                // Load settings from CMS or dedicated settings API
-                // For now, values are pre-filled in HTML
-                console.log('Settings loaded');
+                // Load settings from CMS
+                const response = await fetch(`${API_BASE}/get_content.php`);
+                const result = await response.json();
+                
+                if (result.status && result.data) {
+                    const data = result.data;
+                    
+                    // Populate form fields with loaded values
+                    if (data.global_site_name) document.getElementById('settingSiteName').value = data.global_site_name;
+                    if (data.global_site_desc) document.getElementById('settingSiteDesc').value = data.global_site_desc;
+                    if (data.header_phone_display) document.getElementById('settingPhone').value = data.header_phone_display;
+                    if (data.header_email) document.getElementById('settingEmail').value = data.header_email;
+                    
+                    // Security settings
+                    if (data.security_session_timeout) {
+                        document.getElementById('settingSessionTimeout').value = data.security_session_timeout;
+                    }
+                    if (data.security_max_login_attempts) {
+                        document.getElementById('settingMaxLoginAttempts').value = data.security_max_login_attempts;
+                    }
+                    if (data.system_maintenance_mode) {
+                        document.getElementById('settingMaintenanceMode').checked = data.system_maintenance_mode === '1';
+                    }
+                }
                 
                 // Load permissions matrix
                 loadPermissions();
@@ -4698,7 +4728,10 @@ if ($userRole === 'admin') {
                     'global_site_name': settings.siteName,
                     'global_site_desc': settings.siteDesc,
                     'header_phone_display': settings.phone,
-                    'header_email': settings.email
+                    'header_email': settings.email,
+                    'security_session_timeout': settings.sessionTimeout,
+                    'security_max_login_attempts': settings.maxLoginAttempts,
+                    'system_maintenance_mode': settings.maintenanceMode ? '1' : '0'
                 };
 
                 for (const [key, value] of Object.entries(settingsMapping)) {
@@ -4881,6 +4914,10 @@ if ($userRole === 'admin') {
                 }
                 
                 allLogs = result.data;
+                
+                // Populate user filter dropdown
+                populateUserFilter(allLogs);
+                
                 renderLogs(allLogs);
             } catch (error) {
                 console.error('Error loading logs:', error);
@@ -4890,6 +4927,37 @@ if ($userRole === 'admin') {
                     <p>${error.message}</p>
                 </td></tr>`;
             }
+        }
+
+        function populateUserFilter(logs) {
+            const userFilter = document.getElementById('logsUserFilter');
+            if (!userFilter) return;
+            
+            // Get unique users from logs
+            const users = {};
+            logs.forEach(log => {
+                if (log.username && log.user_id) {
+                    users[log.user_id] = {
+                        id: log.user_id,
+                        username: log.username,
+                        role: log.role || ''
+                    };
+                }
+            });
+            
+            // Sort by username
+            const sortedUsers = Object.values(users).sort((a, b) => 
+                a.username.localeCompare(b.username)
+            );
+            
+            // Build options HTML
+            let optionsHTML = '<option value="">Tất cả người dùng</option>';
+            sortedUsers.forEach(user => {
+                const roleLabel = user.role ? ` (${user.role})` : '';
+                optionsHTML += `<option value="${user.id}">${user.username}${roleLabel}</option>`;
+            });
+            
+            userFilter.innerHTML = optionsHTML;
         }
 
         function renderLogs(logs) {
@@ -4948,6 +5016,7 @@ if ($userRole === 'admin') {
 
         function filterLogs() {
             const search = (document.getElementById('logsSearchInput')?.value || '').toLowerCase();
+            const userFilter = document.getElementById('logsUserFilter')?.value || '';
             const actionFilter = document.getElementById('logsActionFilter')?.value || '';
             
             const filtered = allLogs.filter(log => {
@@ -4956,8 +5025,9 @@ if ($userRole === 'admin') {
                     (log.details || '').toLowerCase().includes(search) ||
                     (log.ip_address || '').includes(search) ||
                     (log.action || '').toLowerCase().includes(search);
+                const matchUser = !userFilter || String(log.user_id) === userFilter;
                 const matchAction = !actionFilter || log.action === actionFilter;
-                return matchSearch && matchAction;
+                return matchSearch && matchUser && matchAction;
             });
             
             renderLogs(filtered);

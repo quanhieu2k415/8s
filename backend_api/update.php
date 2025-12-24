@@ -1,4 +1,19 @@
 <?php
+require_once __DIR__ . '/../autoloader.php';
+
+use App\Services\Auth;
+use App\Services\ActivityLogger;
+
+// Check authentication
+$auth = Auth::getInstance();
+if (!$auth->check()) {
+    http_response_code(401);
+    echo json_encode(array("message" => "Unauthorized", "status" => false));
+    exit();
+}
+
+$currentUser = $auth->user();
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: POST');
@@ -42,6 +57,16 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("sssssssi", $ho_ten, $nam_sinh, $dia_chi, $chuong_trinh, $quoc_gia, $sdt, $ghi_chu, $id);
 
 if ($stmt->execute()) {
+    // Log activity
+    ActivityLogger::getInstance()->logUpdate(
+        $currentUser['id'],
+        $currentUser['username'],
+        $currentUser['role'],
+        'registration',
+        $id,
+        "Cập nhật đăng ký: {$ho_ten} - {$chuong_trinh}"
+    );
+    
     http_response_code(200);
     echo json_encode(array("message" => "Cập nhật dữ liệu thành công!", "status" => true));
 } else {

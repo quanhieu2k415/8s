@@ -10,8 +10,26 @@ use App\Services\Auth;
 use App\Services\Permission;
 use App\Core\CSRF;
 
-// Session timeout configuration (1 hour = 3600 seconds)
-define('SESSION_TIMEOUT', 3600);
+// Session timeout configuration
+// Try to load from CMS settings, fallback to 30 minutes (1800 seconds)
+$sessionTimeoutMinutes = 30; // Default
+try {
+    $db = \App\Core\Database::getInstance();
+    $timeoutSetting = $db->fetchAll(
+        "SELECT content_value FROM content_pages WHERE section_key = 'security_session_timeout' LIMIT 1"
+    );
+    if (!empty($timeoutSetting) && isset($timeoutSetting[0]['content_value'])) {
+        $sessionTimeoutMinutes = (int)$timeoutSetting[0]['content_value'];
+        // Ensure it's within reasonable range (5-1440 minutes = 1 day)
+        if ($sessionTimeoutMinutes < 5) $sessionTimeoutMinutes = 5;
+        if ($sessionTimeoutMinutes > 1440) $sessionTimeoutMinutes = 1440;
+    }
+} catch (Exception $e) {
+    // If error loading setting, use default
+    error_log("Error loading session timeout setting: " . $e->getMessage());
+}
+
+define('SESSION_TIMEOUT', $sessionTimeoutMinutes * 60); // Convert to seconds
 
 $auth = Auth::getInstance();
 $permission = Permission::getInstance();

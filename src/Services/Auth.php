@@ -201,12 +201,17 @@ class Auth
             return false;
         }
 
+        // Generate unique session token for single-session login
+        $sessionToken = bin2hex(random_bytes(32));
+        $this->userRepo->saveSessionToken($user['id'], $sessionToken);
+
         // Log in the user
         $sessionUser = [
             'id' => $user['id'],
             'username' => $user['username'],
             'email' => $user['email'],
-            'role' => $user['role']
+            'role' => $user['role'],
+            'session_token' => $sessionToken
         ];
         
         $this->session->setUser($sessionUser);

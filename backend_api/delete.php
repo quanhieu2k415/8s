@@ -1,4 +1,19 @@
 <?php
+require_once __DIR__ . '/../autoloader.php';
+
+use App\Services\Auth;
+use App\Services\ActivityLogger;
+
+// Check authentication
+$auth = Auth::getInstance();
+if (!$auth->check()) {
+    http_response_code(401);
+    echo json_encode(array("message" => "Unauthorized", "status" => false));
+    exit();
+}
+
+$currentUser = $auth->user();
+
 // 1. Cấu hình Headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); 
@@ -46,6 +61,16 @@ $stmt->bind_param("i", $id);
 
 if ($stmt->execute()) {
     if ($stmt->affected_rows > 0) {
+        // Log activity
+        ActivityLogger::getInstance()->logDelete(
+            $currentUser['id'],
+            $currentUser['username'],
+            $currentUser['role'],
+            'registration',
+            $id,
+            "Xóa đăng ký ID: {$id}"
+        );
+        
         http_response_code(200);
         echo json_encode(array("message" => "Xóa người dùng ID $id thành công.", "status" => true));
     } else {

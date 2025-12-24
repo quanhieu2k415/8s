@@ -1,4 +1,19 @@
 <?php
+require_once __DIR__ . '/../autoloader.php';
+
+use App\Services\Auth;
+use App\Services\ActivityLogger;
+
+// Check authentication
+$auth = Auth::getInstance();
+if (!$auth->check()) {
+    http_response_code(401);
+    echo json_encode(array("message" => "Unauthorized", "status" => false));
+    exit();
+}
+
+$currentUser = $auth->user();
+
 // 1. Cấu hình Headers (quan trọng cho API)
 header('Content-Type: application/json');
 // Cho phép mọi tên miền (Frontend) truy cập (Cross-Origin Resource Sharing - CORS)
@@ -50,6 +65,18 @@ $stmt = $conn->prepare("INSERT INTO $table_name (ho_ten, nam_sinh, dia_chi, chuo
 $stmt->bind_param("ssssss", $ho_ten, $nam_sinh, $dia_chi, $chuong_trinh, $quoc_gia, $sdt);
 
 if ($stmt->execute()) {
+    $newId = $conn->insert_id;
+    
+    // Log activity
+    ActivityLogger::getInstance()->logCreate(
+        $currentUser['id'],
+        $currentUser['username'],
+        $currentUser['role'],
+        'registration',
+        $newId,
+        "Thêm đăng ký tư vấn: {$ho_ten} - {$chuong_trinh}"
+    );
+    
     // 7. Trả về kết quả thành công
     echo json_encode(array("message" => "Thêm người dùng thành công.", "status" => true));
 } else {

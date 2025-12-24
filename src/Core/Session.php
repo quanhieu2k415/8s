@@ -50,7 +50,7 @@ class Session
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
         ini_set('session.cookie_httponly', '1');
-        ini_set('session.cookie_samesite', 'Strict');
+        ini_set('session.cookie_samesite', 'Lax');
         ini_set('session.gc_maxlifetime', (string) $lifetime);
 
         session_name($sessionName);
@@ -61,34 +61,14 @@ class Session
             'domain' => '',
             'secure' => $secure,
             'httponly' => true,
-            'samesite' => 'Strict'
+            'samesite' => 'Lax'
         ]);
 
         session_start();
         $this->started = true;
 
-        // Check session timeout
-        $this->checkTimeout($lifetime);
-
         // Validate session fingerprint
         $this->validateFingerprint();
-    }
-
-    /**
-     * Check if session has timed out
-     */
-    private function checkTimeout(int $lifetime): void
-    {
-        $lastActivity = $this->get('_last_activity');
-        
-        if ($lastActivity !== null) {
-            if (time() - $lastActivity > $lifetime) {
-                $this->destroy();
-                $this->start();
-            }
-        }
-        
-        $this->set('_last_activity', time());
     }
 
     /**

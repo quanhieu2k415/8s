@@ -9,6 +9,7 @@ include 'db_config.php';
 
 use App\Services\Auth;
 use App\Services\Permission;
+use App\Services\ActivityLogger;
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -146,6 +147,17 @@ if ($method === 'POST') {
     
     if ($stmt->execute()) {
         $newId = $conn->insert_id;
+        
+        // Log activity
+        ActivityLogger::getInstance()->logCreate(
+            $currentUser['id'],
+            $currentUser['username'],
+            $userRole,
+            'content_block',
+            $newId,
+            "Tạo content block: {$title} tại {$pageKey}"
+        );
+        
         echo json_encode([
             'status' => true, 
             'id' => $newId, 
@@ -199,6 +211,16 @@ if ($method === 'PUT') {
     );
     
     if ($stmt->execute()) {
+        // Log activity
+        ActivityLogger::getInstance()->logUpdate(
+            $currentUser['id'],
+            $currentUser['username'],
+            $userRole,
+            'content_block',
+            $id,
+            "Cập nhật content block: {$title}"
+        );
+        
         echo json_encode(['status' => true, 'message' => 'Cập nhật thành công']);
     } else {
         http_response_code(500);
@@ -223,6 +245,16 @@ if ($method === 'DELETE') {
     $stmt->bind_param("i", $id);
     
     if ($stmt->execute()) {
+        // Log activity
+        ActivityLogger::getInstance()->logDelete(
+            $currentUser['id'],
+            $currentUser['username'],
+            $userRole,
+            'content_block',
+            $id,
+            "Xóa content block ID: {$id}"
+        );
+        
         echo json_encode(['status' => true, 'message' => 'Xóa thành công']);
     } else {
         http_response_code(500);
