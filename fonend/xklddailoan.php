@@ -12,6 +12,11 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
 <section class="page-banner" style="<?php echo $header_style; ?>">
     <h1>🇹🇼 <?php echo get_text('xklddailoan_title', 'Xuất Khẩu Lao Động Đài Loan'); ?> <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">TW</span></h1>
     <p><?php echo get_text('xklddailoan_subtitle', 'Chi phí thấp - Thu nhập ổn định - Cơ hội phát triển'); ?></p>
+    <div class="breadcrumb">
+        <a href="index.php">Trang chủ</a>
+        <span>/</span>
+        <span>XKLĐ Đài Loan</span>
+    </div>
 </section>
 
 <!-- INTRO - Section 1 -->

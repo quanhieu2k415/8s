@@ -27,19 +27,42 @@ $cms_loaded = false;
  * Load all CMS content from database into cache
  */
 function load_all_cms_content() {
-    global $conn, $content_table, $cms_content_cache, $cms_loaded;
+    global $conn, $cms_content_cache, $cms_loaded;
     
     if ($cms_loaded) return;
     if (!$conn) return;
 
-    $table = isset($content_table) ? $content_table : 'content_pages';
-    
-    $sql = "SELECT section_key, content_value FROM $table";
-    $result = $conn->query($sql);
-    
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $cms_content_cache[$row['section_key']] = $row['content_value'];
+    // Load Texts
+    $sql_text = "SELECT text_key, text_value FROM site_texts";
+    $result_text = $conn->query($sql_text);
+    if ($result_text) {
+        while ($row = $result_text->fetch_assoc()) {
+            $cms_content_cache[$row['text_key']] = $row['text_value'];
+        }
+    }
+
+    // Load Images
+    $sql_img = "SELECT image_key, image_url FROM site_images";
+    $result_img = $conn->query($sql_img);
+    if ($result_img) {
+        while ($row = $result_img->fetch_assoc()) {
+            $cms_content_cache[$row['image_key']] = $row['image_url'];
+        }
+    }
+
+    // Legacy fallback (optional, if content_pages still used)
+    if (isset($GLOBALS['content_table'])) {
+        $table = $GLOBALS['content_table'];
+        $sql_legacy = "SELECT section_key, content_value FROM $table"; // Assuming column names
+        // We suppress errors here in case table doesn't exist
+        $result_legacy = @$conn->query($sql_legacy);
+        if ($result_legacy) {
+            while ($row = $result_legacy->fetch_assoc()) {
+                // Only add if not already present (prefer new tables)
+                if (!isset($cms_content_cache[$row['section_key']])) {
+                    $cms_content_cache[$row['section_key']] = $row['content_value'];
+                }
+            }
         }
     }
 

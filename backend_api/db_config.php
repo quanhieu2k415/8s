@@ -12,6 +12,7 @@ $user_table = "user";
 
 // Khởi tạo kết nối
 $conn = new mysqli($servername, $username, $password, $dbname);
+$conn->set_charset("utf8mb4");
 
 if ($conn->connect_error) {
     // Nếu lỗi kết nối, KHÔNG gán $conn

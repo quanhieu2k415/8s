@@ -3774,6 +3774,29 @@ if ($userRole === 'admin') {
                     ]}
                 ]
             },
+            xkldjp: {
+                name: 'XKLĐ Nhật Bản',
+                sections: [
+                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
+                        { key: 'xkldjp_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' },
+                        { key: 'xkldjp_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Nhật Bản' },
+                        { key: 'xkldjp_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình thực tập sinh kỹ năng tại Nhật Bản' }
+                    ]},
+                    {
+                        title: 'ℹ️ Giới thiệu chương trình', icon: 'info',
+                        fields: [
+                            { key: 'xkldjp_intro_img', type: 'image', label: 'Hình ảnh Intro', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg' },
+                            { key: 'xkldjp_intro_title', label: 'Tiêu đề giới thiệu', type: 'text', defaultValue: 'Chương Trình Thực Tập Sinh Kỹ Năng' },
+                            { key: 'xkldjp_intro_desc', type: 'textarea', label: 'Mô tả ngắn', defaultValue: 'Nhật Bản là điểm đến hàng đầu của lao động Việt Nam với môi trường làm việc chuyên nghiệp, thu nhập cao và nhiều cơ hội phát triển.' },
+                            { key: 'xkldjp_benefit_1', label: 'Lợi ích 1', type: 'text', defaultValue: '💰 Thu nhập 30-40 triệu/tháng' },
+                            { key: 'xkldjp_benefit_2', label: 'Lợi ích 2', type: 'text', defaultValue: '🏠 Hỗ trợ chỗ ở miễn phí' },
+                            { key: 'xkldjp_benefit_3', label: 'Lợi ích 3', type: 'text', defaultValue: '✈️ Bay 0 đồng' },
+                            { key: 'xkldjp_benefit_4', label: 'Lợi ích 4', type: 'text', defaultValue: '📋 Hợp đồng 3 năm' },
+                            { key: 'xkldjp_benefit_5', label: 'Lợi ích 5', type: 'text', defaultValue: '🛡️ Bảo hiểm đầy đủ' }
+                        ]
+                    }
+                ]
+            },
             xkldhan: {
                 name: 'XKLĐ Hàn Quốc',
                 sections: [
@@ -3818,25 +3841,7 @@ if ($userRole === 'admin') {
                     ]}
                 ]
             },
-            xkldjp: {
-                name: 'XKLĐ Nhật Bản',
-                sections: [
-                    { title: '🖼️ Banner Trang', icon: 'image', fields: [
-                        { key: 'xkldjp_header_bg', label: 'Ảnh nền banner', type: 'image', defaultValue: 'https://icogroup.vn/vnt_upload/weblink/banner_xkldjp.jpg' },
-                        { key: 'xkldjp_title', label: 'Tiêu đề chính', type: 'text', defaultValue: 'Xuất Khẩu Lao Động Nhật Bản 🇯🇵' },
-                        { key: 'xkldjp_subtitle', label: 'Mô tả ngắn', type: 'text', defaultValue: 'Chương trình thực tập sinh kỹ năng - Thu nhập cao, tương lai ổn định' }
-                    ]},
-                    { title: '📋 Chương Trình', icon: 'work', fields: [
-                        { key: 'xkldjp_about_title', label: 'Tiêu đề giới thiệu', type: 'text', defaultValue: 'Chương Trình Thực Tập Sinh Kỹ Năng' },
-                        { key: 'xkldjp_about_desc', label: 'Mô tả', type: 'textarea', defaultValue: 'Chương trình đào tạo và làm việc tại Nhật Bản trong 3-5 năm với mức thu nhập hấp dẫn và cơ hội phát triển nghề nghiệp.' }
-                    ]},
-                    { title: '✨ Quyền Lợi', icon: 'star', fields: [
-                        { key: 'xkldjp_benefit_1', label: 'Quyền lợi 1', type: 'text', defaultValue: 'Thu nhập 30-40 triệu VNĐ/tháng' },
-                        { key: 'xkldjp_benefit_2', label: 'Quyền lợi 2', type: 'text', defaultValue: 'Hỗ trợ nhà ở, tiền về nước' },
-                        { key: 'xkldjp_benefit_3', label: 'Quyền lợi 3', type: 'text', defaultValue: 'Bảo hiểm y tế, bảo hiểm lao động' }
-                    ]}
-                ]
-            },
+
             xklddailoan: {
                 name: 'XKLĐ Đài Loan',
                 sections: [
@@ -4218,16 +4223,33 @@ if ($userRole === 'admin') {
                 const value = input.value;
 
                 try {
-                    const response = await fetch(`${API_BASE}/save_content.php`, {
+                    const page = document.getElementById('visualPageSelect').value;
+                    let endpoint = `${API_BASE}/text_api.php`;
+                    let bodyData = {
+                        text_key: key,
+                        text_value: value,
+                        page: page,
+                        section: 'visual_cms'
+                    };
+
+                    if (input.classList.contains('cms-image-url')) {
+                         endpoint = `${API_BASE}/image_api.php`;
+                         bodyData = {
+                            image_key: key,
+                            image_url: value,
+                            alt_text: '',
+                            page: page,
+                            section: 'visual_cms'
+                         };
+                    }
+
+                    const response = await fetch(endpoint, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-Token': CSRF_TOKEN
                         },
-                        body: JSON.stringify({
-                            section_key: key,
-                            content_value: value
-                        })
+                        body: JSON.stringify(bodyData)
                     });
                     const result = await response.json();
                     

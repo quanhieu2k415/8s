@@ -12,8 +12,8 @@ $header_bg = get_image('xkldjp_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #BC002D, #fff);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1>🇯🇵 Xuất Khẩu Lao Động Nhật Bản <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">JP</span></h1>
-    <p>Chương trình thực tập sinh kỹ năng - Thu nhập cao, môi trường làm việc tốt</p>
+    <h1><?php echo_text('xkldjp_title', 'Xuất Khẩu Lao Động Nhật Bản'); ?></h1>
+    <p><?php echo_text('xkldjp_subtitle', 'Chương trình thực tập sinh kỹ năng - Thu nhập cao, môi trường làm việc tốt'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
         <span>/</span>
@@ -27,18 +27,18 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
     <div class="container">
         <div class="about-grid">
             <div class="about-image">
-                <img src="https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg" alt="XKLĐ Nhật Bản">
+                <img src="<?php echo get_image('xkldjp_intro_img', 'https://icogroup.vn/vnt_upload/weblink/banner_chu_04.jpg'); ?>" alt="XKLĐ Nhật Bản">
             </div>
             <div class="about-content">
-                <h3>Chương Trình Thực Tập Sinh Kỹ Năng</h3>
-                <p>Nhật Bản là điểm đến hàng đầu của lao động Việt Nam với môi trường làm việc chuyên nghiệp, thu nhập cao và nhiều cơ hội phát triển.</p>
+                <h3><?php echo_text('xkldjp_intro_title', 'Chương Trình Thực Tập Sinh Kỹ Năng'); ?></h3>
+                <p><?php echo_text('xkldjp_intro_desc', 'Nhật Bản là điểm đến hàng đầu của lao động Việt Nam với môi trường làm việc chuyên nghiệp, thu nhập cao và nhiều cơ hội phát triển.'); ?></p>
                 
                 <div class="about-values">
-                    <div class="value-item"><span>💰</span><span>Thu nhập 30-40 triệu/tháng</span></div>
-                    <div class="value-item"><span>🏠</span><span>Hỗ trợ chỗ ở miễn phí</span></div>
-                    <div class="value-item"><span>✈️</span><span>Bay 0 đồng</span></div>
-                    <div class="value-item"><span>📋</span><span>Hợp đồng 3 năm</span></div>
-                    <div class="value-item"><span>🛡️</span><span>Bảo hiểm đầy đủ</span></div>
+                    <div class="value-item"><span><?php echo_text('xkldjp_benefit_1', '💰 Thu nhập 30-40 triệu/tháng'); ?></span></div>
+                    <div class="value-item"><span><?php echo_text('xkldjp_benefit_2', '🏠 Hỗ trợ chỗ ở miễn phí'); ?></span></div>
+                    <div class="value-item"><span><?php echo_text('xkldjp_benefit_3', '✈️ Bay 0 đồng'); ?></span></div>
+                    <div class="value-item"><span><?php echo_text('xkldjp_benefit_4', '📋 Hợp đồng 3 năm'); ?></span></div>
+                    <div class="value-item"><span><?php echo_text('xkldjp_benefit_5', '🛡️ Bảo hiểm đầy đủ'); ?></span></div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 /**
  * Users Management JavaScript
  * Handles all user management functionality in dashboard
+ * Updated: 2025-12-24
  */
 
 const USERS_API_BASE = '../backend_api/users_api.php';
@@ -390,11 +391,25 @@ async function importUsersSubmit() {
         const result = await response.json();
 
         if (result.success) {
-            showToast(`Import thành công ${result.data.created} tài khoản!`, 'success');
-            closeUserModal('importUsersModal');
-            loadUsersList();
-            if (typeof isAdmin !== 'undefined' && isAdmin) {
-                loadUsersStats();
+            if (result.errors && result.errors.length > 0) {
+                let msg = `Đã import ${result.imported}/${users.length} tài khoản.\n\nCác lỗi gặp phải:\n` + result.errors.join('\n');
+                alert(msg);
+
+                if (result.imported > 0) {
+                    showToast(`Đã import ${result.imported} tài khoản (có lỗi)`, 'warning');
+                    closeUserModal('importUsersModal');
+                    loadUsersList();
+                    if (typeof isAdmin !== 'undefined' && isAdmin) {
+                        loadUsersStats();
+                    }
+                }
+            } else {
+                showToast(`Import thành công ${result.imported} tài khoản!`, 'success');
+                closeUserModal('importUsersModal');
+                loadUsersList();
+                if (typeof isAdmin !== 'undefined' && isAdmin) {
+                    loadUsersStats();
+                }
             }
         } else {
             throw new Error(result.message);
