@@ -33,17 +33,95 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ==================== RICH TEXT EDITOR FUNCTIONS ====================
 
+// Store last focused editor
+let lastFocusedEditor = null;
+
+// Track editor focus
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.rich-editor').forEach(editor => {
+        editor.addEventListener('focus', () => {
+            lastFocusedEditor = editor;
+        });
+    });
+});
+
 /**
  * Format selected text with command
  */
 function formatBlockText(command, value = null) {
-    document.execCommand(command, false, value);
-    // Keep focus on the editor
-    const editor = document.activeElement;
-    if (editor && editor.classList.contains('rich-editor')) {
-        editor.focus();
+    // Get the active editor
+    let editor = document.activeElement;
+
+    // If no editor is focused, use the last focused one
+    if (!editor || !editor.classList.contains('rich-editor')) {
+        editor = lastFocusedEditor;
     }
+
+    // If still no editor, try to find one
+    if (!editor) {
+        editor = document.querySelector('.rich-editor');
+    }
+
+    if (!editor) {
+        console.error('No editor found');
+        return;
+    }
+
+    // Focus the editor first
+    editor.focus();
+
+    // Execute the command
+    try {
+        const success = document.execCommand(command, false, value);
+        if (!success) {
+            console.warn(`execCommand '${command}' failed`);
+        }
+    } catch (error) {
+        console.error('Error executing command:', error);
+    }
+
+    // Update button states
+    updateToolbarButtonStates();
+
+    // Keep focus on editor
+    editor.focus();
 }
+
+/**
+ * Update toolbar button active states based on current selection
+ */
+function updateToolbarButtonStates() {
+    // Commands to check
+    const commands = {
+        'bold': 'format_bold',
+        'italic': 'format_italic',
+        'underline': 'format_underlined',
+        'strikeThrough': 'format_strikethrough'
+    };
+
+    // Update each button
+    Object.entries(commands).forEach(([command, iconName]) => {
+        const buttons = document.querySelectorAll(`button[onclick*="formatBlockText('${command}')"]`);
+        const isActive = document.queryCommandState(command);
+
+        buttons.forEach(button => {
+            if (isActive) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+    });
+}
+
+// Update button states when selection changes
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.rich-editor').forEach(editor => {
+        editor.addEventListener('mouseup', updateToolbarButtonStates);
+        editor.addEventListener('keyup', updateToolbarButtonStates);
+        editor.addEventListener('focus', updateToolbarButtonStates);
+    });
+});
 
 /**
  * Apply text color
@@ -58,6 +136,17 @@ function applyBlockTextColor(color) {
 function applyBlockFont(fontFamily) {
     if (fontFamily) {
         document.execCommand('fontName', false, fontFamily);
+    }
+}
+
+/**
+ * Insert hyperlink
+ */
+function insertLink() {
+    const url = prompt('Nhập URL:', 'https://');
+    if (url && url !== 'https://') {
+        document.execCommand('createLink', false, url);
+        updateToolbarButtonStates();
     }
 }
 
@@ -308,7 +397,7 @@ function openAddBlockModal() {
     editingBlockId = null;
     document.getElementById('blockModalTitle').textContent = 'Thêm Content Block mới';
     document.getElementById('blockId').value = '';
-    document.getElementById('blockPageKey').value = currentPageKey;
+    // Page is already selected in main interface, use currentPageKey
     document.getElementById('blockType').value = 'section';
     document.getElementById('blockOrder').value = allBlocks.length + 1;
     document.getElementById('blockTitleEditor').innerHTML = '';
@@ -330,7 +419,7 @@ function openEditBlockModal(id) {
     editingBlockId = id;
     document.getElementById('blockModalTitle').textContent = 'Chỉnh sửa Content Block';
     document.getElementById('blockId').value = block.id;
-    document.getElementById('blockPageKey').value = block.page_key;
+    // Page is already selected in main interface
     document.getElementById('blockType').value = block.block_type || 'section';
     document.getElementById('blockOrder').value = block.block_order;
     document.getElementById('blockTitleEditor').innerHTML = block.title || '';
@@ -363,7 +452,7 @@ function openEditBlockModal(id) {
  */
 async function saveBlock() {
     const id = document.getElementById('blockId').value;
-    const pageKey = document.getElementById('blockPageKey').value;
+    const pageKey = currentPageKey; // Use current selected page
     const blockType = document.getElementById('blockType').value;
     const blockOrder = parseInt(document.getElementById('blockOrder').value) || 0;
     const title = document.getElementById('blockTitleEditor').innerHTML;
@@ -371,7 +460,7 @@ async function saveBlock() {
     const content = document.getElementById('blockContentEditor').innerHTML;
 
     if (!pageKey) {
-        showToast('Vui lòng chọn trang', 'error');
+        showToast('Vui lòng chọn trang trước', 'error');
         return;
     }
 

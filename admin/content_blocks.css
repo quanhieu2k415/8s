@@ -122,8 +122,8 @@
 
 /* Rich Editor Area */
 .rich-editor {
-    min-height: 200px;
-    max-height: 500px;
+    min-height: 300px;
+    max-height: 600px;
     overflow-y: auto;
     padding: 18px 20px;
     border: 1px solid var(--border-light);
@@ -330,8 +330,11 @@
 }
 
 /* ==================== BLOCK MODAL ==================== */
+/* Higher specificity to override generic modal-content styles */
+#blockModal .modal-content,
 .block-modal-content {
-    max-width: 900px;
+    max-width: 80% !important;
+    width: 80% !important;
 }
 
 .block-form-row {
@@ -454,23 +457,23 @@
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .blocks-header-left {
         flex-direction: column;
     }
-    
+
     .page-select {
         width: 100%;
     }
-    
+
     .block-form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .image-upload-area {
         flex-direction: column;
     }
-    
+
     .image-preview-box {
         width: 100%;
         height: 150px;
