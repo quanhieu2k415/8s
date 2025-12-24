@@ -20,11 +20,13 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     profile_updated_at TIMESTAMP NULL DEFAULT NULL,
+    session_token VARCHAR(64) DEFAULT NULL,
     INDEX idx_username (username),
     INDEX idx_email (email),
     INDEX idx_role (role),
     INDEX idx_is_active (is_active),
-    INDEX idx_manager_id (manager_id)
+    INDEX idx_manager_id (manager_id),
+    INDEX idx_session_token (session_token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -44,21 +46,7 @@ CREATE INDEX idx_remember_tokens_token_hash ON remember_tokens(token_hash);
 CREATE INDEX idx_remember_tokens_expires_at ON remember_tokens(expires_at);
 
 -- ==========================================
--- 3. SINGLE SESSION (Alters admin_users)
--- ==========================================
--- Add session_token column if not exists (handling via stored procedure or silent fail in simple scripts)
--- Since SQL scripts don't have easy "IF COL EXISTS", we use a block or just error suppression in manual run.
--- However, for a fresh install, we can just ALTER.
--- If re-running, this might error. We'll use a safer approach if possible, but standard SQL ALTER is usually fine for fresh setup.
-
--- Attempt to add session_token. If it fails (exists), it's fine in many tools, or we skip check.
--- For standard MySQL import, we can't do conditional ALTER easily without procedures.
--- We will assume fresh install or ignore error.
-ALTER TABLE admin_users ADD COLUMN session_token VARCHAR(64) NULL;
-ALTER TABLE admin_users ADD INDEX idx_session_token (session_token);
-
--- ==========================================
--- 4. PERMISSIONS & ROLES (Depends on admin_users)
+-- 3. PERMISSIONS & ROLES (Depends on admin_users)
 -- ==========================================
 CREATE TABLE IF NOT EXISTS permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
