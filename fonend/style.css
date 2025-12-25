@@ -3368,6 +3368,27 @@ nav a[href="index.php"] img {
     margin-bottom: 0;
 }
 
+/* Merge adjacent blocks of same type */
+.block-type-section+.block-type-section,
+.block-type-card+.block-type-card,
+.block-type-info+.block-type-info,
+.block-type-banner+.block-type-banner {
+    margin-top: 0;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.block-type-section:has(+ .block-type-section),
+.block-type-card:has(+ .block-type-card),
+.block-type-info:has(+ .block-type-info),
+.block-type-banner:has(+ .block-type-banner) {
+    margin-bottom: 0;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 /* Block Title */
 .block-title-display {
     font-size: 28px;
@@ -3403,6 +3424,31 @@ nav a[href="index.php"] img {
     font-size: 16px;
     line-height: 1.8;
     color: var(--text-secondary);
+}
+
+/* Allow inline styles from editor to override defaults */
+.block-content-display *[style*="font-family"] {
+    font-family: inherit !important;
+}
+
+.block-content-display *[style*="font-size"] {
+    /* Inline font sizes from editor take precedence */
+}
+
+.block-content-display *[style*="color"] {
+    /* Inline colors from editor take precedence */
+}
+
+.block-title-display *[style*="font-family"] {
+    font-family: inherit !important;
+}
+
+.block-title-display *[style*="font-size"] {
+    /* Inline font sizes from editor take precedence */
+}
+
+.block-title-display *[style*="color"] {
+    /* Inline colors from editor take precedence */
 }
 
 .block-content-display p {

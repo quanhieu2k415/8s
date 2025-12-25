@@ -12,7 +12,7 @@ $header_bg = get_image('xkldjp_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #BC002D, #fff);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1><?php echo_text('xkldjp_title', 'Xuất Khẩu Lao Động Nhật Bản'); ?></h1>
+    <h1>🇯🇵 <?php echo_text('xkldjp_title', 'Xuất Khẩu Lao Động Nhật Bản'); ?></h1>
     <p><?php echo_text('xkldjp_subtitle', 'Chương trình thực tập sinh kỹ năng - Thu nhập cao, môi trường làm việc tốt'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
@@ -61,12 +61,44 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
         </div>
     </div>
 </section>
+<!-- DYNAMIC CONTENT BLOCKS -->
+<?php
+$blocks = get_content_blocks('xkldjp');
+if (!empty($blocks)):
+?>
+<section class="section content-blocks-section">
+    <div class="container">
+        <?php foreach ($blocks as $block): ?>
+        <div class="dynamic-content-block block-type-<?php echo htmlspecialchars($block['block_type']); ?>">
+            <?php if (!empty($block['title'])): ?>
+            <div class="block-title-display">
+                <?php echo render_html($block['title']); ?>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['image_url'])): ?>
+            <div class="block-image-display">
+                <img src="<?php echo htmlspecialchars($block['image_url']); ?>" alt="">
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['content'])): ?>
+            <div class="block-content-display">
+                <?php echo render_html($block['content']); ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
+
 <?php endif; ?>
 
 <!-- CTA -->
 <section class="form-section">
     <div class="form-container" style="text-align: center;">
-        <h3>🇯🇵 Đăng Ký XKLĐ Nhật Bản</h3>
+        <h3>Đăng Ký XKLĐ Nhật Bản</h3>
         <p style="margin-bottom: 30px; color: #666;">Hotline: <strong>0822.314.555</strong> • Địa chỉ: Số 360, Phan Đình Phùng, Thái Nguyên</p>
         <a href="index.php#dangky" class="hero-btn">Đăng ký ngay</a>
     </div>

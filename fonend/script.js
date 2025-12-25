@@ -80,9 +80,11 @@
         STORAGE_KEY: 'ico-dark-mode',
 
         init() {
-            this.createToggle();
-            this.loadPreference();
-            this.bindEvents();
+            // DARK MODE DISABLED - Feature is hidden
+            // To re-enable, uncomment the lines below:
+            // this.createToggle();
+            // this.loadPreference();
+            // this.bindEvents();
         },
 
         createToggle() {
@@ -187,17 +189,12 @@
         loadPreference() {
             const savedMode = localStorage.getItem(this.STORAGE_KEY);
 
-            // Check system preference if no saved preference
-            if (savedMode === null) {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                    document.body.classList.add('dark-mode');
-                }
-            } else if (savedMode === 'true') {
+            // DEFAULT TO LIGHT MODE - Only use dark if explicitly saved
+            if (savedMode === 'true') {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.body.classList.add('dark-mode');
             }
+            // If savedMode is null or 'false', stay in light mode (default)
         },
 
         bindEvents() {

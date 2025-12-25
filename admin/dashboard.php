@@ -239,8 +239,50 @@ if ($userRole === 'admin') {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <link rel="icon" type="image/x-icon" href="../logo.ico">
+    <link rel=" icon" type="image/x-icon" href="../logo.ico">
     <link rel="stylesheet" href="content_blocks.css">
+    
+    <?php
+    // Dynamic Font Loading from Database
+    require_once __DIR__ . '/../backend_api/db_config.php';
+    
+    $font_body = '';
+    $font_heading = '';
+    $font_body_url = '';
+    $font_heading_url = '';
+    
+    if ($conn) {
+        $sql = "SELECT text_key, text_value FROM site_texts WHERE text_key IN ('global_font_body', 'global_font_heading', 'global_font_body_url', 'global_font_heading_url')";
+        $result = $conn->query($sql);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                switch ($row['text_key']) {
+                    case 'global_font_body':
+                        $font_body = $row['text_value'];
+                        break;
+                    case 'global_font_heading':
+                        $font_heading = $row['text_value'];
+                        break;
+                    case 'global_font_body_url':
+                        $font_body_url = $row['text_value'];
+                        break;
+                    case 'global_font_heading_url':
+                        $font_heading_url = $row['text_value'];
+                        break;
+                }
+            }
+        }
+    }
+    
+    // Load Google Fonts if specified
+    if ($font_body_url && filter_var($font_body_url, FILTER_VALIDATE_URL)) {
+        echo '<link rel="stylesheet" href="' . htmlspecialchars($font_body_url) . '">';
+    }
+    if ($font_heading_url && filter_var($font_heading_url, FILTER_VALIDATE_URL) && $font_heading_url !== $font_body_url) {
+        echo '<link rel="stylesheet" href="' . htmlspecialchars($font_heading_url) . '">';
+    }
+    ?>
+    
     <style>
 
         /* ===== CSS Variables ===== */
@@ -279,6 +321,13 @@ if ($userRole === 'admin') {
             --radius-md: 10px;
             --radius-lg: 16px;
         }
+
+        <?php if ($font_body): ?>
+        /* Dynamic font override from database */
+        body {
+            font-family: <?php echo htmlspecialchars($font_body); ?> !important;
+        }
+        <?php endif; ?>
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-primary); min-height: 100vh; color: var(--text-primary); }
@@ -1631,6 +1680,38 @@ if ($userRole === 'admin') {
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; font-weight: 600; margin-bottom: 8px;">Email nhận thông báo</label>
                             <input type="email" id="settingNotifyEmail" class="cms-field-input" value="admin@icogroup.vn" placeholder="Email nhận thông báo">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Font Settings -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>🔤 Cài đặt Font chữ</h2>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Font cho nội dung (Body)</label>
+                            <input type="text" id="settingFontBody" class="cms-field-input" value="'Inter', sans-serif" placeholder="'Roboto', sans-serif">
+                            <small style="color: var(--text-muted);">Font family cho nội dung chính. Ví dụ: 'Roboto', sans-serif</small>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">URL Google Font cho Body (tuỳ chọn)</label>
+                            <input type="url" id="settingFontBodyUrl" class="cms-field-input" placeholder="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+                            <small style="color: var(--text-muted);">Để trống nếu dùng system font</small>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">Font cho tiêu đề (Heading)</label>
+                            <input type="text" id="settingFontHeading" class="cms-field-input" value="'Inter', sans-serif" placeholder="'Montserrat', sans-serif">
+                            <small style="color: var(--text-muted);">Font family cho các tiêu đề. Ví dụ: 'Montserrat', sans-serif</small>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">URL Google Font cho Heading (tuỳ chọn)</label>
+                            <input type="url" id="settingFontHeadingUrl" class="cms-field-input" placeholder="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap">
+                            <small style="color: var(--text-muted);">Để trống nếu dùng system font</small>
+                        </div>
+                        <div style="padding: 12px; background: var(--info-light); border-left: 4px solid var(--info); border-radius: 6px;">
+                            <small style="color: var(--text-secondary);">💡 Sau khi lưu, font sẽ tự động áp dụng cho cả Admin Panel và Frontend. Nhớ refresh trang để thấy thay đổi (Ctrl + F5).</small>
                         </div>
                     </div>
                 </div>
@@ -4697,6 +4778,20 @@ if ($userRole === 'admin') {
                     if (data.system_maintenance_mode) {
                         document.getElementById('settingMaintenanceMode').checked = data.system_maintenance_mode === '1';
                     }
+                    
+                    // Font settings
+                    if (data.global_font_body) {
+                        document.getElementById('settingFontBody').value = data.global_font_body;
+                    }
+                    if (data.global_font_body_url) {
+                        document.getElementById('settingFontBodyUrl').value = data.global_font_body_url;
+                    }
+                    if (data.global_font_heading) {
+                        document.getElementById('settingFontHeading').value = data.global_font_heading;
+                    }
+                    if (data.global_font_heading_url) {
+                        document.getElementById('settingFontHeadingUrl').value = data.global_font_heading_url;
+                    }
                 }
                 
                 // Load permissions matrix
@@ -4718,7 +4813,11 @@ if ($userRole === 'admin') {
                     maintenanceMode: document.getElementById('settingMaintenanceMode')?.checked,
                     emailNotify: document.getElementById('settingEmailNotify')?.checked,
                     emailContact: document.getElementById('settingEmailContact')?.checked,
-                    notifyEmail: document.getElementById('settingNotifyEmail')?.value
+                    notifyEmail: document.getElementById('settingNotifyEmail')?.value,
+                    fontBody: document.getElementById('settingFontBody')?.value,
+                    fontBodyUrl: document.getElementById('settingFontBodyUrl')?.value,
+                    fontHeading: document.getElementById('settingFontHeading')?.value,
+                    fontHeadingUrl: document.getElementById('settingFontHeadingUrl')?.value
                 };
 
                 // Save to CMS
@@ -4731,7 +4830,11 @@ if ($userRole === 'admin') {
                     'header_email': settings.email,
                     'security_session_timeout': settings.sessionTimeout,
                     'security_max_login_attempts': settings.maxLoginAttempts,
-                    'system_maintenance_mode': settings.maintenanceMode ? '1' : '0'
+                    'system_maintenance_mode': settings.maintenanceMode ? '1' : '0',
+                    'global_font_body': settings.fontBody,
+                    'global_font_body_url': settings.fontBodyUrl,
+                    'global_font_heading': settings.fontHeading,
+                    'global_font_heading_url': settings.fontHeadingUrl
                 };
 
                 for (const [key, value] of Object.entries(settingsMapping)) {

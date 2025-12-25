@@ -14,6 +14,69 @@ include_once __DIR__ . '/content_helper.php';
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="animations.css">
     <link rel="icon" type="image/x-icon" href="../logo.ico">
+    
+    <?php
+    // Dynamic Font Loading from Database
+    $font_body = get_text('global_font_body', '');
+    $font_heading = get_text('global_font_heading', '');
+    $font_body_url = get_text('global_font_body_url', '');
+    $font_heading_url = get_text('global_font_heading_url', '');
+    
+    // Load Google Fonts if specified
+    if ($font_body_url && filter_var($font_body_url, FILTER_VALIDATE_URL)) {
+        echo '<link rel="stylesheet" href="' . htmlspecialchars($font_body_url) . '">';
+    }
+    if ($font_heading_url && filter_var($font_heading_url, FILTER_VALIDATE_URL) && $font_heading_url !== $font_body_url) {
+        echo '<link rel="stylesheet" href="' . htmlspecialchars($font_heading_url) . '">';
+    }
+    ?>
+    
+    <!-- Load Google Fonts for Content Blocks -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
+    
+    <style>
+    /* CRITICAL: Content blocks MUST preserve their inline font-family styles */
+    .block-content-display, 
+    .block-content-display *, 
+    .block-title-display,
+    .block-title-display * {
+        /* Inline styles will take precedence - do NOT override */
+    }
+    
+    <?php if ($font_body): ?>
+    /* Dynamic font override from database - EXCLUDE content blocks */
+    body {
+        font-family: <?php echo htmlspecialchars($font_body); ?> !important;
+    }
+    p:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *),
+    span:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *),
+    div:not(.block-content-display):not(.block-title-display) {
+        font-family: <?php echo htmlspecialchars($font_body); ?>;
+    }
+    :root {
+        --font-body: <?php echo htmlspecialchars($font_body); ?>;
+        --font-sans: <?php echo htmlspecialchars($font_body); ?>;
+    }
+    <?php endif; ?>
+    
+    <?php if ($font_heading): ?>
+    h1:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *), 
+    h2:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *), 
+    h3:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *), 
+    h4:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *), 
+    h5:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *), 
+    h6:not(.block-content-display):not(.block-content-display *):not(.block-title-display):not(.block-title-display *) {
+        font-family: <?php echo htmlspecialchars($font_heading); ?> !important;
+    }
+    :root {
+        --font-heading: <?php echo htmlspecialchars($font_heading); ?>;
+    }
+    <?php endif; ?>
+    </style>
 </head>
 <body>
 

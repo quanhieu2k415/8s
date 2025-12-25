@@ -11,7 +11,7 @@ $header_bg = get_image('nhat_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #BC002D, #FFFFFF);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1>🇯🇵 <?php echo get_text('nhat_title', 'Du Học Nhật Bản'); ?> <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">JP</span></h1>
+    <h1>🇯🇵 <?php echo get_text('nhat_title', 'Du Học Nhật Bản'); ?></h1>
     <p><?php echo get_text('nhat_subtitle', 'Hành trình chinh phục xứ sở hoa anh đào'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
@@ -228,7 +228,7 @@ if (!empty($blocks)):
 <!-- CTA -->
 <section class="form-section">
     <div class="form-container" style="text-align: center;">
-        <h3>🇯🇵 <?php echo get_text('nhat_cta_title', 'Đăng Ký Tư Vấn Du Học Nhật Bản'); ?></h3>
+        <h3><?php echo get_text('nhat_cta_title', 'Đăng Ký Tư Vấn Du Học Nhật Bản'); ?></h3>
         <p style="margin-bottom: 30px; color: #666;"><?php echo get_text('nhat_cta_desc', 'Nhận tư vấn miễn phí từ đội ngũ chuyên gia với 15 năm kinh nghiệm'); ?></p>
         
         <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-bottom: 30px;">

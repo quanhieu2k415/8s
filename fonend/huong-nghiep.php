@@ -212,6 +212,38 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
             </div>
         </div>
     </div>
+<!-- DYNAMIC CONTENT BLOCKS -->
+<?php
+$blocks = get_content_blocks('huongnghiep');
+if (!empty($blocks)):
+?>
+<section class="section content-blocks-section">
+    <div class="container">
+        <?php foreach ($blocks as $block): ?>
+        <div class="dynamic-content-block block-type-<?php echo htmlspecialchars($block['block_type']); ?>">
+            <?php if (!empty($block['title'])): ?>
+            <div class="block-title-display">
+                <?php echo render_html($block['title']); ?>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['image_url'])): ?>
+            <div class="block-image-display">
+                <img src="<?php echo htmlspecialchars($block['image_url']); ?>" alt="">
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['content'])): ?>
+            <div class="block-content-display">
+                <?php echo render_html($block['content']); ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
+
 </section>
 
 <!-- CTA -->

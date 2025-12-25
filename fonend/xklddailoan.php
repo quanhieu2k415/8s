@@ -10,7 +10,7 @@ $header_bg = get_image('xklddailoan_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #FE0000, #fff);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1>🇹🇼 <?php echo get_text('xklddailoan_title', 'Xuất Khẩu Lao Động Đài Loan'); ?> <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">TW</span></h1>
+    <h1>🇹🇼 <?php echo get_text('xklddailoan_title', 'Xuất Khẩu Lao Động Đài Loan'); ?></h1>
     <p><?php echo get_text('xklddailoan_subtitle', 'Chi phí thấp - Thu nhập ổn định - Cơ hội phát triển'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
@@ -41,6 +41,38 @@ $header_style = $header_bg ? "background: url('$header_bg') no-repeat center cen
 </section>
 <?php endif; ?>
 
+
+<!-- DYNAMIC CONTENT BLOCKS -->
+<?php
+$blocks = get_content_blocks('xklddailoan');
+if (!empty($blocks)):
+?>
+<section class="section content-blocks-section">
+    <div class="container">
+        <?php foreach ($blocks as $block): ?>
+        <div class="dynamic-content-block block-type-<?php echo htmlspecialchars($block['block_type']); ?>">
+            <?php if (!empty($block['title'])): ?>
+            <div class="block-title-display">
+                <?php echo render_html($block['title']); ?>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['image_url'])): ?>
+            <div class="block-image-display">
+                <img src="<?php echo htmlspecialchars($block['image_url']); ?>" alt="">
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($block['content'])): ?>
+            <div class="block-content-display">
+                <?php echo render_html($block['content']); ?>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
 <section class="form-section">
     <div class="form-container" style="text-align: center;">
         <h3><?php echo get_text('xklddailoan_cta_title', 'Đăng Ký XKLĐ Đài Loan'); ?></h3>

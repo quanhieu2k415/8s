@@ -182,6 +182,9 @@ async function loadFonts() {
         if (result.status) {
             customFonts = result.custom_fonts || [];
 
+            // Store globally for later use
+            window.lastFontData = result;
+
             // Add Google Fonts to head
             if (result.google_fonts) {
                 result.google_fonts.forEach(font => {
@@ -222,56 +225,60 @@ async function loadFonts() {
 }
 
 /**
+ * Populate a single font select dropdown
+ */
+function populateSingleFontSelect(select, fontData) {
+    select.innerHTML = '<option value="">-- Chọn font --</option>';
+
+    // System fonts
+    if (fontData.system_fonts && fontData.system_fonts.length > 0) {
+        const systemGroup = document.createElement('optgroup');
+        systemGroup.label = 'System Fonts';
+        fontData.system_fonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font.family;
+            option.textContent = font.name;
+            option.style.fontFamily = font.family;
+            systemGroup.appendChild(option);
+        });
+        select.appendChild(systemGroup);
+    }
+
+    // Google fonts
+    if (fontData.google_fonts && fontData.google_fonts.length > 0) {
+        const googleGroup = document.createElement('optgroup');
+        googleGroup.label = 'Google Fonts';
+        fontData.google_fonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font.family;
+            option.textContent = font.name;
+            option.style.fontFamily = font.family;
+            googleGroup.appendChild(option);
+        });
+        select.appendChild(googleGroup);
+    }
+
+    // Custom fonts
+    if (fontData.custom_fonts && fontData.custom_fonts.length > 0) {
+        const customGroup = document.createElement('optgroup');
+        customGroup.label = 'Custom Fonts';
+        fontData.custom_fonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font.family;
+            option.textContent = font.name;
+            option.style.fontFamily = font.family;
+            customGroup.appendChild(option);
+        });
+        select.appendChild(customGroup);
+    }
+}
+
+/**
  * Populate font select dropdowns
  */
 function populateFontSelects(fontData) {
     const selects = document.querySelectorAll('.font-select');
-
-    selects.forEach(select => {
-        select.innerHTML = '<option value="">-- Chọn font --</option>';
-
-        // System fonts
-        if (fontData.system_fonts && fontData.system_fonts.length > 0) {
-            const systemGroup = document.createElement('optgroup');
-            systemGroup.label = 'System Fonts';
-            fontData.system_fonts.forEach(font => {
-                const option = document.createElement('option');
-                option.value = font.family;
-                option.textContent = font.name;
-                option.style.fontFamily = font.family;
-                systemGroup.appendChild(option);
-            });
-            select.appendChild(systemGroup);
-        }
-
-        // Google fonts
-        if (fontData.google_fonts && fontData.google_fonts.length > 0) {
-            const googleGroup = document.createElement('optgroup');
-            googleGroup.label = 'Google Fonts';
-            fontData.google_fonts.forEach(font => {
-                const option = document.createElement('option');
-                option.value = font.family;
-                option.textContent = font.name;
-                option.style.fontFamily = font.family;
-                googleGroup.appendChild(option);
-            });
-            select.appendChild(googleGroup);
-        }
-
-        // Custom fonts
-        if (fontData.custom_fonts && fontData.custom_fonts.length > 0) {
-            const customGroup = document.createElement('optgroup');
-            customGroup.label = 'Custom Fonts';
-            fontData.custom_fonts.forEach(font => {
-                const option = document.createElement('option');
-                option.value = font.family;
-                option.textContent = font.name;
-                option.style.fontFamily = font.family;
-                customGroup.appendChild(option);
-            });
-            select.appendChild(customGroup);
-        }
-    });
+    selects.forEach(select => populateSingleFontSelect(select, fontData));
 }
 
 // ==================== CONTENT BLOCKS MANAGEMENT ====================
@@ -407,6 +414,17 @@ function openAddBlockModal() {
     document.getElementById('blockTrackingInfo').style.display = 'none';
 
     document.getElementById('blockModal').style.display = 'block';
+
+    // Reload fonts for the modal's font selects
+    setTimeout(() => {
+        const modal = document.getElementById('blockModal');
+        if (modal) {
+            const fontSelects = modal.querySelectorAll('.font-select');
+            if (fontSelects.length > 0 && window.lastFontData) {
+                fontSelects.forEach(select => populateSingleFontSelect(select, window.lastFontData));
+            }
+        }
+    }, 100);
 }
 
 /**

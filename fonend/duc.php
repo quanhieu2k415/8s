@@ -11,7 +11,7 @@ $header_bg = get_image('duc_header_bg', '');
 $header_style = $header_bg ? "background: url('$header_bg') no-repeat center center/cover;" : "background: linear-gradient(135deg, #000000, #DD0000, #FFCC00);";
 ?>
 <section class="page-banner" style="<?php echo $header_style; ?>">
-    <h1>🇩🇪 <?php echo get_text('duc_title', 'Du Học Đức'); ?> <span style="font-size: 0.5em; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; vertical-align: middle;">DE</span></h1>
+    <h1>🇩🇪 <?php echo get_text('duc_title', 'Du Học Đức'); ?></h1>
     <p><?php echo get_text('duc_subtitle', 'Chương trình du học miễn học phí với cơ hội việc làm và định cư'); ?></p>
     <div class="breadcrumb">
         <a href="index.php">Trang chủ</a>
@@ -224,7 +224,7 @@ if (!empty($blocks)):
 <!-- CTA -->
 <section class="form-section">
     <div class="form-container" style="text-align: center;">
-        <h3>🇩🇪 <?php echo get_text('duc_cta_title', 'Đăng Ký Tư Vấn Du Học Đức'); ?></h3>
+        <h3><?php echo get_text('duc_cta_title', 'Đăng Ký Tư Vấn Du Học Đức'); ?></h3>
         <p style="margin-bottom: 30px; color: #666;"><?php echo get_text('duc_cta_desc', 'Nhận tư vấn miễn phí từ chuyên gia du học Đức của ICOGroup'); ?></p>
         
         <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-bottom: 30px;">
